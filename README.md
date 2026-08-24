@@ -48,4 +48,4 @@ Decisions:
 Current request-contract adoption:
 - `publishPreflight` is shared between Nuxt and Azure.
 - `matchingLedgerApproval` is shared between Nuxt and Azure.
-- `manualCrawlEnqueue` is shared on the Nuxt side, but the Azure function still uses a different payload shape and has not been aligned yet.
+- `manualCrawlEnqueue` is shared between Nuxt and Azure using the Azure-owned payload shape.

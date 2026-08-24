@@ -1,11 +1,13 @@
 import { z } from 'zod'
 
 export const manualCrawlEnqueueSchema = z.object({
-  sourceTableName: z.string().min(1),
-  sourceRowKey: z.string().min(1),
-  crawlUrl: z.string().url(),
+  tableName: z.enum(['m2crmproducts']),
+  rowKey: z.string().min(1),
+  url: z.string().url().startsWith('https://'),
+  crawlType: z.enum(['Range', 'Single']),
   styleCode: z.string().min(1),
   trade: z.string().min(1),
+  force: z.boolean().default(false),
   testMode: z.boolean().optional()
 })
 
