@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { extractedVendorVariantSchema } from './page-detail.schema'
+import { extractedVendorVariantSchema } from './page-detail.schema.js'
 
 export const crawlVariantDetailTableSchema = z.object({
   partitionKey: z.string().trim().min(1),

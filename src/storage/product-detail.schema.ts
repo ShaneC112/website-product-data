@@ -5,7 +5,7 @@ import {
   extractedDetailBlobSchema,
   extractedReviewModelSchema,
   extractedWidthSlotSchema
-} from './page-detail.schema'
+} from './page-detail.schema.js'
 
 export const crawlProductDetailTableSchema = z.object({
   partitionKey: z.string().trim().min(1),

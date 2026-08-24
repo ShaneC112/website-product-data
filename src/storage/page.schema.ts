@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { crawlPageRoleSchema } from './page-detail.schema'
+import { crawlPageRoleSchema } from './page-detail.schema.js'
 
 export const crawlPageVariantUrlsSchema = z.array(z.string().trim().min(1))
 

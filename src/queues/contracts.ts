@@ -69,7 +69,11 @@ export const extractJobSchema = z.object({
 
 export const variantJobSchema = z.object({
   urlKey: z.string().trim().min(1),
-  runId: z.string().trim().min(1).optional()
+  runId: z.string().trim().min(1).optional(),
+  sourceTableName: z.string().trim().min(1).optional(),
+  styleCode: z.string().trim().min(1).optional(),
+  trade: z.string().trim().min(1).optional(),
+  sourceGroupKey: z.string().trim().min(1).optional()
 })
 
 export const transformJobSchema = z.object({
