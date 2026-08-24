@@ -32,6 +32,10 @@
       "types": "./dist/storage/index.d.ts",
       "default": "./dist/storage/index.js"
     },
+    "./storage/artefacts": {
+      "types": "./dist/storage/artefacts.d.ts",
+      "default": "./dist/storage/artefacts.js"
+    },
     "./storage/constants": {
       "types": "./dist/storage/constants.d.ts",
       "default": "./dist/storage/constants.js"

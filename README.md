@@ -49,3 +49,483 @@ Current request-contract adoption:
 - `publishPreflight` is shared between Nuxt and Azure.
 - `matchingLedgerApproval` is shared between Nuxt and Azure.
 - `manualCrawlEnqueue` is shared between Nuxt and Azure using the Azure-owned payload shape.
+
+## Storage and messaging reference
+
+This section is the canonical reference for shared Azure Tables, queues, and blob artefacts used by the website product enrichment pipeline.
+
+### Tables
+
+#### `webcrawlpages`
+
+Intent:
+- transient canonical page ledger, one row per canonical URL
+- tracks render status, source identity, and blob evidence paths
+
+Key strategy:
+- `partitionKey = urlKey`
+- `rowKey = urlKey`
+
+Primary producers:
+- crawl request dispatcher
+- render result writer in the page store
+
+Primary consumers:
+- extract worker
+- transform worker
+- sweeper and purge flows
+- Nuxt read routes
+
+Important fields:
+- `url`: canonical page URL used for render and downstream identity
+- `urlKey`: hashed canonical URL key used as the page identity
+- `sourceTableName`, `sourceRowKey`: source product identity when known
+- `styleCode`, `trade`, `sourceGroupKey`: grouping and operator-facing metadata
+- `pageRole`: `range`, `variant`, or `single`
+- `variantUrlsJson`: discovered variant URLs for range pages
+- `linkedProductCount`: number of source products currently linked to this page
+- `contentHash`: render content hash used for change detection
+- `status`: current page processing state
+- `blobHtmlPath`, `blobScreenshotPath`, `blobElementsJsonPath`: render evidence blob paths
+- `blobCaptureManifestPath`, `blobVendorStatePath`: structured render artefact paths when available
+- `visibleTextLength`: compact render telemetry
+- `ttlExpiresAt`: transient retention cutoff
+- `rawPriceMinor`, `vatRate`, `vendorSku`: source-product pricing identity carried forward for fallback and transform
+
+#### `webcrawlpagedetail`
+
+Intent:
+- transient compact extraction summary per page
+- points to full extracted payload blobs when needed
+
+Key strategy:
+- `partitionKey = urlKey`
+- `rowKey = urlKey`
+
+Primary producers:
+- extract worker
+
+Primary consumers:
+- transform worker
+- Nuxt AI review detail route
+- purge and sweeper flows
+
+Important fields:
+- `urlKey`: page identity
+- `sourceGroupKey`: group identity used for readiness aggregation
+- `pageRole`: `range`, `variant`, or `single`
+- `status`: `draft` or `ready`
+- `detailJson`: compact summary payload stored in-table
+- `extractedDetailBlobPath`: full extracted detail blob path
+- `vendorProductPageBlobPath`: full vendor product page blob path when split out
+- `ttlExpiresAt`: transient retention cutoff
+
+#### `webcrawlvariantdetail`
+
+Intent:
+- transient compact per-variant summary for publish preflight and review
+- points to full variant blobs when needed
+
+Key strategy:
+- `partitionKey = sourceGroupStorageKey`
+- `rowKey = parentUrlKey:preferredVariantIdentity`
+
+Primary producers:
+- transform worker
+
+Primary consumers:
+- publish worker
+- purge and sweeper flows
+
+Important fields:
+- `sourceGroupKey`, `sourceGroupStorageKey`: group identity
+- `parentUrlKey`: parent product page identity
+- `variantId`, `variantUrl`, `label`: variant identity fields
+- `detailJson`: compact variant summary payload
+- `detailBlobPath`: full variant blob path
+- `ttlExpiresAt`: transient retention cutoff
+
+#### `webcrawlgroupstate`
+
+Intent:
+- transient readiness summary per source group
+- drives operator views such as crawl status and AI review
+
+Key strategy:
+- `partitionKey = sourceGroupStorageKey`
+- `rowKey = sourceGroupStorageKey`
+
+Primary producers:
+- transform worker
+- price recompose path in dispatcher
+
+Primary consumers:
+- Nuxt crawl status and AI review routes
+- publish queue decision logic
+
+Important fields:
+- `sourceGroupKey`: logical group identity
+- `state`: readiness state such as `draft`, `ready`, `trade_unmapped`, `ai_field_missing`, `swatch_missing`
+- `pageCount`: number of page-detail rows in the group
+- `detailCount`: number of detail rows contributing to readiness
+- `readinessReasonsJson`: serialized readiness reasons used by UI and publish gating
+- `ttlExpiresAt`: transient retention cutoff when present
+
+#### `webcrawlproductdetail`
+
+Intent:
+- durable composed product output per source product
+- publish-facing durable record that survives transient cleanup
+
+Key strategy:
+- `partitionKey = sourceGroupStorageKey`
+- `rowKey = sourceTableName:sourceRowKey` when url links exist
+- fallback legacy row shape may use `rowKey = urlKey`
+
+Primary producers:
+- transform worker
+- price recompose path in dispatcher
+
+Primary consumers:
+- publish worker
+- Nuxt AI review routes
+- future publish integrations
+
+Important fields:
+- `urlKey`: originating canonical page identity
+- `sourceGroupKey`, `sourceGroupStorageKey`: group identity
+- `sourceTableName`, `sourceRowKey`: source product identity
+- `vendorSku`, `rawPriceMinor`, `vatRate`: source-product pricing identity preserved per product row
+- `styleCode`, `trade`: operator-facing metadata when available
+- `status`: `draft` or `ready`
+- `detailJson`: compact composed summary payload stored in-table
+- `detailBlobPath`: full composed product detail blob path
+- `publishedAt`: durable freshness timestamp used by rerender gating
+- `updatedAt`, `createdAt`, `promptVersion`: optional lifecycle metadata when present
+
+#### `webcrawlurllinks`
+
+Intent:
+- durable forward fan-out from canonical URL to source products
+- preserves many-to-one mapping when multiple source products share one vendor URL
+
+Key strategy:
+- `partitionKey = urlStorageKey`
+- `rowKey = sourceTableName:sourceRowKey`
+
+Primary producers:
+- crawl request dispatcher
+
+Primary consumers:
+- transform worker
+- dispatcher price recompose path
+- Nuxt read routes for canonical source metadata
+
+Important fields:
+- `urlKey`, `urlStorageKey`: canonical URL identity
+- `sourceGroupKey`, `sourceGroupStorageKey`: group identity
+- `sourceTableName`, `sourceRowKey`: source product identity
+- `styleCode`, `trade`: operator-facing metadata
+- `vendorSku`, `rawPriceMinor`, `vatRate`: source-product pricing identity
+- `crawlUrl`: optional original crawl URL when available
+
+#### `webcrawlvalidations`
+
+Intent:
+- durable operator-fixable crawl configuration error ledger
+- blocks invalid products before render and AI work
+
+Key strategy:
+- `partitionKey = sourceTableName`
+- `rowKey = sourceRowKey`
+
+Primary producers:
+- crawl request dispatcher
+
+Primary consumers:
+- Nuxt validations screen
+- dispatcher resolution path when a valid request re-fires
+
+Important fields:
+- `sourceTableName`, `sourceRowKey`: source product identity
+- `sourceGroupKey`: optional group identity when known
+- `styleCode`, `trade`, `crawlUrl`: operator-facing context
+- `errorsJson`: serialized validation error list
+- `firstSeenAt`, `lastSeenAt`: lifecycle timestamps
+- `resolvedAt`: set when a later valid request resolves the issue
+
+#### `webcrawlrunsummary`
+
+Intent:
+- durable per-run telemetry and stage tracing
+- operational read model, not publish payload
+
+Key strategy:
+- `partitionKey = runId`
+- `rowKey = runId`
+
+Primary producers:
+- dispatcher
+- extract worker
+- transform worker
+- publish worker
+- failure/finalization helpers
+
+Primary consumers:
+- Nuxt crawl status screen
+- operational debugging and cost tracing
+
+Important fields:
+- `runId`: run identity
+- `sourceGroupKey`, `urlKey`, `styleCode`, `sourceTableName`: source context
+- `status`: current or final run status
+- stage timestamps: `requestedAt`, `renderStartedAt`, `renderCompletedAt`, `extractStartedAt`, `extractCompletedAt`, `transformStartedAt`, `transformCompletedAt`, `publishStartedAt`, `publishCompletedAt`
+- `aiCallCount`, `aiTotalTokens`, `aiEstimatedCost`: aggregate AI telemetry
+- `warningCount`: compact warning summary
+
+#### `webcrawlmatchledger`
+
+Intent:
+- transient or review-oriented matching proposal ledger for publish preflight
+- stores proposed variant-to-product matches and operator approval state
+
+Key strategy:
+- `partitionKey = sourceGroupStorageKey`
+- `rowKey = variantRowKey`
+
+Primary producers:
+- publish worker preflight proposal generation
+- approval update function mutates approval state
+
+Primary consumers:
+- Nuxt variant matching screen
+- future publish approval flows
+
+Important fields:
+- `sourceGroupKey`, `sourceGroupStorageKey`: group identity
+- `parentUrlKey`, `variantRowKey`: parent and variant identity
+- `variantId`, `variantUrl`, `variantLabel`, `colourName`, `swatchImageUrl`, `swatchHex`: review context
+- `matchedProductRowKey`, `matchedSourceRowKey`, `matchedSourceTableName`: proposed target identity
+- `matchMethod`: `exact_url`, `colour_hint`, or `unmatched`
+- `matchConfidence`: numeric proposal confidence
+- `approvalState`: `pending`, `approved`, `rejected`, or `not_required`
+- `proposalSource`: currently `publish_preflight`
+- `detailJson`: compact explanation payload for the proposal
+- `updatedAt`: last proposal or approval update time
+- `ttlExpiresAt`: retention cutoff when used
+
+### Queues
+
+#### `crawl-requests`
+
+Intent:
+- entry queue for crawl requests from sync, manual operator actions, and sweeper recovery
+
+Primary producers:
+- sync trigger paths
+- manual enqueue HTTP function
+- sweeper recovery path
+
+Primary consumer:
+- crawl request dispatcher
+
+Message contract:
+- `CrawlRequestMessage` from Azure shared contracts
+- includes source identity, canonical crawl URL, crawl type, style/trade metadata, validation errors, pricing identity, force flag, and request timestamp
+
+#### `crawl-render-jobs`
+
+Intent:
+- render work queue for canonical pages and discovered variant pages
+
+Primary producers:
+- crawl request dispatcher
+- variant worker
+
+Primary consumer:
+- render dispatch worker
+
+Message contract:
+- `RenderJob` / `RenderRequest`
+- includes `urlKey`, `url`, `blobPrefix`, `pageRole`, and optional source metadata used downstream
+
+#### `crawl-extract-jobs`
+
+Intent:
+- extraction work queue after render completes
+
+Primary producers:
+- render dispatch worker
+
+Primary consumer:
+- extract worker
+
+Message contract:
+- `ExtractJob`
+- includes `urlKey` and optional `runId`
+
+#### `crawl-variant-jobs`
+
+Intent:
+- variant discovery follow-up queue for range pages
+
+Primary producers:
+- extract worker when a page is a range page
+
+Primary consumer:
+- variant worker
+
+Message contract:
+- `VariantJob`
+- includes `urlKey` and optional `runId`
+
+#### `crawl-transform-jobs`
+
+Intent:
+- transform/composition work queue after extraction completes for non-range pages
+
+Primary producers:
+- extract worker
+
+Primary consumer:
+- transform worker
+
+Message contract:
+- `TransformJob`
+- includes `urlKey` and optional `runId`
+
+#### `publish-jobs`
+
+Intent:
+- publish-preflight and publish-stage queue for ready source groups
+
+Primary producers:
+- dispatcher price recompose path
+- transform worker when a group becomes ready
+- publish preflight HTTP trigger
+
+Primary consumer:
+- publish worker
+
+Message contract:
+- `PublishJob`
+- includes `sourceGroupKey` and optional `runId`
+
+### Blob container
+
+#### `crawl-artefacts`
+
+Intent:
+- stores full render, extraction, variant, and composed-detail artefacts that are too large or too detailed for Azure Table rows
+
+Primary producers:
+- render service / render dispatch flow
+- extract worker
+- transform worker
+
+Primary consumers:
+- extract worker
+- transform worker
+- publish worker
+- purge and sweeper flows
+
+Common blob families:
+- `pages/{urlKey}/page.html`: raw rendered HTML evidence
+- `pages/{urlKey}/page.png` or screenshot path from render output: rendered screenshot evidence
+- `pages/{urlKey}/elements.json`: extracted DOM element evidence from render
+- `pages/{urlKey}/capture-manifest.json`: structured render capture manifest when available
+- `pages/{urlKey}/vendor-state.json`: vendor-specific structured state emitted by render when available
+- `pages/{urlKey}/extracted-detail.json`: full extracted detail payload used by transform
+- `pages/{urlKey}/vendor-product-page.json`: full vendor product page payload when split from extracted detail
+- `pages/{urlKey}/variants/{encodedVariantRowKey}.json`: full per-variant payload used by publish preflight
+- `pages/{urlKey}/composed-detail.json`: full composed product detail payload used by publish and review
+
+Retention model:
+- transient artefact blobs follow the same retention window as transient crawl state
+- durable product rows may continue to reference composed detail blobs after transient working data has expired, depending on cleanup policy and future archival decisions
+
+## Field glossary appendix
+
+This appendix is a compact field-level glossary for the most reused shared contracts. It complements the intent-oriented reference above.
+
+### Common identity fields
+
+| Field | Meaning |
+|---|---|
+| `partitionKey` | Azure Table partition key used for storage locality and query shape. Its meaning depends on the table. |
+| `rowKey` | Azure Table row key used as the row identity within a partition. |
+| `urlKey` | Hashed canonical URL identity for a crawled page. |
+| `urlStorageKey` | Hashed storage partition key derived from `urlKey` for URL-link rows. |
+| `sourceGroupKey` | Logical group identity, typically combining source table, root domain, and style code. |
+| `sourceGroupStorageKey` | Hashed storage key derived from `sourceGroupKey`. |
+| `sourceTableName` | Upstream source table name, currently typically `m2crmproducts`. |
+| `sourceRowKey` | Upstream source product row identity. |
+
+### `CrawlPageRow` field glossary
+
+| Field | Meaning |
+|---|---|
+| `url` | Canonical page URL used for render and downstream processing. |
+| `pageRole` | Page classification: `range`, `variant`, or `single`. |
+| `rootDomain` | Root domain derived from the canonical URL for grouping and render scoping. |
+| `variantUrlsJson` | Serialized discovered variant URL list for range pages. |
+| `linkedProductCount` | Number of source products currently linked to this canonical page. |
+| `contentHash` | Rendered content hash used for change detection and reuse decisions. |
+| `status` | Current page processing state written by render/update flows. |
+| `blobHtmlPath` | Blob path to raw rendered HTML evidence. |
+| `blobScreenshotPath` | Blob path to rendered screenshot evidence. |
+| `blobElementsJsonPath` | Blob path to extracted DOM elements evidence. |
+| `blobCaptureManifestPath` | Blob path to structured render capture manifest when available. |
+| `blobVendorStatePath` | Blob path to vendor-specific structured state when available. |
+| `visibleTextLength` | Compact render telemetry used for diagnostics and review. |
+| `ttlExpiresAt` | Transient retention cutoff timestamp. |
+| `rawPriceMinor` | Source price in minor currency units carried forward for composition. |
+| `vatRate` | Source VAT rate carried forward for composition. |
+| `vendorSku` | Source vendor SKU carried forward for composition. |
+
+### `CrawlProductDetailRow` field glossary
+
+| Field | Meaning |
+|---|---|
+| `status` | Durable composed detail readiness state, usually `draft` or `ready`. |
+| `detailJson` | Compact composed summary payload stored directly in the table row. |
+| `detailBlobPath` | Blob path to the full composed product detail payload. |
+| `publishedAt` | Durable freshness timestamp used by rerender gating and publish reuse. |
+| `promptVersion` | Optional AI prompt version metadata when captured. |
+| `updatedAt` | Optional last-update timestamp when explicitly written. |
+| `createdAt` | Optional creation timestamp when explicitly written. |
+
+### `CrawlValidationRow` field glossary
+
+| Field | Meaning |
+|---|---|
+| `errorsJson` | Serialized list of operator-fixable validation errors. |
+| `firstSeenAt` | Timestamp when the validation issue was first recorded. |
+| `lastSeenAt` | Timestamp when the validation issue was most recently observed. |
+| `resolvedAt` | Timestamp set when a later valid request resolves the issue. |
+
+### `CrawlRunSummaryRow` field glossary
+
+| Field | Meaning |
+|---|---|
+| `requestedAt` | Time the run was accepted into the crawl pipeline. |
+| `renderStartedAt` / `renderCompletedAt` | Render stage timing. |
+| `extractStartedAt` / `extractCompletedAt` | Extract stage timing. |
+| `transformStartedAt` / `transformCompletedAt` | Transform stage timing. |
+| `publishStartedAt` / `publishCompletedAt` | Publish or publish-preflight stage timing. |
+| `aiCallCount` | Number of AI calls attributed to the run. |
+| `aiTotalTokens` | Aggregate AI token usage for the run. |
+| `aiEstimatedCost` | Approximate AI cost when token pricing settings are configured. |
+| `warningCount` | Compact warning count for the run. |
+
+### `CrawlMatchingLedgerRow` field glossary
+
+| Field | Meaning |
+|---|---|
+| `parentUrlKey` | Canonical page identity for the parent product page. |
+| `variantRowKey` | Variant identity used as the ledger row identity. |
+| `matchMethod` | Proposal method: `exact_url`, `colour_hint`, or `unmatched`. |
+| `matchConfidence` | Numeric confidence score for the current proposal. |
+| `approvalState` | Operator approval state for the proposal. |
+| `proposalSource` | Workflow that generated the proposal, currently `publish_preflight`. |
+| `detailJson` | Compact explanation payload describing why the proposal was made. |
