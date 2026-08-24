@@ -1,0 +1,43 @@
+{
+  "name": "@shane-corrigan/website-product-data",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.5.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./storage": {
+      "types": "./dist/storage/index.d.ts",
+      "default": "./dist/storage/index.js"
+    },
+    "./storage/constants": {
+      "types": "./dist/storage/constants.d.ts",
+      "default": "./dist/storage/constants.js"
+    },
+    "./storage/contracts": {
+      "types": "./dist/storage/contracts.d.ts",
+      "default": "./dist/storage/contracts.js"
+    },
+    "./storage/keys": {
+      "types": "./dist/storage/keys.d.ts",
+      "default": "./dist/storage/keys.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  }
+}
