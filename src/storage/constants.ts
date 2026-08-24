@@ -6,6 +6,7 @@ export const STORAGE_TABLES = {
   crawlUrlLink: 'webcrawlurllinks',
   crawlPage: 'webcrawlpages',
   crawlPageDetail: 'webcrawlpagedetail',
+  crawlVariantDetail: 'webcrawlvariantdetail',
   crawlMatchingLedger: 'webcrawlmatchledger'
 } as const
 

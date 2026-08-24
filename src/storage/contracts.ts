@@ -134,6 +134,20 @@ export type CrawlPageDetailRow = {
   ttlExpiresAt?: string
 }
 
+export type CrawlVariantDetailRow = {
+  partitionKey: string
+  rowKey: string
+  sourceGroupKey: string
+  sourceGroupStorageKey?: string
+  parentUrlKey: string
+  variantId?: string
+  variantUrl?: string
+  label?: string
+  detailJson: string
+  detailBlobPath?: string
+  ttlExpiresAt?: string
+}
+
 export type CrawlMatchingLedgerRow = {
   partitionKey: string
   rowKey: string
