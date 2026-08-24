@@ -28,6 +28,7 @@ Non-goals for the first cut:
 Local integration pattern:
 - add a file dependency: `"@shane-corrigan/website-product-data": "file:../website-product-data"`
 - build this repo before consumers that require the emitted `dist/` output
+- the Azure Functions repo currently imports built `dist/` subpaths directly for compatibility with its current TypeScript module resolution
 
 Exports:
 - `@shane-corrigan/website-product-data/requests`
@@ -40,5 +41,11 @@ Exports:
 Decisions:
 - The private shared package is the single source of truth for shared storage contracts and shared write request payload contracts.
 - Nuxt write routes import request schemas from this package instead of duplicating them locally.
+- Azure write functions should import the same shared request schemas wherever the payload contract matches.
 - Page-local client validation that is only used by one page should be inlined in that page rather than kept in a shared UI schema file.
 - APISyncAzure remains out of scope for this package.
+
+Current request-contract adoption:
+- `publishPreflight` is shared between Nuxt and Azure.
+- `matchingLedgerApproval` is shared between Nuxt and Azure.
+- `manualCrawlEnqueue` is shared on the Nuxt side, but the Azure function still uses a different payload shape and has not been aligned yet.
