@@ -1,5 +1,6 @@
 export const STORAGE_TABLES = {
   crawlGroupState: 'webcrawlgroupstate',
+  crawlGroupPdf: 'webcrawlgrouppdfs',
   crawlRunSummary: 'webcrawlrunsummary',
   crawlValidation: 'webcrawlvalidations',
   crawlProductDetail: 'webcrawlproductdetail',
@@ -7,11 +8,14 @@ export const STORAGE_TABLES = {
   crawlPage: 'webcrawlpages',
   crawlPageDetail: 'webcrawlpagedetail',
   crawlVariantDetail: 'webcrawlvariantdetail',
-  crawlMatchingLedger: 'webcrawlmatchledger'
+  crawlMatchingLedger: 'webcrawlmatchledger',
+  crawlVariantSwatch: 'webcrawlvariantswatches'
 } as const
 
 export const STORAGE_CONTAINERS = {
-  crawlArtefacts: 'crawl-artefacts'
+  crawlArtefacts: 'crawl-artefacts',
+  crawlManualPdfs: 'crawl-manual-pdfs',
+  crawlSwatches: 'crawl-swatches'
 } as const
 
 export const STORAGE_QUEUES = {

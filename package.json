@@ -40,6 +40,10 @@
       "types": "./dist/storage/index.d.ts",
       "default": "./dist/storage/index.js"
     },
+    "./storage/group-pdf.schema": {
+      "types": "./dist/storage/group-pdf.schema.d.ts",
+      "default": "./dist/storage/group-pdf.schema.js"
+    },
     "./storage/group-state.schema": {
       "types": "./dist/storage/group-state.schema.d.ts",
       "default": "./dist/storage/group-state.schema.js"
@@ -71,6 +75,10 @@
     "./storage/validation.schema": {
       "types": "./dist/storage/validation.schema.d.ts",
       "default": "./dist/storage/validation.schema.js"
+    },
+    "./storage/variant-swatch.schema": {
+      "types": "./dist/storage/variant-swatch.schema.d.ts",
+      "default": "./dist/storage/variant-swatch.schema.js"
     },
     "./storage/variant-detail.schema": {
       "types": "./dist/storage/variant-detail.schema.d.ts",
