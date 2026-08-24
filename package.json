@@ -28,21 +28,57 @@
       "types": "./dist/requests/contracts.d.ts",
       "default": "./dist/requests/contracts.js"
     },
+    "./queues": {
+      "types": "./dist/queues/index.d.ts",
+      "default": "./dist/queues/index.js"
+    },
+    "./queues/contracts": {
+      "types": "./dist/queues/contracts.d.ts",
+      "default": "./dist/queues/contracts.js"
+    },
     "./storage": {
       "types": "./dist/storage/index.d.ts",
       "default": "./dist/storage/index.js"
     },
-    "./storage/artefacts": {
-      "types": "./dist/storage/artefacts.d.ts",
-      "default": "./dist/storage/artefacts.js"
+    "./storage/group-state.schema": {
+      "types": "./dist/storage/group-state.schema.d.ts",
+      "default": "./dist/storage/group-state.schema.js"
+    },
+    "./storage/matching-ledger.schema": {
+      "types": "./dist/storage/matching-ledger.schema.d.ts",
+      "default": "./dist/storage/matching-ledger.schema.js"
+    },
+    "./storage/page.schema": {
+      "types": "./dist/storage/page.schema.d.ts",
+      "default": "./dist/storage/page.schema.js"
+    },
+    "./storage/page-detail.schema": {
+      "types": "./dist/storage/page-detail.schema.d.ts",
+      "default": "./dist/storage/page-detail.schema.js"
+    },
+    "./storage/product-detail.schema": {
+      "types": "./dist/storage/product-detail.schema.d.ts",
+      "default": "./dist/storage/product-detail.schema.js"
+    },
+    "./storage/run-summary.schema": {
+      "types": "./dist/storage/run-summary.schema.d.ts",
+      "default": "./dist/storage/run-summary.schema.js"
+    },
+    "./storage/url-link.schema": {
+      "types": "./dist/storage/url-link.schema.d.ts",
+      "default": "./dist/storage/url-link.schema.js"
+    },
+    "./storage/validation.schema": {
+      "types": "./dist/storage/validation.schema.d.ts",
+      "default": "./dist/storage/validation.schema.js"
+    },
+    "./storage/variant-detail.schema": {
+      "types": "./dist/storage/variant-detail.schema.d.ts",
+      "default": "./dist/storage/variant-detail.schema.js"
     },
     "./storage/constants": {
       "types": "./dist/storage/constants.d.ts",
       "default": "./dist/storage/constants.js"
-    },
-    "./storage/contracts": {
-      "types": "./dist/storage/contracts.d.ts",
-      "default": "./dist/storage/contracts.js"
     },
     "./storage/keys": {
       "types": "./dist/storage/keys.d.ts",
