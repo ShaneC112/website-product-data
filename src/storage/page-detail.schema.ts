@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { registryFieldValueSchema, variantRegistryFieldValueSchema } from '../registry/field-registry.js'
+import { classifiedImageSchema } from './image-classification.schema.js'
 
 export const crawlPageRoleSchema = z.enum(['range', 'variant', 'single'])
 export const crawlProductDetailStatusSchema = z.enum(['draft', 'ready'])
@@ -57,6 +58,9 @@ export const extractedVendorVariantSchema = z.object({
   url: z.string().trim().min(1).optional(),
   colourName: z.string().trim().min(1).optional(),
   swatchImageUrl: z.string().trim().min(1).optional(),
+  imageUrls: z.array(z.string().trim().min(1)).optional(),
+  swatchImageUrls: z.array(z.string().trim().min(1)).optional(),
+  classifiedImages: z.array(classifiedImageSchema).optional(),
   swatchHex: z.string().trim().min(1).optional(),
   variantFields: z.array(variantRegistryFieldValueSchema).optional(),
   widths: z.array(extractedWidthSlotSchema).optional(),

@@ -48,6 +48,10 @@
       "types": "./dist/storage/group-state.schema.d.ts",
       "default": "./dist/storage/group-state.schema.js"
     },
+    "./storage/image-classification.schema": {
+      "types": "./dist/storage/image-classification.schema.d.ts",
+      "default": "./dist/storage/image-classification.schema.js"
+    },
     "./storage/matching-ledger.schema": {
       "types": "./dist/storage/matching-ledger.schema.d.ts",
       "default": "./dist/storage/matching-ledger.schema.js"

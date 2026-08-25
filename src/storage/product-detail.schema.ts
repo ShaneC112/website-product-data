@@ -49,6 +49,7 @@ export const compactVendorProductPageSchema = z.object({
   rangeName: z.string().trim().min(1).optional(),
   productType: z.string().trim().min(1).optional(),
   brandName: z.string().trim().min(1).optional(),
+  imageUrls: z.array(z.string().trim().min(1)).optional(),
   widths: z.array(extractedWidthSlotSchema),
   variantCount: z.number().int().nonnegative()
 })

@@ -1,5 +1,16 @@
 # website-product-data
 
+## Intent
+
+`website-product-data` is the shared data-contract library for the website product
+enrichment system. It exists to provide one authoritative definition of the data
+structures and helpers that cross repository boundaries: Azure Table entity schemas,
+blob artefact schemas, queue message contracts, the shared product and variant field
+registry, storage key builders, and write-request payload contracts. The Azure
+orchestrator and the Nuxt UI import these definitions instead of redefining them
+locally, so writers and readers never drift. This package contains no workflow logic,
+no browser automation, and no framework-specific runtime code.
+
 Private shared storage-contract repo for the website product enrichment system.
 
 Purpose:
@@ -31,6 +42,7 @@ Local integration pattern:
 - the Azure Functions repo currently imports built `dist/` subpaths directly for compatibility with its current TypeScript module resolution
 
 Exports:
+- `@shane-corrigan/website-product-data/registry`
 - `@shane-corrigan/website-product-data/requests`
 - `@shane-corrigan/website-product-data/requests/contracts`
 - `@shane-corrigan/website-product-data/storage`

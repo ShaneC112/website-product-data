@@ -1,6 +1,7 @@
 export * from './constants.js'
 export * from './group-pdf.schema.js'
 export * from './group-state.schema.js'
+export * from './image-classification.schema.js'
 export * from './matching-ledger.schema.js'
 export * from './page.schema.js'
 export * from './page-detail.schema.js'

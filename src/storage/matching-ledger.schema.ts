@@ -1,6 +1,13 @@
 import { z } from 'zod'
 
-export const crawlMatchingLedgerMatchMethodSchema = z.enum(['exact_url', 'colour_hint', 'unmatched'])
+export const crawlMatchingLedgerMatchMethodSchema = z.enum([
+  'exact_url',
+  'colour_hint',
+  'colour_field',
+  'vendor_rule',
+  'ai_proposal',
+  'unmatched'
+])
 export const crawlMatchingLedgerApprovalStateSchema = z.enum(['pending', 'approved', 'rejected', 'not_required'])
 export const crawlMatchingLedgerProposalSourceSchema = z.enum(['publish_preflight'])
 export const crawlMatchingLedgerDetailSchema = z.record(z.unknown())

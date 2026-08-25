@@ -12,8 +12,8 @@ export const crawlRequestMessageSchema = z.object({
   rowKey: z.string().trim().min(1),
   url: z.string().trim().min(1).optional(),
   crawlType: z.enum(['Range', 'Single']),
-  styleCode: z.string().trim().min(1),
-  trade: z.string().trim().min(1),
+  styleCode: z.string().trim().default(''),
+  trade: z.string().trim().default(''),
   promptVersion: z.string().trim().min(1).optional(),
   sourceGroupKey: z.string().trim().min(1).optional(),
   sourceGroupType: z.enum(['Range', 'Single', 'Mixed']).optional(),
@@ -25,6 +25,19 @@ export const crawlRequestMessageSchema = z.object({
   validationErrors: z.array(queueValidationErrorSchema).default([]),
   force: z.boolean().default(false),
   requestedAt: z.string().trim().min(1)
+}).superRefine((message, ctx) => {
+  // styleCode/trade are only required for otherwise-valid requests; messages that carry
+  // validation errors deliberately pass through with empty values so the dispatcher can
+  // record them in the validation ledger.
+  if (message.validationErrors.length > 0) {
+    return
+  }
+  if (message.styleCode.length === 0) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['styleCode'], message: 'styleCode is required when no validation errors are present' })
+  }
+  if (message.trade.length === 0) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['trade'], message: 'trade is required when no validation errors are present' })
+  }
 })
 
 export const renderRequestSchema = z.object({

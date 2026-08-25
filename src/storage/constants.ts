@@ -21,6 +21,7 @@ export const STORAGE_CONTAINERS = {
 export const STORAGE_QUEUES = {
   crawlRequests: 'crawl-requests',
   crawlRenderJobs: 'crawl-render-jobs',
+  crawlImageJobs: 'crawl-image-jobs',
   crawlTransformJobs: 'crawl-transform-jobs',
   publishJobs: 'publish-jobs'
 } as const

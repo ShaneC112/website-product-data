@@ -1,5 +1,7 @@
 import { z } from 'zod'
 import { extractedVendorVariantSchema } from './page-detail.schema.js'
+import { classifiedImageSchema } from './image-classification.schema.js'
+import { crawlVariantSwatchSourceSchema, crawlVariantSwatchStatusSchema } from './variant-swatch.schema.js'
 
 export const crawlVariantDetailTableSchema = z.object({
   partitionKey: z.string().trim().min(1),
@@ -22,6 +24,11 @@ export const variantDetailSummarySchema = z.object({
   url: z.string().trim().min(1).optional(),
   colourName: z.string().trim().min(1).optional(),
   swatchImageUrl: z.string().trim().min(1).optional(),
+  swatchSource: crawlVariantSwatchSourceSchema.optional(),
+  swatchStatus: crawlVariantSwatchStatusSchema.optional(),
+  imageUrls: z.array(z.string().trim().min(1)).optional(),
+  swatchImageUrls: z.array(z.string().trim().min(1)).optional(),
+  classifiedImages: z.array(classifiedImageSchema).optional(),
   swatchHex: z.string().trim().min(1).optional()
 })
 
