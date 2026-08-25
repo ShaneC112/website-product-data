@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { registryFieldValueSchema, variantRegistryFieldValueSchema } from '../registry/field-registry.js'
+
 export const crawlPageRoleSchema = z.enum(['range', 'variant', 'single'])
 export const crawlProductDetailStatusSchema = z.enum(['draft', 'ready'])
 
@@ -56,6 +58,7 @@ export const extractedVendorVariantSchema = z.object({
   colourName: z.string().trim().min(1).optional(),
   swatchImageUrl: z.string().trim().min(1).optional(),
   swatchHex: z.string().trim().min(1).optional(),
+  variantFields: z.array(variantRegistryFieldValueSchema).optional(),
   widths: z.array(extractedWidthSlotSchema).optional(),
   dynamicFields: z.array(extractedDynamicFieldSchema).optional(),
   features: z.array(z.string().trim().min(1)).optional(),
@@ -95,13 +98,6 @@ export const extractedReviewModelSchema = z.object({
   knownFeatures: z.array(extractedReviewKnownAttributeSchema),
   additionalSpecifications: z.array(extractedReviewAdditionalAttributeSchema),
   additionalFeatures: z.array(extractedReviewAdditionalAttributeSchema)
-})
-
-export const extractedPatternEvidenceSchema = z.object({
-  horizontalRepeat: z.string().trim().min(1).optional(),
-  horizontalDrop: z.string().trim().min(1).optional(),
-  verticalRepeat: z.string().trim().min(1).optional(),
-  verticalDrop: z.string().trim().min(1).optional()
 })
 
 export const crawlPageDetailTableSchema = z.object({
@@ -150,6 +146,7 @@ export const extractedDetailBlobSchema = z.object({
   trade: z.string().trim().min(1).optional(),
   promptVersion: z.string().trim().min(1).optional(),
   url: z.string().trim().min(1).optional(),
+  fields: z.array(registryFieldValueSchema).default([]),
   title: z.string().trim().min(1).optional(),
   description: z.string().trim().min(1).optional(),
   productType: z.string().trim().min(1).optional(),
@@ -170,14 +167,10 @@ export const extractedDetailBlobSchema = z.object({
   antiStatic: z.boolean().optional(),
   suitabilityUfH: z.boolean().optional(),
   features: z.array(z.string().trim().min(1)).optional(),
-  patternEvidence: extractedPatternEvidenceSchema.optional(),
   waterResistant: z.boolean().optional(),
   packInfo: extractedPackInfoSchema.optional(),
   dimensions: z.array(extractedDimensionSchema).optional(),
   look: z.string().trim().min(1).optional(),
-  additionalSpecifications: z.array(extractedAdditionalAttributeSchema).optional(),
-  additionalFeatures: z.array(extractedAdditionalAttributeSchema).optional(),
-  measurements: z.array(extractedMeasurementSchema).optional(),
   warnings: z.array(z.string().trim().min(1)).optional(),
   status: crawlProductDetailStatusSchema.optional(),
   hasDiscoveredVariants: z.boolean().optional(),

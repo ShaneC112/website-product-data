@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { registryFieldValueSchema } from '../registry/field-registry.js'
 import {
   crawlPageRoleSchema,
   crawlProductDetailStatusSchema,
@@ -61,6 +62,7 @@ export const productDetailSummarySchema = z.object({
     trade: z.string().optional(),
     promptVersion: z.string().trim().min(1).optional(),
     url: z.string().trim().min(1).optional(),
+    fields: z.array(registryFieldValueSchema).optional(),
     title: z.string().trim().min(1).optional(),
     description: z.string().optional(),
     productType: z.string().trim().min(1).optional(),
