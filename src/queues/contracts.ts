@@ -69,6 +69,7 @@ export const renderResponseSchema = z.object({
     elements: z.array(z.string().trim().min(1)),
     captureManifest: z.string().trim().min(1).optional(),
     vendorState: z.string().trim().min(1).optional(),
+    visibleText: z.string().trim().min(1).optional(),
     debug: z.array(z.string().trim().min(1)).optional(),
     debugPayloads: z.array(z.string().trim().min(1)).optional()
   }),
@@ -91,7 +92,8 @@ export const renderCompleteSchema = z.object({
     screenshot: z.string().trim().min(1),
     elements: z.array(z.string().trim().min(1)),
     captureManifest: z.string().trim().min(1).optional(),
-    vendorState: z.string().trim().min(1).optional()
+    vendorState: z.string().trim().min(1).optional(),
+    visibleText: z.string().trim().min(1).optional()
   }),
   visibleTextLength: z.number().int(),
   warnings: z.array(z.string().trim().min(1)).optional(),

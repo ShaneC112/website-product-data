@@ -23,6 +23,7 @@ export const crawlPageTableSchema = z.object({
   blobElementsJsonPath: z.string().trim().min(1).optional(),
   blobCaptureManifestPath: z.string().trim().min(1).optional(),
   blobVendorStatePath: z.string().trim().min(1).optional(),
+  blobVisibleTextPath: z.string().trim().min(1).optional(),
   visibleTextLength: z.number().int().nonnegative().optional(),
   ttlExpiresAt: z.string().trim().min(1).optional(),
   etag: z.string().trim().min(1).optional(),

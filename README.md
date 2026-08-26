@@ -120,6 +120,24 @@ new `measurement-list` registry field should follow the same pattern: keep the r
 since `extracted.fields` is surfaced directly to operators as the "final AI pass"
 output in the AI review UI.
 
+**Update:** `renderResponseSchema`/`renderCompleteSchema`'s `blobPaths` and
+`crawlPageTableSchema` all gained an optional `visibleText`/`blobVisibleTextPath`
+field. This carries render's already-computed, hidden-aware, tag-free rendering of
+the page's visible text through to Azure, which prefers it over a fixed-size raw
+HTML excerpt for the AI extraction input (see
+`website-product-enrichment-azure/README.md`'s AI-extraction pitfalls for why).
+
+**Update:** a field registry `exampleValue` is prompt guidance shown to the model as
+a format illustration, not real data - but a model can and will copy a
+realistic-looking example verbatim when it is uncertain of the real value. This
+happened with the `width` field's original example (`[{"value":400,"unit":"cm"}]`),
+which the AI returned unmodified for a page whose real width was "4 m". Any new
+`exampleValue` for a numeric/structured field should use an unmistakable placeholder
+(e.g. `<the number found on the page>` rather than a plausible real number) so that
+even a model that ignores the "never copy an example" instruction in the consuming
+repo's system prompt produces an obviously-invalid value that downstream structural
+validation rejects, instead of a silently-wrong one.
+
 ### Tables
 
 #### `webcrawlpages`
@@ -154,6 +172,7 @@ Important fields:
 - `status`: current page processing state
 - `blobHtmlPath`, `blobScreenshotPath`, `blobElementsJsonPath`: render evidence blob paths
 - `blobCaptureManifestPath`, `blobVendorStatePath`: structured render artefact paths when available
+- `blobVisibleTextPath`: blob path to the hidden-aware, tag-free visible-text rendering, when non-empty
 - `visibleTextLength`: compact render telemetry
 - `ttlExpiresAt`: transient retention cutoff
 - `rawPriceMinor`, `vatRate`, `vendorSku`: source-product pricing identity carried forward for fallback and transform
@@ -550,6 +569,7 @@ This appendix is a compact field-level glossary for the most reused shared contr
 | `blobElementsJsonPath` | Blob path to extracted DOM elements evidence. |
 | `blobCaptureManifestPath` | Blob path to structured render capture manifest when available. |
 | `blobVendorStatePath` | Blob path to vendor-specific structured state when available. |
+| `blobVisibleTextPath` | Blob path to the hidden-aware, tag-free visible-text rendering, when non-empty. Preferred over raw HTML for the AI extraction excerpt. |
 | `visibleTextLength` | Compact render telemetry used for diagnostics and review. |
 | `ttlExpiresAt` | Transient retention cutoff timestamp. |
 | `rawPriceMinor` | Source price in minor currency units carried forward for composition. |
