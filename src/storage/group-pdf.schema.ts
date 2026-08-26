@@ -8,6 +8,8 @@ export const crawlGroupPdfTableSchema = z.object({
   rowKey: z.string().trim().min(1),
   sourceGroupKey: z.string().trim().min(1),
   sourceGroupStorageKey: z.string().trim().min(1).optional(),
+  styleCodeRaw: z.string().trim().min(1).optional(),
+  styleCodeStorageKey: z.string().trim().min(1).optional(),
   blobPath: z.string().trim().min(1),
   fileName: z.string().trim().min(1),
   contentType: z.string().trim().min(1),

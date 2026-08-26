@@ -4,8 +4,7 @@ import {
   crawlPageRoleSchema,
   crawlProductDetailStatusSchema,
   extractedDetailBlobSchema,
-  extractedReviewModelSchema,
-  extractedWidthSlotSchema
+  extractedReviewModelSchema
 } from './page-detail.schema.js'
 
 export const crawlProductDetailTableSchema = z.object({
@@ -14,8 +13,11 @@ export const crawlProductDetailTableSchema = z.object({
   urlKey: z.string().trim().min(1).optional(),
   sourceGroupKey: z.string().trim().min(1).optional(),
   sourceGroupStorageKey: z.string().trim().min(1).optional(),
+  styleCodeRaw: z.string().trim().min(1).optional(),
+  styleCodeStorageKey: z.string().trim().min(1).optional(),
   sourceTableName: z.string().trim().min(1).optional(),
   sourceRowKey: z.string().trim().min(1).optional(),
+  m2crmUuid: z.string().trim().min(1).optional(),
   vendorSku: z.string().trim().min(1).optional(),
   rawPriceMinor: z.number().optional(),
   vatRate: z.number().optional(),
@@ -40,7 +42,10 @@ export const composedProductSummarySchema = z.object({
 })
 
 export const composedProductSourceSchema = z.object({
-  styleCode: z.string().trim().min(1).optional()
+  styleCode: z.string().trim().min(1).optional(),
+  styleCodeRaw: z.string().trim().min(1).optional(),
+  styleCodeStorageKey: z.string().trim().min(1).optional(),
+  m2crmUuid: z.string().trim().min(1).optional()
 })
 
 export const compactVendorProductPageSchema = z.object({
@@ -50,7 +55,7 @@ export const compactVendorProductPageSchema = z.object({
   productType: z.string().trim().min(1).optional(),
   brandName: z.string().trim().min(1).optional(),
   imageUrls: z.array(z.string().trim().min(1)).optional(),
-  widths: z.array(extractedWidthSlotSchema),
+  widthCount: z.number().int().nonnegative(),
   variantCount: z.number().int().nonnegative()
 })
 

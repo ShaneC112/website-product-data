@@ -5,7 +5,8 @@ export const crawlGroupStateSchema = z.enum([
   'ready',
   'trade_unmapped',
   'ai_field_missing',
-  'swatch_missing'
+  'swatch_missing',
+  'final_check_flagged'
 ])
 
 export const crawlGroupReadinessReasonsSchema = z.array(z.string().trim().min(1))
@@ -14,6 +15,8 @@ export const crawlGroupStateTableSchema = z.object({
   partitionKey: z.string().trim().min(1),
   rowKey: z.string().trim().min(1),
   sourceGroupKey: z.string().trim().min(1),
+  styleCodeRaw: z.string().trim().min(1).optional(),
+  styleCodeStorageKey: z.string().trim().min(1).optional(),
   state: crawlGroupStateSchema,
   pageCount: z.number().int().nonnegative(),
   detailCount: z.number().int().nonnegative(),

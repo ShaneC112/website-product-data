@@ -6,19 +6,29 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json"
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run"
   },
   "dependencies": {
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.9"
   },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./registry": {
+      "types": "./dist/registry/index.d.ts",
+      "default": "./dist/registry/index.js"
+    },
+    "./registry/index": {
+      "types": "./dist/registry/index.d.ts",
+      "default": "./dist/registry/index.js"
     },
     "./requests": {
       "types": "./dist/requests/index.d.ts",

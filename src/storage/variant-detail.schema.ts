@@ -8,6 +8,8 @@ export const crawlVariantDetailTableSchema = z.object({
   rowKey: z.string().trim().min(1),
   sourceGroupKey: z.string().trim().min(1),
   sourceGroupStorageKey: z.string().trim().min(1).optional(),
+  styleCodeRaw: z.string().trim().min(1).optional(),
+  styleCodeStorageKey: z.string().trim().min(1).optional(),
   parentUrlKey: z.string().trim().min(1),
   variantId: z.string().trim().min(1).optional(),
   variantUrl: z.string().trim().min(1).optional(),
@@ -19,6 +21,7 @@ export const crawlVariantDetailTableSchema = z.object({
 
 export const variantDetailSummarySchema = z.object({
   summaryType: z.literal('variant-detail-summary'),
+  canonicalVariantKey: z.string().trim().min(1).optional(),
   variantId: z.string().trim().min(1).optional(),
   label: z.string().trim().min(1).optional(),
   url: z.string().trim().min(1).optional(),

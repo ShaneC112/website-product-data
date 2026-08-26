@@ -24,7 +24,7 @@ Current scope:
 - storage container names
 - storage queue names
 - Azure Table entity types
-- shared key helpers such as `buildCrawlProductDetailPartitionKey`
+- shared key helpers such as `encodeStorageKey`, `buildCanonicalSourceRowKey`, and `buildCanonicalVariantKey`
 - shared write request schemas for Nuxt server routes and related callers
 
 Current consumers:
@@ -63,6 +63,47 @@ Current request-contract adoption:
 - `manualCrawlEnqueue` is shared between Nuxt and Azure using the Azure-owned payload shape.
 
 ## Storage and messaging reference
+
+Canonical key helpers now shipped in this package:
+
+- `encodeStorageKey` / `decodeStorageKey`: reversible Azure Table-safe business keys
+- `normaliseVariantToken` and `normaliseWidth`: canonical colour/design and width normalization
+- `buildStyleCodeStorageKey`: styleCode-first group storage key
+- `buildCanonicalSourceRowKey`: canonical source identity from `m2crmUuid`
+- `buildCanonicalVariantKey`: colour/design-first variant identity with width appended only when it distinguishes a true colour/design variant
+
+Queue contracts now include canonical identity pass-through fields on render jobs (`styleCodeRaw`, `styleCodeStorageKey`, `m2crmUuid`, `sourceGroupKey`) and the shared `renderCompleteSchema` for `crawl-render-complete`.
+
+`renderCompleteSchema` is intentionally not minimal. It requires `url` and `blobPaths`
+(the real render evidence) and also carries `pageRole`, `sourceTableName`,
+`styleCode`, `styleCodeRaw`, `styleCodeStorageKey`, `m2crmUuid`, `trade`, and
+`sourceGroupKey` — the same identity fields present on the render job. This is
+because `website-product-enrichment-azure`'s `renderDispatchWorker` may be creating
+the `webcrawlpages` row for a `urlKey` for the first time (true for every discovered
+variant page), so there is no fallback source for these fields other than this
+message. Trimming this schema back to "just status and a content hash" reintroduces
+a real bug found via live E2E testing: pages silently lost their `url`, `pageRole`,
+and `sourceGroupKey`, corrupting downstream transform/publish. See
+[plan/render-update/06-live-e2e-payloads.md](/workspaces/project-container/plan/render-update/06-live-e2e-payloads.md#findings-from-the-first-live-run--read-before-touching-render-complete-or-dispatcher-code)
+for the full writeup. If a new field is added to the render job contract that Azure
+needs after completion, add it here too.
+
+`compactVendorProductPageSchema` (part of `productDetailSummarySchema` in
+`storage/product-detail.schema.ts`) intentionally does **not** carry the full
+`widths` array — only a `widthCount`. Azure Table Storage rejects any single
+property over 64KB, and vendor-supplied `widths`/extracted field text is unbounded
+(a live E2E run hit this with a vendor page whose width parser scraped ~38K
+characters of CSS text as bogus "width" values). The full-fidelity detail always
+lives in the `composed-detail.json` blob; this compact schema is index/preview data
+only, so any new field added here should be a count, enum, or short id — never
+unbounded vendor text. Because this schema is shared across repos (at minimum
+`website-product-enrichment-azure` and `website-product-enrichment-ui` both parse
+`webcrawlproductdetail` rows through it), changing it requires rebuilding this
+package *and* restarting every consuming repo's process — a `file:` dependency
+consumer can be holding a stale on-disk copy and/or a stale in-memory module even
+after this package's `dist` is rebuilt. See
+[plan/render-update/06-live-e2e-payloads.md](/workspaces/project-container/plan/render-update/06-live-e2e-payloads.md#findings-from-the-first-live-run--read-before-touching-render-complete-or-dispatcher-code)
+(Pitfall 6) for the full trace.
 
 This section is the canonical reference for shared Azure Tables, queues, and blob artefacts used by the website product enrichment pipeline.
 
@@ -140,10 +181,12 @@ Intent:
 
 Key strategy:
 - `partitionKey = sourceGroupStorageKey`
-- `rowKey = parentUrlKey:preferredVariantIdentity`
+- `rowKey = canonicalVariantKey` using `buildCanonicalVariantKey(...)`
+- `parentUrlKey = range page urlKey` for the whole group, even when the row was produced from a variant child page
 
 Primary producers:
 - transform worker
+- image classify worker (pre-transform classified-image enrichment)
 
 Primary consumers:
 - publish worker
@@ -151,11 +194,16 @@ Primary consumers:
 
 Important fields:
 - `sourceGroupKey`, `sourceGroupStorageKey`: group identity
-- `parentUrlKey`: parent product page identity
+- `parentUrlKey`: range-page identity used by publish and review joins
 - `variantId`, `variantUrl`, `label`: variant identity fields
 - `detailJson`: compact variant summary payload
 - `detailBlobPath`: full variant blob path
 - `ttlExpiresAt`: transient retention cutoff
+
+Local E2E note:
+- when validating a new canonical-key or queue-contract change locally, prefer clearing the full
+	pipeline state and rerunning from scratch rather than attempting a transient backfill. The Azure
+	repo ships `npm run reset:pipeline -- --confirm` for this purpose.
 
 #### `webcrawlgroupstate`
 
