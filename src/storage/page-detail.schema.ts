@@ -40,7 +40,8 @@ export const extractedDynamicFieldValueSchema = z.union([
   z.number(),
   z.boolean(),
   z.null(),
-  extractedScalarMeasurementSchema
+  extractedScalarMeasurementSchema,
+  z.array(extractedScalarMeasurementSchema)
 ])
 
 export const extractedDynamicFieldSchema = z.object({

@@ -107,6 +107,19 @@ after this package's `dist` is rebuilt. See
 
 This section is the canonical reference for shared Azure Tables, queues, and blob artefacts used by the website product enrichment pipeline.
 
+**Update:** the underlying width-parsing bug referenced above (a vendor page's
+extracted `width` text turning into thousands of bogus entries) was later fixed at
+the source, not just capped. The `width` registry field
+(`src/registry/field-registry.ts`, Carpet trade) is now `valueType: 'measurement-list'`
+— an array of `{ value: number, unit: string }` — instead of free text. Downstream,
+`website-product-enrichment-azure`'s `buildWidthSlots` now maps this array directly
+into `vendorProductPage.widths` instead of splitting a raw string on `-`/`/`/" to ",
+so a bad extraction can no longer fan out into dozens of garbage width entries. Any
+new `measurement-list` registry field should follow the same pattern: keep the raw
+`fields[]` value as an array of `{ value, unit }` objects (do not stringify it),
+since `extracted.fields` is surfaced directly to operators as the "final AI pass"
+output in the AI review UI.
+
 ### Tables
 
 #### `webcrawlpages`
