@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { renderCompleteSchema, renderResponseSchema } from '../src/queues/contracts.js'
+import { getRegistryEntriesForTrade } from '../src/registry/index.js'
 import { crawlPageTableSchema } from '../src/storage/page.schema.js'
 
 // regression coverage for the visible-text plumbing added alongside the render pipeline: render
@@ -56,5 +57,18 @@ describe('visible-text schema plumbing', () => {
     })
 
     expect(parsed.blobVisibleTextPath).toBe('x/visible-text.txt')
+  })
+})
+
+describe('carpet registry additions', () => {
+  it('includes the new optional Carpet fields with the expected categories', () => {
+    const entries = getRegistryEntriesForTrade('Carpet')
+
+    expect(entries).toEqual(expect.arrayContaining([
+      expect.objectContaining({ field: 'togRating', requiredLevel: 'optional', category: 'specifications' }),
+      expect.objectContaining({ field: 'suitability', requiredLevel: 'optional', category: 'specifications' }),
+      expect.objectContaining({ field: 'warranty', requiredLevel: 'optional', category: 'specifications' }),
+      expect.objectContaining({ field: 'areaRoom', requiredLevel: 'optional', category: 'additional' })
+    ]))
   })
 })

@@ -1,5 +1,19 @@
 # Learnings
 
+## Promoting a catch-all attribute into a named registry field creates fixture drift
+
+`TOG rating` originally only appeared in downstream tests as an
+`additionalSpecifications` entry. Once it was promoted into the Carpet registry as
+the named field `togRating` (alongside `suitability`, `warranty`, and `areaRoom`),
+the shared registry change itself was straightforward - but consumer fixtures still
+encoded the old catch-all representation. The production code was already
+registry-driven; the stale assumptions lived in tests and docs.
+
+**Best practice:** when a field graduates from catch-all to named registry entry,
+review adjacent consumer fixtures and README examples immediately. Otherwise the
+codebase drifts into a confusing state where the registry says one thing and the
+tests/documentation still teach the old shape.
+
 ## `width` registry field: structural fix over defensive capping
 
 **Challenge:** a live E2E run showed a vendor page's extracted `width` field

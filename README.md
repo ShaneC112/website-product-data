@@ -138,6 +138,14 @@ even a model that ignores the "never copy an example" instruction in the consumi
 repo's system prompt produces an obviously-invalid value that downstream structural
 validation rejects, instead of a silently-wrong one.
 
+**Update:** the Carpet registry now includes optional named fields for `togRating`,
+`suitability`, and `warranty` as specifications, plus `areaRoom` as an additional
+named field. These were promoted from catch-all evidence because they recur on
+vendor pages often enough to deserve stable field names in the extraction contract.
+When promoting a catch-all attribute into a named field, update both the shared
+registry tests and any consumer fixtures that previously asserted it under
+`additionalSpecifications` or `additionalFeatures`.
+
 ### Tables
 
 #### `webcrawlpages`
