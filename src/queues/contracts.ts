@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { registryFieldValueSchema } from '../registry/field-registry.js'
 
 export const queueValidationErrorSchema = z.object({
   path: z.string().trim().min(1),
@@ -134,6 +135,66 @@ export const publishJobSchema = z.object({
   runId: z.string().trim().min(1).optional()
 })
 
+export const batchOperationSchema = z.enum([
+  'product_extraction',
+  'image_classification',
+  'variant_enrichment', // already single-call today; wrapped for telemetry only
+  'final_confidence' // already single-call today; wrapped for telemetry only
+])
+
+export const batchItemStatusSchema = z.enum(['pending', 'batched', 'succeeded', 'failed', 'missing'])
+
+export const extractionBatchJobItemSchema = z.object({
+  urlKey: z.string().trim().min(1),
+  variantId: z.string().trim().min(1).optional(),
+  url: z.string().trim().min(1),
+  pageRole: z.enum(['range', 'variant', 'single'])
+})
+
+export const extractionBatchJobSchema = z.object({
+  batchId: z.string().trim().min(1),
+  sourceGroupKey: z.string().trim().min(1),
+  runId: z.string().trim().min(1).optional(),
+  trade: z.string().trim().min(1).optional(),
+  operation: batchOperationSchema,
+  attempt: z.number().int().nonnegative().default(0),
+  items: z.array(extractionBatchJobItemSchema).min(1),
+  estimatedPromptTokens: z.number().int().nonnegative(),
+  createdAt: z.string().trim().min(1)
+}).superRefine((job, ctx) => {
+  const seen = new Set<string>()
+  job.items.forEach((item, index) => {
+    const key = `${item.urlKey}:${item.variantId ?? ''}`
+    if (seen.has(key)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['items', index, 'urlKey'],
+        message: `duplicate item key ${key} within batch`
+      })
+      return
+    }
+    seen.add(key)
+  })
+})
+
+export const batchItemResultSchema = z.object({
+  urlKey: z.string().trim().min(1),
+  variantId: z.string().trim().min(1).optional(),
+  status: z.enum(['succeeded', 'failed', 'missing']),
+  fields: z.array(registryFieldValueSchema).optional(),
+  // models often return an explicit `null` (not an omitted key) when there's no error - accept
+  // both, matching the pattern used elsewhere for optional AI-authored fields.
+  error: z.string().trim().min(1).max(500).nullable().optional(),
+  confidence: z.number().min(0).max(1).optional()
+})
+
+export const extractionBatchResultSchema = z.object({
+  batchId: z.string().trim().min(1),
+  operation: batchOperationSchema,
+  attempt: z.number().int().nonnegative(),
+  results: z.array(batchItemResultSchema)
+})
+
 export type QueueValidationError = z.infer<typeof queueValidationErrorSchema>
 export type CrawlRequestMessage = z.infer<typeof crawlRequestMessageSchema>
 export type RenderRequest = z.infer<typeof renderRequestSchema>
@@ -144,6 +205,12 @@ export type ExtractJob = z.infer<typeof extractJobSchema>
 export type VariantJob = z.infer<typeof variantJobSchema>
 export type TransformJob = z.infer<typeof transformJobSchema>
 export type PublishJob = z.infer<typeof publishJobSchema>
+export type BatchOperation = z.infer<typeof batchOperationSchema>
+export type BatchItemStatus = z.infer<typeof batchItemStatusSchema>
+export type ExtractionBatchJobItem = z.infer<typeof extractionBatchJobItemSchema>
+export type ExtractionBatchJob = z.infer<typeof extractionBatchJobSchema>
+export type BatchItemResult = z.infer<typeof batchItemResultSchema>
+export type ExtractionBatchResult = z.infer<typeof extractionBatchResultSchema>
 
 export const CrawlRequestMessage = crawlRequestMessageSchema
 export const RenderRequest = renderRequestSchema
@@ -154,3 +221,8 @@ export const ExtractJob = extractJobSchema
 export const VariantJob = variantJobSchema
 export const TransformJob = transformJobSchema
 export const PublishJob = publishJobSchema
+export const BatchOperation = batchOperationSchema
+export const BatchItemStatus = batchItemStatusSchema
+export const ExtractionBatchJob = extractionBatchJobSchema
+export const BatchItemResult = batchItemResultSchema
+export const ExtractionBatchResult = extractionBatchResultSchema

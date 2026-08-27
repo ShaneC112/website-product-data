@@ -414,6 +414,35 @@ Important fields:
 - `updatedAt`: last proposal or approval update time
 - `ttlExpiresAt`: retention cutoff when used
 
+#### `webcrawlextractbatch`
+
+Intent:
+- durable ledger for the batch AI extraction/image-classification aggregation barrier
+- tracks every variant-page item pending, batched, or resolved for a `(sourceGroupKey, operation)`
+  pair so scale-out and restarts cannot lose or duplicate batch work
+
+Key strategy:
+- `partitionKey = sourceGroupKey` (or its storage-safe encoded form)
+- `rowKey = \`${operation}:${urlKey}\`` (optionally suffixed with `variantId`)
+
+Primary producers:
+- render dispatch worker (diverts variant-page render-completes into the ledger instead of the
+  single-item extract queue when batch mode is enabled)
+- extract/image-classify workers (diverts variant-page image classification the same way)
+
+Primary consumers:
+- the extraction batch coordinator (packs pending items into batches once enough have arrived)
+- the extraction batch sweeper (timer; force-flushes stale trailing batches)
+- the extraction batch worker (dispatches the batched AI call and updates item status)
+
+Important fields:
+- `sourceGroupKey`, `operation`, `urlKey`, `variantId`, `url`, `pageRole`: item identity
+- `status`: `pending`, `batched`, `succeeded`, `failed`, or `missing`
+- `batchId`: the batch this item was last assigned to, once packed
+- `attempt`: whole-batch retry count carried onto every item in that batch
+- `estimatedTokens`: used by the packer to size batches against the model's output-token budget
+- `firstSeenAt`, `updatedAt`, `ttlExpiresAt`: lifecycle timestamps
+
 ### Queues
 
 #### `crawl-requests`
@@ -493,6 +522,30 @@ Primary consumer:
 Message contract:
 - `TransformJob`
 - includes `urlKey` and optional `runId`
+
+#### `crawl-extract-batch-jobs`
+
+Intent:
+- dispatches one AI call for a whole batch of variant-page items (extraction or image
+  classification) instead of one call per item
+
+Primary producers:
+- the extraction batch coordinator, once enough ledger items for a `(sourceGroupKey, operation)`
+  pair have arrived (or the sweeper force-flushes a stale trailing batch)
+
+Primary consumer:
+- the extraction batch worker
+
+Message contract:
+- `ExtractionBatchJob`
+- includes `batchId`, `sourceGroupKey`, `operation`, `attempt`, `items[]` (each keyed by `urlKey` +
+  optional `variantId` - never by array index), and `estimatedPromptTokens`
+- results are correlated back per item via `ExtractionBatchResult` / `BatchItemResult`; a batch
+  that comes back with fewer results than items retries the whole batch, then splits into smaller
+  batches, then falls back to the existing single-item queues - it never leaves a group
+  publishable on partial batch success
+- fully reversible via `BATCH_MODE_ENABLED=false` in the azure repo: disabled, this queue is never
+  used and the existing single-item queues are unchanged
 
 #### `publish-jobs`
 

@@ -98,6 +98,10 @@
       "types": "./dist/storage/variant-detail.schema.d.ts",
       "default": "./dist/storage/variant-detail.schema.js"
     },
+    "./storage/extract-batch.schema": {
+      "types": "./dist/storage/extract-batch.schema.d.ts",
+      "default": "./dist/storage/extract-batch.schema.js"
+    },
     "./storage/constants": {
       "types": "./dist/storage/constants.d.ts",
       "default": "./dist/storage/constants.js"

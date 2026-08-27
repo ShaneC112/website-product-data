@@ -9,7 +9,8 @@ export const STORAGE_TABLES = {
   crawlPageDetail: 'webcrawlpagedetail',
   crawlVariantDetail: 'webcrawlvariantdetail',
   crawlMatchingLedger: 'webcrawlmatchledger',
-  crawlVariantSwatch: 'webcrawlvariantswatches'
+  crawlVariantSwatch: 'webcrawlvariantswatches',
+  crawlExtractBatch: 'webcrawlextractbatch'
 } as const
 
 export const STORAGE_CONTAINERS = {
@@ -21,7 +22,11 @@ export const STORAGE_CONTAINERS = {
 export const STORAGE_QUEUES = {
   crawlRequests: 'crawl-requests',
   crawlRenderJobs: 'crawl-render-jobs',
+  crawlRenderComplete: 'crawl-render-complete',
+  crawlExtractJobs: 'crawl-extract-jobs',
+  crawlVariantJobs: 'crawl-variant-jobs',
   crawlImageJobs: 'crawl-image-jobs',
   crawlTransformJobs: 'crawl-transform-jobs',
+  crawlExtractBatchJobs: 'crawl-extract-batch-jobs',
   publishJobs: 'publish-jobs'
 } as const

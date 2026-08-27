@@ -1,4 +1,5 @@
 export * from './constants.js'
+export * from './extract-batch.schema.js'
 export * from './group-pdf.schema.js'
 export * from './group-state.schema.js'
 export * from './image-classification.schema.js'
