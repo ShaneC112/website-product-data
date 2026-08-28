@@ -74,6 +74,12 @@ Canonical key helpers now shipped in this package:
 
 Queue contracts now include canonical identity pass-through fields on render jobs (`styleCodeRaw`, `styleCodeStorageKey`, `m2crmUuid`, `sourceGroupKey`) and the shared `renderCompleteSchema` for `crawl-render-complete`.
 
+`crawlRequestMessageSchema`, `manualCrawlEnqueueSchema`, and `renderRequestSchema` also carry an optional
+`productOnlinePdfUrl` field for curated upstream PDF evidence. This is intentionally a contract-level
+pass-through: the sync/manual enqueue path can preserve a known vendor PDF URL even when the rendered page
+does not link to it, and downstream render/extraction stages can hand the original PDF to the multimodal
+model instead of trying to rediscover or reconstruct it from HTML.
+
 `renderCompleteSchema` is intentionally not minimal. It requires `url` and `blobPaths`
 (the real render evidence) and also carries `pageRole`, `sourceTableName`,
 `styleCode`, `styleCodeRaw`, `styleCodeStorageKey`, `m2crmUuid`, `trade`, and

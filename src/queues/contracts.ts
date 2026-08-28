@@ -23,6 +23,7 @@ export const crawlRequestMessageSchema = z.object({
   // share one crawled URL but are different m2crm products/groups) so extraction knows which
   // weight option this group's copy is describing. Absent/undefined for single-weight products.
   pileWeightHint: z.string().trim().min(1).optional(),
+  productOnlinePdfUrl: z.string().url().optional(),
   reason: z.enum(['new', 'url_changed', 'product_changed', 'manual']),
   changedFields: z.array(z.string().trim().min(1)).default([]),
   rawPriceMinor: z.number().int().optional(),
@@ -58,7 +59,8 @@ export const renderRequestSchema = z.object({
   styleCodeStorageKey: z.string().trim().min(1).optional(),
   m2crmUuid: z.string().trim().min(1).optional(),
   trade: z.string().trim().min(1).optional(),
-  sourceGroupKey: z.string().trim().min(1).optional()
+  sourceGroupKey: z.string().trim().min(1).optional(),
+  productOnlinePdfUrl: z.string().url().optional()
 })
 
 export const renderJobSchema = renderRequestSchema

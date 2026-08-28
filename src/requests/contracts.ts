@@ -10,6 +10,7 @@ export const manualCrawlEnqueueSchema = z.object({
   // see crawlRequestMessageSchema's pileWeightHint - same disambiguation contract, just entering
   // via the manual HTTP path instead of the sync path.
   pileWeightHint: z.string().trim().min(1).optional(),
+  productOnlinePdfUrl: z.string().url().startsWith('https://').optional(),
   force: z.boolean().default(false),
   testMode: z.boolean().optional()
 })

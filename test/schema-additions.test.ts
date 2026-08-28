@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { crawlRequestMessageSchema, renderCompleteSchema, renderResponseSchema } from '../src/queues/contracts.js'
+import { crawlRequestMessageSchema, renderCompleteSchema, renderRequestSchema, renderResponseSchema } from '../src/queues/contracts.js'
 import { getRegistryEntriesForTrade } from '../src/registry/index.js'
 import { crawlPageTableSchema } from '../src/storage/page.schema.js'
 import { manualCrawlEnqueueSchema } from '../src/requests/contracts.js'
@@ -136,5 +136,71 @@ describe('pileWeightHint plumbing (multi-weight product disambiguation)', () => 
     })
 
     expect(parsed.pileWeightHint).toBe('40oz')
+  })
+})
+
+describe('productOnlinePdfUrl plumbing (curated upstream PDF evidence)', () => {
+  const baseMessage = {
+    source: 'manual' as const,
+    tableName: 'm2crmproducts',
+    rowKey: '123',
+    url: 'https://example.com/range',
+    crawlType: 'Range' as const,
+    styleCode: 'VICTORIA/BURFORDTWIST/40OZ',
+    trade: 'Carpet',
+    reason: 'manual' as const,
+    requestedAt: '2026-01-01T00:00:00.000Z'
+  }
+
+  it('accepts an optional productOnlinePdfUrl on the crawl request message', () => {
+    const parsed = crawlRequestMessageSchema.parse({
+      ...baseMessage,
+      productOnlinePdfUrl: 'https://cdn.example.com/spec.pdf'
+    })
+
+    expect(parsed.productOnlinePdfUrl).toBe('https://cdn.example.com/spec.pdf')
+  })
+
+  it('accepts an optional productOnlinePdfUrl on the manual crawl-enqueue HTTP request', () => {
+    const parsed = manualCrawlEnqueueSchema.parse({
+      tableName: 'm2crmproducts',
+      rowKey: '123',
+      url: 'https://example.com/range',
+      crawlType: 'Range',
+      styleCode: 'VICTORIA/BURFORDTWIST/40OZ',
+      trade: 'Carpet',
+      productOnlinePdfUrl: 'https://cdn.example.com/spec.pdf'
+    })
+
+    expect(parsed.productOnlinePdfUrl).toBe('https://cdn.example.com/spec.pdf')
+  })
+
+  it('rejects a non-https productOnlinePdfUrl on the manual crawl-enqueue HTTP request', () => {
+    const result = manualCrawlEnqueueSchema.safeParse({
+      tableName: 'm2crmproducts',
+      rowKey: '123',
+      url: 'https://example.com/range',
+      crawlType: 'Range',
+      styleCode: 'VICTORIA/BURFORDTWIST/40OZ',
+      trade: 'Carpet',
+      productOnlinePdfUrl: 'http://cdn.example.com/spec.pdf'
+    })
+
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('render request contract additions', () => {
+  it('accepts an optional productOnlinePdfUrl on the render request', () => {
+    const parsed = renderRequestSchema.safeParse({
+      runId: 'run-1',
+      urlKey: 'url-key-1',
+      url: 'https://example.com/range',
+      blobPrefix: 'runs/run-1/url-key-1',
+      pageRole: 'range',
+      productOnlinePdfUrl: 'https://cdn.example.com/spec.pdf'
+    })
+
+    expect(parsed.success).toBe(true)
   })
 })
