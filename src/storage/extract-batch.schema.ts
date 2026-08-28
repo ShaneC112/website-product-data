@@ -2,8 +2,8 @@ import { z } from 'zod'
 import { batchItemStatusSchema, batchOperationSchema } from '../queues/contracts.js'
 
 export const crawlExtractBatchTableSchema = z.object({
-  partitionKey: z.string().trim().min(1), // sourceGroupKey (or a hashed form, matching existing stores)
-  rowKey: z.string().trim().min(1), // `${operation}:${urlKey}` (optionally suffixed with variantId)
+  partitionKey: z.string().trim().min(1), // encoded sourceGroupKey
+  rowKey: z.string().trim().min(1), // `${operation}:${urlKey}`
   sourceGroupKey: z.string().trim().min(1),
   operation: batchOperationSchema,
   urlKey: z.string().trim().min(1),
@@ -20,7 +20,3 @@ export const crawlExtractBatchTableSchema = z.object({
 })
 
 export type CrawlExtractBatchTable = z.infer<typeof crawlExtractBatchTableSchema>
-
-export function parseCrawlExtractBatchTable(value: unknown): CrawlExtractBatchTable {
-  return crawlExtractBatchTableSchema.parse(value)
-}

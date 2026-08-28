@@ -146,6 +146,13 @@ When promoting a catch-all attribute into a named field, update both the shared
 registry tests and any consumer fixtures that previously asserted it under
 `additionalSpecifications` or `additionalFeatures`.
 
+**Update:** unused blob/batch parser exports were removed from the shared schemas
+once all consumers were confirmed to use the schemas/stringifiers directly rather
+than the old `parseExtractedDetailBlob`, `parseVendorProductPageBlob`, and
+`parseCrawlExtractBatchTable` helpers. Keep the zod schemas as the shared contract
+surface; avoid adding one-off parser wrappers unless a real cross-repo consumer
+needs them.
+
 ### Tables
 
 #### `webcrawlpages`

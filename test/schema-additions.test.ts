@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { renderCompleteSchema, renderResponseSchema } from '../src/queues/contracts.js'
+import { crawlRequestMessageSchema, renderCompleteSchema, renderResponseSchema } from '../src/queues/contracts.js'
 import { getRegistryEntriesForTrade } from '../src/registry/index.js'
 import { crawlPageTableSchema } from '../src/storage/page.schema.js'
+import { manualCrawlEnqueueSchema } from '../src/requests/contracts.js'
 
 // regression coverage for the visible-text plumbing added alongside the render pipeline: render
 // uploads a hidden-aware, tag-free rendering of the page (previously only its length was kept),
@@ -70,5 +71,70 @@ describe('carpet registry additions', () => {
       expect.objectContaining({ field: 'warranty', requiredLevel: 'optional', category: 'specifications' }),
       expect.objectContaining({ field: 'areaRoom', requiredLevel: 'optional', category: 'additional' })
     ]))
+  })
+
+  // regression test: pileWeight used to be free 'text' (e.g. "40oz and 50oz" for a multi-weight
+  // range), which can't be compared/filtered/displayed consistently. It must be a structured
+  // 'measurement' field like pileHeight/thickness/totalHeight, not text.
+  it('registers pileWeight as a structured measurement, not free text', () => {
+    const entries = getRegistryEntriesForTrade('Carpet')
+
+    expect(entries).toEqual(expect.arrayContaining([
+      expect.objectContaining({ field: 'pileWeight', valueType: 'measurement' })
+    ]))
+  })
+})
+
+describe('pileWeightHint plumbing (multi-weight product disambiguation)', () => {
+  const baseMessage = {
+    source: 'manual' as const,
+    tableName: 'm2crmproducts',
+    rowKey: '123',
+    url: 'https://example.com/range',
+    crawlType: 'Range' as const,
+    styleCode: 'VICTORIA/BURFORDTWIST/40OZ',
+    trade: 'Carpet',
+    reason: 'new' as const,
+    requestedAt: '2026-01-01T00:00:00.000Z'
+  }
+
+  it('accepts an optional pileWeightHint on the crawl request message', () => {
+    const parsed = crawlRequestMessageSchema.parse({ ...baseMessage, pileWeightHint: '40oz' })
+
+    expect(parsed.pileWeightHint).toBe('40oz')
+  })
+
+  it('omits pileWeightHint by default for single-weight products', () => {
+    const parsed = crawlRequestMessageSchema.parse(baseMessage)
+
+    expect(parsed.pileWeightHint).toBeUndefined()
+  })
+
+  it('accepts an optional pileWeightHint on the crawl page table row', () => {
+    const parsed = crawlPageTableSchema.parse({
+      partitionKey: 'p',
+      rowKey: 'r',
+      url: 'https://example.com',
+      urlKey: 'url-key-1',
+      pileWeightHint: '40oz'
+    })
+
+    expect(parsed.pileWeightHint).toBe('40oz')
+  })
+
+  // this is a separate schema from crawlRequestMessageSchema above (the manual HTTP enqueue path
+  // vs. the sync-triggered queue path) - missed here once already, so it needs its own test.
+  it('accepts an optional pileWeightHint on the manual crawl-enqueue HTTP request', () => {
+    const parsed = manualCrawlEnqueueSchema.parse({
+      tableName: 'm2crmproducts',
+      rowKey: '123',
+      url: 'https://example.com/range',
+      crawlType: 'Range',
+      styleCode: 'VICTORIA/BURFORDTWIST/40OZ',
+      trade: 'Carpet',
+      pileWeightHint: '40oz'
+    })
+
+    expect(parsed.pileWeightHint).toBe('40oz')
   })
 })

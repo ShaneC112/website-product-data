@@ -19,6 +19,10 @@ export const crawlRequestMessageSchema = z.object({
   sourceGroupKey: z.string().trim().min(1).optional(),
   sourceGroupType: z.enum(['Range', 'Single', 'Mixed']).optional(),
   vendorSku: z.string().trim().min(1).optional(),
+  // disambiguates a multi-weight range (e.g. Victoria Carpets' 40oz/50oz Burford Twist, which
+  // share one crawled URL but are different m2crm products/groups) so extraction knows which
+  // weight option this group's copy is describing. Absent/undefined for single-weight products.
+  pileWeightHint: z.string().trim().min(1).optional(),
   reason: z.enum(['new', 'url_changed', 'product_changed', 'manual']),
   changedFields: z.array(z.string().trim().min(1)).default([]),
   rawPriceMinor: z.number().int().optional(),

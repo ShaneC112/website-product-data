@@ -30,7 +30,8 @@ export const crawlPageTableSchema = z.object({
   rawPriceMinor: z.number().optional(),
   vatRate: z.number().optional(),
   vendorSku: z.string().trim().min(1).optional(),
-  sourceRowKey: z.string().trim().min(1).optional()
+  sourceRowKey: z.string().trim().min(1).optional(),
+  pileWeightHint: z.string().trim().min(1).optional()
 })
 
 export type CrawlPageVariantUrls = z.infer<typeof crawlPageVariantUrlsSchema>

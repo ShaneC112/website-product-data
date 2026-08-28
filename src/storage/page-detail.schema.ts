@@ -11,25 +11,6 @@ export const extractedScalarMeasurementSchema = z.object({
   unit: z.string().trim().min(1)
 })
 
-export const extractedMeasurementSchema = z.object({
-  label: z.string().trim().min(1),
-  value: z.number(),
-  unit: z.string().trim().min(1)
-})
-
-export const extractedPackInfoSchema = z.object({
-  length: extractedScalarMeasurementSchema.optional(),
-  width: extractedScalarMeasurementSchema.optional(),
-  height: extractedScalarMeasurementSchema.optional(),
-  coverage: extractedScalarMeasurementSchema.optional(),
-  piecesPerPack: z.number().int().positive().optional()
-})
-
-export const extractedDimensionSchema = z.object({
-  length: extractedScalarMeasurementSchema.optional(),
-  width: extractedScalarMeasurementSchema.optional()
-})
-
 export const extractedAdditionalAttributeSchema = z.object({
   description: z.string().trim().min(1),
   value: z.string().trim().min(1)
@@ -146,36 +127,15 @@ export const rangeDetailSummarySchema = z.object({
   hasDiscoveredVariants: z.boolean()
 })
 
+// Mirrors azure's ExtractedDetail TS type (extractedDetail.ts) exactly - trade-specific fields
+// (construction, pileWeight, backing, etc.) live in `fields[]` (registry-driven) and
+// `vendorProductPage.specifications`/`.dynamicFields`, never as top-level properties here.
 export const extractedDetailBlobSchema = z.object({
   styleCode: z.string().trim().min(1).optional(),
   trade: z.string().trim().min(1).optional(),
   promptVersion: z.string().trim().min(1).optional(),
   url: z.string().trim().min(1).optional(),
   fields: z.array(registryFieldValueSchema).default([]),
-  title: z.string().trim().min(1).optional(),
-  description: z.string().trim().min(1).optional(),
-  productType: z.string().trim().min(1).optional(),
-  construction: z.string().trim().min(1).optional(),
-  pileFibreComposition: z.string().trim().min(1).optional(),
-  pileHeight: extractedScalarMeasurementSchema.optional(),
-  thickness: extractedScalarMeasurementSchema.optional(),
-  pileWeight: z.string().trim().min(1).optional(),
-  totalWeight: z.string().trim().min(1).optional(),
-  backing: z.string().trim().min(1).optional(),
-  gauge: z.string().trim().min(1).optional(),
-  stitchCount: z.string().trim().min(1).optional(),
-  width: z.string().trim().min(1).optional(),
-  totalHeight: extractedScalarMeasurementSchema.optional(),
-  fireRating: z.string().trim().min(1).optional(),
-  mothResistant: z.boolean().optional(),
-  stainResistant: z.boolean().optional(),
-  antiStatic: z.boolean().optional(),
-  suitabilityUfH: z.boolean().optional(),
-  features: z.array(z.string().trim().min(1)).optional(),
-  waterResistant: z.boolean().optional(),
-  packInfo: extractedPackInfoSchema.optional(),
-  dimensions: z.array(extractedDimensionSchema).optional(),
-  look: z.string().trim().min(1).optional(),
   warnings: z.array(z.string().trim().min(1)).optional(),
   status: crawlProductDetailStatusSchema.optional(),
   hasDiscoveredVariants: z.boolean().optional(),
@@ -196,8 +156,6 @@ export type CrawlPageRoleValue = z.infer<typeof crawlPageRoleSchema>
 export type CrawlProductDetailStatusValue = z.infer<typeof crawlProductDetailStatusSchema>
 export type PageDetailSummary = z.infer<typeof pageDetailSummarySchema>
 export type RangeDetailSummary = z.infer<typeof rangeDetailSummarySchema>
-export type ExtractedDetailBlob = z.infer<typeof extractedDetailBlobSchema>
-export type ExtractedVendorProductPage = z.infer<typeof extractedVendorProductPageSchema>
 export type ExtractedVendorVariant = z.infer<typeof extractedVendorVariantSchema>
 export type CrawlPageDetailParsed =
   | {
@@ -216,14 +174,6 @@ export function parsePageDetailSummary(value: string): PageDetailSummary {
 
 export function parseRangeDetailSummary(value: string): RangeDetailSummary {
   return rangeDetailSummarySchema.parse(JSON.parse(value))
-}
-
-export function parseExtractedDetailBlob(value: string): ExtractedDetailBlob {
-  return extractedDetailBlobSchema.parse(JSON.parse(value))
-}
-
-export function parseVendorProductPageBlob(value: string): ExtractedVendorProductPage {
-  return extractedVendorProductPageSchema.parse(JSON.parse(value))
 }
 
 export function stringifyPageDetailSummary(value: unknown): string {

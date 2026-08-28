@@ -7,6 +7,9 @@ export const manualCrawlEnqueueSchema = z.object({
   crawlType: z.enum(['Range', 'Single']),
   styleCode: z.string().min(1),
   trade: z.string().min(1),
+  // see crawlRequestMessageSchema's pileWeightHint - same disambiguation contract, just entering
+  // via the manual HTTP path instead of the sync path.
+  pileWeightHint: z.string().trim().min(1).optional(),
   force: z.boolean().default(false),
   testMode: z.boolean().optional()
 })
