@@ -3,8 +3,9 @@ import { z } from 'zod'
 export const manualCrawlEnqueueSchema = z.object({
   tableName: z.enum(['m2crmproducts']),
   rowKey: z.string().min(1),
-  url: z.string().url().startsWith('https://'),
-  crawlType: z.enum(['Range', 'Single']),
+  url: z.string().url().startsWith('https://').optional(),
+  crawlType: z.enum(['Range', 'Single', 'SpecifiedUrls']),
+  specifiedUrls: z.array(z.string().url().startsWith('https://')).min(1).optional(),
   styleCode: z.string().min(1),
   trade: z.string().min(1),
   // see crawlRequestMessageSchema's pileWeightHint - same disambiguation contract, just entering
@@ -13,6 +14,13 @@ export const manualCrawlEnqueueSchema = z.object({
   productOnlinePdfUrl: z.string().url().startsWith('https://').optional(),
   force: z.boolean().default(false),
   testMode: z.boolean().optional()
+}).superRefine((input, ctx) => {
+  if (input.crawlType !== 'SpecifiedUrls' && !input.url) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['url'], message: 'url is required for Single and Range crawl requests' })
+  }
+  if (input.crawlType === 'SpecifiedUrls' && !input.specifiedUrls?.length) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['specifiedUrls'], message: 'specifiedUrls is required for SpecifiedUrls crawl requests' })
+  }
 })
 
 export type ManualCrawlEnqueueInput = z.infer<typeof manualCrawlEnqueueSchema>

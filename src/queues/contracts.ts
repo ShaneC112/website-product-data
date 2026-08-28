@@ -12,7 +12,8 @@ export const crawlRequestMessageSchema = z.object({
   tableName: z.string().trim().min(1),
   rowKey: z.string().trim().min(1),
   url: z.string().trim().min(1).optional(),
-  crawlType: z.enum(['Range', 'Single']),
+  crawlType: z.enum(['Range', 'Single', 'SpecifiedUrls']),
+  specifiedUrls: z.array(z.string().url()).min(1).optional(),
   styleCode: z.string().trim().default(''),
   trade: z.string().trim().default(''),
   promptVersion: z.string().trim().min(1).optional(),
@@ -43,6 +44,9 @@ export const crawlRequestMessageSchema = z.object({
   }
   if (message.trade.length === 0) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['trade'], message: 'trade is required when no validation errors are present' })
+  }
+  if (message.crawlType === 'SpecifiedUrls' && !message.specifiedUrls?.length) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['specifiedUrls'], message: 'specifiedUrls is required for SpecifiedUrls crawl requests' })
   }
 })
 

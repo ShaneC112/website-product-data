@@ -15,6 +15,8 @@ export const crawlPageTableSchema = z.object({
   pageRole: crawlPageRoleSchema.optional(),
   rootDomain: z.string().trim().min(1).optional(),
   variantUrlsJson: z.string().trim().min(1).optional(),
+  specifiedVariantUrlsJson: z.string().trim().min(1).optional(),
+  crawlType: z.enum(['Range', 'Single', 'SpecifiedUrls']).optional(),
   linkedProductCount: z.number().int().nonnegative().optional(),
   contentHash: z.string().trim().min(1).optional(),
   status: z.string().trim().min(1).optional(),

@@ -80,6 +80,11 @@ pass-through: the sync/manual enqueue path can preserve a known vendor PDF URL e
 does not link to it, and downstream render/extraction stages can hand the original PDF to the multimodal
 model instead of trying to rediscover or reconstruct it from HTML.
 
+`crawlRequestMessageSchema` and `manualCrawlEnqueueSchema` support `crawlType: 'SpecifiedUrls'` for
+source-authoritative variant membership. Such requests require `specifiedUrls`, an HTTPS URL array. Azure
+canonicalizes and deduplicates that list, then crawls each member directly as a variant under a source-record
+group; ordinary `Range` and `Single` requests retain their existing single-URL semantics.
+
 `renderCompleteSchema` is intentionally not minimal. It requires `url` and `blobPaths`
 (the real render evidence) and also carries `pageRole`, `sourceTableName`,
 `styleCode`, `styleCodeRaw`, `styleCodeStorageKey`, `m2crmUuid`, `trade`, and

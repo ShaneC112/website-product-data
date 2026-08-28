@@ -20,6 +20,7 @@ export const crawlGroupStateTableSchema = z.object({
   state: crawlGroupStateSchema,
   pageCount: z.number().int().nonnegative(),
   detailCount: z.number().int().nonnegative(),
+  expectedVariantCount: z.number().int().positive().optional(),
   readinessReasonsJson: z.string().trim().min(1).optional(),
   ttlExpiresAt: z.string().trim().min(1).optional()
 })

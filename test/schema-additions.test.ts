@@ -139,6 +139,46 @@ describe('pileWeightHint plumbing (multi-weight product disambiguation)', () => 
   })
 })
 
+describe('SpecifiedUrls crawl requests', () => {
+  const baseRequest = {
+    source: 'manual' as const,
+    tableName: 'm2crmproducts',
+    rowKey: 'source-123',
+    crawlType: 'SpecifiedUrls' as const,
+    styleCode: 'SISAL',
+    trade: 'Carpet',
+    reason: 'manual' as const,
+    requestedAt: '2026-01-01T00:00:00.000Z'
+  }
+
+  it('accepts explicit HTTPS variant URLs without requiring a parent URL', () => {
+    const parsed = crawlRequestMessageSchema.parse({
+      ...baseRequest,
+      specifiedUrls: ['https://example.com/product/one', 'https://example.com/product/two']
+    })
+
+    expect(parsed.specifiedUrls).toHaveLength(2)
+    expect(parsed.url).toBeUndefined()
+  })
+
+  it('rejects an explicit URL request with no variant URLs', () => {
+    expect(crawlRequestMessageSchema.safeParse(baseRequest).success).toBe(false)
+  })
+
+  it('accepts the same shape at the manual HTTP boundary', () => {
+    const parsed = manualCrawlEnqueueSchema.parse({
+      tableName: 'm2crmproducts',
+      rowKey: 'source-123',
+      crawlType: 'SpecifiedUrls',
+      specifiedUrls: ['https://example.com/product/one'],
+      styleCode: 'SISAL',
+      trade: 'Carpet'
+    })
+
+    expect(parsed.specifiedUrls).toEqual(['https://example.com/product/one'])
+  })
+})
+
 describe('productOnlinePdfUrl plumbing (curated upstream PDF evidence)', () => {
   const baseMessage = {
     source: 'manual' as const,
