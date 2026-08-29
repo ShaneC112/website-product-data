@@ -6,6 +6,7 @@ export const crawlExtractBatchTableSchema = z.object({
   rowKey: z.string().trim().min(1), // `${operation}:${urlKey}`
   sourceGroupKey: z.string().trim().min(1),
   operation: batchOperationSchema,
+  runId: z.string().trim().min(1).optional(),
   urlKey: z.string().trim().min(1),
   variantId: z.string().trim().min(1).optional(),
   url: z.string().trim().min(1),

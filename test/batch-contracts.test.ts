@@ -97,6 +97,7 @@ describe('crawlExtractBatchTableSchema', () => {
       rowKey: 'product_extraction:url-key-1',
       sourceGroupKey: 'VENDOR/RANGE',
       operation: 'product_extraction',
+      runId: 'run-1',
       urlKey: 'url-key-1',
       url: 'https://example.com/variant-1',
       pageRole: 'variant',
@@ -106,6 +107,7 @@ describe('crawlExtractBatchTableSchema', () => {
     })
     expect(parsed.status).toBe('pending')
     expect(parsed.attempt).toBe(0)
+    expect(parsed.runId).toBe('run-1')
   })
 })
 

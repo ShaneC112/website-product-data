@@ -47,7 +47,6 @@ Exports:
 - `@shane-corrigan/website-product-data/requests/contracts`
 - `@shane-corrigan/website-product-data/storage`
 - `@shane-corrigan/website-product-data/storage/constants`
-- `@shane-corrigan/website-product-data/storage/contracts`
 - `@shane-corrigan/website-product-data/storage/keys`
 
 Decisions:
@@ -73,6 +72,8 @@ Canonical key helpers now shipped in this package:
 - `buildCanonicalVariantKey`: colour/design-first variant identity with width appended only when it distinguishes a true colour/design variant
 
 Queue contracts now include canonical identity pass-through fields on render jobs (`styleCodeRaw`, `styleCodeStorageKey`, `m2crmUuid`, `sourceGroupKey`) and the shared `renderCompleteSchema` for `crawl-render-complete`.
+
+The durable extraction-batch ledger also stores the originating optional `runId`. Consumers use it to distinguish a retry within one run from a later run reusing the same group and URL, so stale succeeded rows can be reset without duplicating work inside a run.
 
 `crawlRequestMessageSchema`, `manualCrawlEnqueueSchema`, and `renderRequestSchema` also carry an optional
 `productOnlinePdfUrl` field for curated upstream PDF evidence. This is intentionally a contract-level
