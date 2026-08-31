@@ -85,6 +85,42 @@ describe('carpet registry additions', () => {
   })
 })
 
+describe('hard-flooring registry additions', () => {
+  it('models Capture performance and construction fields instead of requiring additionalFeatures', () => {
+    const entries = getRegistryEntriesForTrade('Laminate')
+
+    expect(entries).toEqual(expect.arrayContaining([
+      expect.objectContaining({ field: 'look', requiredLevel: 'recommended' }),
+      expect.objectContaining({ field: 'wearRating', requiredLevel: 'optional' }),
+      expect.objectContaining({ field: 'lockingSystem', requiredLevel: 'optional' }),
+      expect.objectContaining({ field: 'fireRating', requiredLevel: 'optional' }),
+      expect.objectContaining({ field: 'antiStatic', valueType: 'boolean' })
+    ]))
+  })
+
+  it('models LVT wear layer and installation separately from the generic Vinyl fields', () => {
+    const entries = getRegistryEntriesForTrade('Vinyl')
+
+    expect(entries).toEqual(expect.arrayContaining([
+      expect.objectContaining({ field: 'wearLayer', requiredLevel: 'recommended', valueType: 'measurement' }),
+      expect.objectContaining({ field: 'installationMethod', requiredLevel: 'recommended' }),
+      expect.objectContaining({ field: 'suitabilityUfH', requiredLevel: 'recommended', valueType: 'boolean' })
+    ]))
+  })
+
+  it('provides a dedicated Engineered Wood registry with board construction and layout fields', () => {
+    const entries = getRegistryEntriesForTrade('Engineered Wood')
+
+    expect(entries).toEqual(expect.arrayContaining([
+      expect.objectContaining({ field: 'thickness', requiredLevel: 'required', valueType: 'measurement' }),
+      expect.objectContaining({ field: 'dimensions', requiredLevel: 'required' }),
+      expect.objectContaining({ field: 'topLayerThickness', requiredLevel: 'recommended', valueType: 'measurement' }),
+      expect.objectContaining({ field: 'finish', requiredLevel: 'recommended' }),
+      expect.objectContaining({ field: 'look', allowedValues: expect.arrayContaining(['chevron', 'herringbone']) })
+    ]))
+  })
+})
+
 describe('pileWeightHint plumbing (multi-weight product disambiguation)', () => {
   const baseMessage = {
     source: 'manual' as const,
