@@ -168,6 +168,18 @@ than the old `parseExtractedDetailBlob`, `parseVendorProductPageBlob`, and
 surface; avoid adding one-off parser wrappers unless a real cross-repo consumer
 needs them.
 
+**Update:** `additionalSpecifications` and `additionalFeatures` now use the
+`attribute-list` registry value type. Their only valid value is an array of
+`{"description": string, "value": string}` objects; string arrays and single
+objects are invalid. Named registry facts live only in `fields[]` and must not be
+repeated in these catch-all arrays or in product-page specifications/dynamic
+fields. Feature booleans such as `mothResistant` and `stainResistant` remain named
+registry fields with `category: 'features'`, so review UIs can group them as
+features without introducing a second string representation. Existing blobs with
+legacy string-array catch-all values remain readable because `fields[].value` is a
+generic JSON contract, but consumers ignore the malformed catch-all shape until the
+page is re-extracted.
+
 ### Tables
 
 #### `webcrawlpages`

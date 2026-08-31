@@ -83,6 +83,15 @@ describe('carpet registry additions', () => {
       expect.objectContaining({ field: 'pileWeight', valueType: 'measurement' })
     ]))
   })
+
+  it('registers additional fields as shaped attribute lists', () => {
+    const entries = getRegistryEntriesForTrade('Carpet')
+
+    expect(entries).toEqual(expect.arrayContaining([
+      expect.objectContaining({ field: 'additionalSpecifications', valueType: 'attribute-list' }),
+      expect.objectContaining({ field: 'additionalFeatures', valueType: 'attribute-list' })
+    ]))
+  })
 })
 
 describe('hard-flooring registry additions', () => {

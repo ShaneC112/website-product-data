@@ -127,9 +127,9 @@ export const rangeDetailSummarySchema = z.object({
   hasDiscoveredVariants: z.boolean()
 })
 
-// Mirrors azure's ExtractedDetail TS type (extractedDetail.ts) exactly - trade-specific fields
-// (construction, pileWeight, backing, etc.) live in `fields[]` (registry-driven) and
-// `vendorProductPage.specifications`/`.dynamicFields`, never as top-level properties here.
+// Mirrors azure's ExtractedDetail TS type (extractedDetail.ts) exactly. Named trade fields
+// (construction, pileWeight, backing, etc.) live only in registry-driven `fields[]`;
+// vendor specifications/dynamic fields are reserved for genuinely additional or variant-only facts.
 export const extractedDetailBlobSchema = z.object({
   styleCode: z.string().trim().min(1).optional(),
   trade: z.string().trim().min(1).optional(),
