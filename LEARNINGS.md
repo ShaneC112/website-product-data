@@ -1,5 +1,26 @@
 # Learnings
 
+## Executable URL policy must survive every transport boundary
+
+Manual HTTP requests already required HTTPS for specified product URLs and curated PDFs, but the
+queue and render schemas accepted any URL scheme. Direct queue producers could therefore bypass
+the ingress guarantee before the renderer fetched the resource.
+
+**Best practice:** enforce HTTPS on executable evidence URLs in both ingress and queue/render
+contracts. Keep intentionally permissive source fields separate when malformed upstream values
+must still travel to a validation ledger.
+
+## Batch fallback controls belong to the queue that consumes them
+
+An exhausted image-classification batch must set `bypassBatch: true` when it falls back to
+`crawl-image-jobs`. Without that flag, the image worker can put the same item back into the batch
+ledger instead of executing the single-item path. Modeling the flag on `TransformJob` hid this
+loop because the image worker borrowed an unrelated queue schema.
+
+**Best practice:** give each queue an accurately named contract, and carry loop-prevention flags
+through every retry, split, and single-item fallback path. Protect the wire shape in the shared
+package as well as the consuming worker tests.
+
 ## Batch identity needs a durable dispatch contract as well as item ownership
 
 The batch item ledger records which URL belongs to a batch, but that alone cannot recover the

@@ -201,6 +201,13 @@ describe('SpecifiedUrls crawl requests', () => {
     expect(crawlRequestMessageSchema.safeParse(baseRequest).success).toBe(false)
   })
 
+  it('rejects non-https specified URLs at the queue boundary', () => {
+    expect(crawlRequestMessageSchema.safeParse({
+      ...baseRequest,
+      specifiedUrls: ['http://example.com/product/one']
+    }).success).toBe(false)
+  })
+
   it('accepts the same shape at the manual HTTP boundary', () => {
     const parsed = manualCrawlEnqueueSchema.parse({
       tableName: 'm2crmproducts',
@@ -264,6 +271,13 @@ describe('productOnlinePdfUrl plumbing (curated upstream PDF evidence)', () => {
 
     expect(result.success).toBe(false)
   })
+
+  it('rejects a non-https productOnlinePdfUrl on the queue message', () => {
+    expect(crawlRequestMessageSchema.safeParse({
+      ...baseMessage,
+      productOnlinePdfUrl: 'http://cdn.example.com/spec.pdf'
+    }).success).toBe(false)
+  })
 })
 
 describe('render request contract additions', () => {
@@ -278,5 +292,19 @@ describe('render request contract additions', () => {
     })
 
     expect(parsed.success).toBe(true)
+  })
+
+  it('rejects non-https page and curated PDF URLs at the render boundary', () => {
+    expect(renderRequestSchema.safeParse({
+      urlKey: 'url-key-1',
+      url: 'http://example.com/range',
+      blobPrefix: 'runs/run-1/url-key-1'
+    }).success).toBe(false)
+    expect(renderRequestSchema.safeParse({
+      urlKey: 'url-key-1',
+      url: 'https://example.com/range',
+      blobPrefix: 'runs/run-1/url-key-1',
+      productOnlinePdfUrl: 'http://cdn.example.com/spec.pdf'
+    }).success).toBe(false)
   })
 })

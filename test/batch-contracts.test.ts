@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   batchItemResultSchema,
   extractionBatchJobSchema,
-  extractionBatchResultSchema
+  extractionBatchResultSchema,
+  imageJobSchema
 } from '../src/queues/contracts.js'
 import { crawlExtractBatchTableSchema } from '../src/storage/extract-batch.schema.js'
 import { STORAGE_QUEUES, STORAGE_TABLES } from '../src/storage/constants.js'
@@ -118,5 +119,22 @@ describe('batch storage constants', () => {
     expect(STORAGE_QUEUES.crawlRenderComplete).toBe('crawl-render-complete')
     expect(STORAGE_QUEUES.crawlExtractJobs).toBe('crawl-extract-jobs')
     expect(STORAGE_QUEUES.crawlVariantJobs).toBe('crawl-variant-jobs')
+  })
+})
+
+describe('imageJobSchema', () => {
+  it('keeps batch processing enabled when bypassBatch is omitted', () => {
+    expect(imageJobSchema.parse({ urlKey: 'url-key-1', runId: 'run-1' })).toEqual({
+      urlKey: 'url-key-1',
+      runId: 'run-1'
+    })
+  })
+
+  it('preserves an explicit single-item fallback', () => {
+    expect(imageJobSchema.parse({ urlKey: 'url-key-1', bypassBatch: true }).bypassBatch).toBe(true)
+  })
+
+  it('rejects non-boolean fallback flags', () => {
+    expect(imageJobSchema.safeParse({ urlKey: 'url-key-1', bypassBatch: 'true' }).success).toBe(false)
   })
 })

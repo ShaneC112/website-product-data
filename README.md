@@ -30,6 +30,7 @@ Current scope:
 Current consumers:
 - `website-product-enrichment-ui`
 - `website-product-enrichment-azure`
+- `website-product-enrichment-render`
 
 Non-goals for the first cut:
 - no public npm publishing
@@ -43,6 +44,8 @@ Local integration pattern:
 
 Exports:
 - `@shane-corrigan/website-product-data/registry`
+- `@shane-corrigan/website-product-data/queues`
+- `@shane-corrigan/website-product-data/queues/contracts`
 - `@shane-corrigan/website-product-data/requests`
 - `@shane-corrigan/website-product-data/requests/contracts`
 - `@shane-corrigan/website-product-data/storage`
@@ -541,6 +544,22 @@ Primary consumer:
 Message contract:
 - `TransformJob`
 - includes `urlKey` and optional `runId`
+
+#### `crawl-image-jobs`
+
+Intent:
+- image classification work after extracted page evidence is available
+
+Primary producers:
+- extract workers and exhausted image-classification batch fallback
+
+Primary consumer:
+- image classification worker
+
+Message contract:
+- `ImageJob`
+- includes `urlKey`, optional `runId`, and optional `bypassBatch`
+- `bypassBatch: true` marks an exhausted batch fallback that must run on the single-item path
 
 #### `crawl-extract-batch-jobs`
 

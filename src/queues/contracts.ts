@@ -1,6 +1,8 @@
 import { z } from 'zod'
 import { registryFieldValueSchema } from '../registry/field-registry.js'
 
+const httpsUrlSchema = z.string().url().startsWith('https://')
+
 export const queueValidationErrorSchema = z.object({
   path: z.string().trim().min(1),
   message: z.string().trim().min(1)
@@ -13,7 +15,7 @@ export const crawlRequestMessageSchema = z.object({
   rowKey: z.string().trim().min(1),
   url: z.string().trim().min(1).optional(),
   crawlType: z.enum(['Range', 'Single', 'SpecifiedUrls']),
-  specifiedUrls: z.array(z.string().url()).min(1).optional(),
+  specifiedUrls: z.array(httpsUrlSchema).min(1).optional(),
   styleCode: z.string().trim().default(''),
   trade: z.string().trim().default(''),
   promptVersion: z.string().trim().min(1).optional(),
@@ -24,7 +26,7 @@ export const crawlRequestMessageSchema = z.object({
   // share one crawled URL but are different m2crm products/groups) so extraction knows which
   // weight option this group's copy is describing. Absent/undefined for single-weight products.
   pileWeightHint: z.string().trim().min(1).optional(),
-  productOnlinePdfUrl: z.string().url().optional(),
+  productOnlinePdfUrl: httpsUrlSchema.optional(),
   reason: z.enum(['new', 'url_changed', 'product_changed', 'manual']),
   changedFields: z.array(z.string().trim().min(1)).default([]),
   rawPriceMinor: z.number().int().optional(),
@@ -53,7 +55,7 @@ export const crawlRequestMessageSchema = z.object({
 export const renderRequestSchema = z.object({
   runId: z.string().trim().min(1).optional(),
   urlKey: z.string().trim().min(1),
-  url: z.string().url(),
+  url: httpsUrlSchema,
   scrapeConfig: z.record(z.unknown()).default({}),
   blobPrefix: z.string().trim().min(1),
   pageRole: z.enum(['range', 'variant', 'single']).default('single'),
@@ -64,7 +66,7 @@ export const renderRequestSchema = z.object({
   m2crmUuid: z.string().trim().min(1).optional(),
   trade: z.string().trim().min(1).optional(),
   sourceGroupKey: z.string().trim().min(1).optional(),
-  productOnlinePdfUrl: z.string().url().optional()
+  productOnlinePdfUrl: httpsUrlSchema.optional()
 })
 
 export const renderJobSchema = renderRequestSchema
@@ -138,6 +140,12 @@ export const variantJobSchema = z.object({
 export const transformJobSchema = z.object({
   urlKey: z.string().trim().min(1),
   runId: z.string().trim().min(1).optional()
+})
+
+export const imageJobSchema = z.object({
+  urlKey: z.string().trim().min(1),
+  runId: z.string().trim().min(1).optional(),
+  bypassBatch: z.boolean().optional()
 })
 
 export const publishJobSchema = z.object({
@@ -214,6 +222,7 @@ export type RenderComplete = z.infer<typeof renderCompleteSchema>
 export type ExtractJob = z.infer<typeof extractJobSchema>
 export type VariantJob = z.infer<typeof variantJobSchema>
 export type TransformJob = z.infer<typeof transformJobSchema>
+export type ImageJob = z.infer<typeof imageJobSchema>
 export type PublishJob = z.infer<typeof publishJobSchema>
 export type BatchOperation = z.infer<typeof batchOperationSchema>
 export type BatchItemStatus = z.infer<typeof batchItemStatusSchema>
@@ -230,6 +239,7 @@ export const RenderComplete = renderCompleteSchema
 export const ExtractJob = extractJobSchema
 export const VariantJob = variantJobSchema
 export const TransformJob = transformJobSchema
+export const ImageJob = imageJobSchema
 export const PublishJob = publishJobSchema
 export const BatchOperation = batchOperationSchema
 export const BatchItemStatus = batchItemStatusSchema
