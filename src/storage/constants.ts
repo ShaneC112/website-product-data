@@ -10,7 +10,8 @@ export const STORAGE_TABLES = {
   crawlVariantDetail: 'webcrawlvariantdetail',
   crawlMatchingLedger: 'webcrawlmatchledger',
   crawlVariantSwatch: 'webcrawlvariantswatches',
-  crawlExtractBatch: 'webcrawlextractbatch'
+  crawlExtractBatch: 'webcrawlextractbatch',
+  sanityImageGeneration: 'sanityimagegeneration'
 } as const
 
 export const STORAGE_CONTAINERS = {
@@ -28,5 +29,7 @@ export const STORAGE_QUEUES = {
   crawlImageJobs: 'crawl-image-jobs',
   crawlTransformJobs: 'crawl-transform-jobs',
   crawlExtractBatchJobs: 'crawl-extract-batch-jobs',
-  publishJobs: 'publish-jobs'
+  publishJobs: 'publish-jobs',
+  sanityImagePrepare: 'sanity-image-prepare',
+  sanityImageGenerate: 'sanity-image-generate'
 } as const

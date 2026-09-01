@@ -47,7 +47,7 @@ delivery intent in the shared storage contract. Keep the lifecycle fields explic
 
 `TOG rating` originally only appeared in downstream tests as an
 `additionalSpecifications` entry. Once it was promoted into the Carpet registry as
-the named field `togRating` (alongside `suitability`, `warranty`, and `areaRoom`),
+the named field `togRating` (alongside `suitability` and `warranty`),
 the shared registry change itself was straightforward - but consumer fixtures still
 encoded the old catch-all representation. The production code was already
 registry-driven; the stale assumptions lived in tests and docs.
@@ -56,6 +56,14 @@ registry-driven; the stale assumptions lived in tests and docs.
 review adjacent consumer fixtures and README examples immediately. Otherwise the
 codebase drifts into a confusing state where the registry says one thing and the
 tests/documentation still teach the old shape.
+
+## Static publication taxonomies must be shared with extraction
+
+Free-text room values cannot safely drive a Sanity list, navigation, and room-image
+generation at the same time. `suitableRooms` now uses one shared list across every
+trade, while Azure filters AI values against the registry's `allowedValues` before
+storage. The Sanity product-type mapper similarly transforms pipeline trade labels
+instead of exposing them as public taxonomy values.
 
 ## `width` registry field: structural fix over defensive capping
 

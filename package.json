@@ -30,6 +30,10 @@
       "types": "./dist/registry/index.d.ts",
       "default": "./dist/registry/index.js"
     },
+    "./sanity": {
+      "types": "./dist/sanity.d.ts",
+      "default": "./dist/sanity.js"
+    },
     "./requests": {
       "types": "./dist/requests/index.d.ts",
       "default": "./dist/requests/index.js"
@@ -101,6 +105,10 @@
     "./storage/extract-batch.schema": {
       "types": "./dist/storage/extract-batch.schema.d.ts",
       "default": "./dist/storage/extract-batch.schema.js"
+    },
+    "./storage/sanity-image-generation.schema": {
+      "types": "./dist/storage/sanity-image-generation.schema.d.ts",
+      "default": "./dist/storage/sanity-image-generation.schema.js"
     },
     "./storage/constants": {
       "types": "./dist/storage/constants.d.ts",

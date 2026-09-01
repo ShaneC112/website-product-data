@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { SANITY_SUITABLE_ROOMS } from './product-taxonomy.js'
 
 export const fieldRequiredLevelSchema = z.enum(['required', 'recommended', 'optional'])
 export const fieldValueTypeSchema = z.enum(['text', 'boolean', 'measurement', 'measurement-list', 'text-list', 'attribute-list'])
@@ -146,7 +147,7 @@ export const fieldRegistry: FieldRegistryEntry[] = [
   createEntry('Carpet', 'bleachCleanable', 'Boolean true when bleach cleanable or bleach safe is explicitly stated.', 'optional', 'boolean', { category: 'features' }),
   createEntry('Carpet', 'petFriendly', 'Boolean true when pet friendly, pet resistant, or suitable for pets is explicitly stated.', 'optional', 'boolean', { category: 'features' }),
   createEntry('Carpet', 'ecoFriendly', 'Boolean true when eco-friendly, sustainable, or environmentally friendly is explicitly stated.', 'optional', 'boolean', { category: 'features' }),
-  createEntry('Carpet', 'areaRoom', 'Room or area suitability when explicitly stated, such as sitting room, hall, or stairs.', 'optional', 'text', { category: 'additional', exampleValue: 'Hall, stairs' }),
+  createEntry('Carpet', 'suitableRooms', 'Rooms where the product is explicitly stated to be suitable. Return only exact canonical room keys.', 'optional', 'text-list', { category: 'additional', exampleValue: '["living-room", "stairs"]', allowedValues: [...SANITY_SUITABLE_ROOMS] }),
   createEntry('Carpet', 'additionalSpecifications', 'Catch-all extra specification rows clearly evidenced on the vendor page that do not map to any named registry field. Return an array of {"description": string, "value": string} objects. Do not include values already captured in named fields such as pileHeight, backing, construction, gauge, or width.', 'optional', 'attribute-list', { category: 'additional' }),
   createEntry('Carpet', 'additionalFeatures', 'Catch-all extra feature rows clearly evidenced on the vendor page that do not map to any named registry field. Return an array of {"description": string, "value": string} objects. Do not include values already captured in named feature fields such as mothResistant or stainResistant.', 'optional', 'attribute-list', { category: 'additional' }),
   createEntry('Carpet', 'patternEvidence', 'Pattern repeat or drop evidence when explicitly stated.', 'optional', 'text', { promptHint: 'Look for pattern repeat or drop values often labelled Horizontal Repeat, Vertical Repeat, Pattern Drop, or Horizontal Drop.' }),
@@ -168,6 +169,7 @@ export const fieldRegistry: FieldRegistryEntry[] = [
   createEntry('Carpet Tile', 'stainResistant', 'Boolean true when stain resistant or stain protection is explicitly stated.', 'optional', 'boolean', { category: 'features' }),
   createEntry('Carpet Tile', 'antiStatic', 'Boolean true when anti-static or electrostatic protection is explicitly stated.', 'optional', 'boolean', { category: 'features' }),
   createEntry('Carpet Tile', 'suitabilityUfH', 'Boolean true when suitable for underfloor heating is explicitly stated.', 'optional', 'boolean', { category: 'features' }),
+  createEntry('Carpet Tile', 'suitableRooms', 'Rooms where the product is explicitly stated to be suitable. Return only exact canonical room keys.', 'optional', 'text-list', { category: 'additional', allowedValues: [...SANITY_SUITABLE_ROOMS] }),
   createEntry('Carpet Tile', 'measurements', 'Other explicit measurements such as tile size or pack dimensions.', 'optional', 'measurement-list'),
   createEntry('Carpet Tile', 'additionalSpecifications', 'Catch-all extra specification rows clearly evidenced on the vendor page that do not map to any named registry field. Return an array of {"description": string, "value": string} objects. Do not include values already captured in named fields such as pileHeight, backing, gauge, or dimensions.', 'optional', 'attribute-list', { category: 'additional' }),
   createEntry('Carpet Tile', 'additionalFeatures', 'Catch-all extra feature rows clearly evidenced on the vendor page that do not map to any named registry field. Return an array of {"description": string, "value": string} objects. Do not include values already captured in named feature fields such as features, mothResistant, or antiStatic.', 'optional', 'attribute-list', { category: 'additional' }),
@@ -195,6 +197,7 @@ export const fieldRegistry: FieldRegistryEntry[] = [
   createEntry('Laminate', 'stainResistant', 'Boolean true when stain resistant performance is explicitly stated.', 'optional', 'boolean', { category: 'features' }),
   createEntry('Laminate', 'antiStatic', 'Boolean true when anti-static performance is explicitly stated.', 'optional', 'boolean', { category: 'features' }),
   createEntry('Laminate', 'ecoFriendly', 'Boolean true when eco-friendly or sustainability claims are explicitly stated.', 'optional', 'boolean', { category: 'features' }),
+  createEntry('Laminate', 'suitableRooms', 'Rooms where the product is explicitly stated to be suitable. Return only exact canonical room keys.', 'optional', 'text-list', { category: 'additional', allowedValues: [...SANITY_SUITABLE_ROOMS] }),
   createEntry('Laminate', 'measurements', 'Other explicit measurements such as plank width, plank length, or pack dimensions.', 'optional', 'measurement-list'),
   createEntry('Laminate', 'additionalSpecifications', 'Catch-all extra specification rows clearly evidenced on the vendor page that do not map to any named registry field. Return an array of {"description": string, "value": string} objects. Do not include values already captured in named fields such as thickness or dimensions.', 'optional', 'attribute-list', { category: 'additional' }),
   createEntry('Laminate', 'additionalFeatures', 'Catch-all extra feature rows clearly evidenced on the vendor page that do not map to any named registry field. Return an array of {"description": string, "value": string} objects. Do not include values already captured in named feature fields such as waterResistant or suitabilityUfH.', 'optional', 'attribute-list', { category: 'additional' }),
@@ -220,6 +223,7 @@ export const fieldRegistry: FieldRegistryEntry[] = [
   createEntry('Vinyl', 'impactSoundReduction', 'Impact sound reduction when explicitly stated.', 'optional', 'text'),
   createEntry('Vinyl', 'antiStatic', 'Boolean true when anti-static performance is explicitly stated.', 'optional', 'boolean', { category: 'features' }),
   createEntry('Vinyl', 'ecoFriendly', 'Boolean true when eco-friendly or sustainability claims are explicitly stated.', 'optional', 'boolean', { category: 'features' }),
+  createEntry('Vinyl', 'suitableRooms', 'Rooms where the product is explicitly stated to be suitable. Return only exact canonical room keys.', 'optional', 'text-list', { category: 'additional', allowedValues: [...SANITY_SUITABLE_ROOMS] }),
   createEntry('Vinyl', 'measurements', 'Other explicit measurements such as plank width, tile size, or roll width.', 'optional', 'measurement-list'),
   createEntry('Vinyl', 'additionalSpecifications', 'Catch-all extra specification rows clearly evidenced on the vendor page that do not map to any named registry field. Return an array of {"description": string, "value": string} objects. Do not include values already captured in named fields such as thickness, dimensions, or look.', 'optional', 'attribute-list', { category: 'additional' }),
   createEntry('Vinyl', 'additionalFeatures', 'Catch-all extra feature rows clearly evidenced on the vendor page that do not map to any named registry field. Return an array of {"description": string, "value": string} objects. Do not include values already captured in named feature fields such as waterResistant.', 'optional', 'attribute-list', { category: 'additional' }),
@@ -247,6 +251,7 @@ export const fieldRegistry: FieldRegistryEntry[] = [
   createEntry('Engineered Wood', 'impactSoundReduction', 'Impact sound reduction when explicitly stated.', 'optional', 'text'),
   createEntry('Engineered Wood', 'antiStatic', 'Boolean true when anti-static performance is explicitly stated.', 'optional', 'boolean', { category: 'features' }),
   createEntry('Engineered Wood', 'ecoFriendly', 'Boolean true when eco-friendly or sustainability claims are explicitly stated.', 'optional', 'boolean', { category: 'features' }),
+  createEntry('Engineered Wood', 'suitableRooms', 'Rooms where the product is explicitly stated to be suitable. Return only exact canonical room keys.', 'optional', 'text-list', { category: 'additional', allowedValues: [...SANITY_SUITABLE_ROOMS] }),
   createEntry('Engineered Wood', 'measurements', 'Other explicit measurements such as board width, board length, or pack dimensions.', 'optional', 'measurement-list'),
   createEntry('Engineered Wood', 'additionalSpecifications', 'Catch-all extra specification rows clearly evidenced on the vendor page that do not map to a named registry field. Return an array of {"description": string, "value": string} objects.', 'optional', 'attribute-list', { category: 'additional' }),
   createEntry('Engineered Wood', 'additionalFeatures', 'Catch-all extra feature rows clearly evidenced on the vendor page that do not map to a named registry field. Return an array of {"description": string, "value": string} objects.', 'optional', 'attribute-list', { category: 'additional' }),
@@ -262,6 +267,7 @@ export const fieldRegistry: FieldRegistryEntry[] = [
   createEntry('Unknown', 'packInfo', 'Canonical pack details when present.', 'optional', 'text'),
   createEntry('Unknown', 'dimensions', 'Structured product dimensions when present.', 'optional', 'text'),
   createEntry('Unknown', 'look', 'Visual layout or style when present.', 'optional', 'text'),
+  createEntry('Unknown', 'suitableRooms', 'Rooms where the product is explicitly stated to be suitable. Return only exact canonical room keys.', 'optional', 'text-list', { category: 'additional', allowedValues: [...SANITY_SUITABLE_ROOMS] }),
   createEntry('Unknown', 'additionalSpecifications', 'Catch-all extra specification rows clearly evidenced on the vendor page that do not map to any named registry field. Return an array of {"description": string, "value": string} objects. Do not include values already captured in named fields.', 'optional', 'attribute-list', { category: 'additional' }),
   createEntry('Unknown', 'additionalFeatures', 'Catch-all extra feature rows clearly evidenced on the vendor page that do not map to any named registry field. Return an array of {"description": string, "value": string} objects. Do not include values already captured in named feature fields.', 'optional', 'attribute-list', { category: 'additional' }),
   createEntry('Unknown', 'patternEvidence', 'Pattern repeat or drop evidence when explicitly stated.', 'optional', 'text', { promptHint: 'Look for pattern repeat or drop values often labelled Horizontal Repeat, Vertical Repeat, or Pattern Drop.' }),

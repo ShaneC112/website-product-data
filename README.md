@@ -6,10 +6,11 @@
 enrichment system. It exists to provide one authoritative definition of the data
 structures and helpers that cross repository boundaries: Azure Table entity schemas,
 blob artefact schemas, queue message contracts, the shared product and variant field
-registry, storage key builders, and write-request payload contracts. The Azure
+registry, storage key builders, write-request payload contracts, and reusable Sanity
+ingestion rules. The Azure
 orchestrator and the Nuxt UI import these definitions instead of redefining them
-locally, so writers and readers never drift. This package contains no workflow logic,
-no browser automation, and no framework-specific runtime code.
+locally, so writers and readers never drift. This package contains no browser
+automation or framework-specific runtime code.
 
 Private shared storage-contract repo for the website product enrichment system.
 
@@ -48,12 +49,14 @@ Exports:
 - `@shane-corrigan/website-product-data/queues/contracts`
 - `@shane-corrigan/website-product-data/requests`
 - `@shane-corrigan/website-product-data/requests/contracts`
+- `@shane-corrigan/website-product-data/sanity`
 - `@shane-corrigan/website-product-data/storage`
 - `@shane-corrigan/website-product-data/storage/constants`
 - `@shane-corrigan/website-product-data/storage/keys`
 
 Decisions:
 - The private shared package is the single source of truth for shared storage contracts and shared write request payload contracts.
+- The `sanity` subpath owns pure crawl-to-Sanity mapping, publication gating, conflict-preserving merge logic, and the generic draft/candidate workflow through a minimal structural client interface. It has no runtime `@sanity/client` dependency.
 - Nuxt write routes import request schemas from this package instead of duplicating them locally.
 - Azure write functions should import the same shared request schemas wherever the payload contract matches.
 - Page-local client validation that is only used by one page should be inlined in that page rather than kept in a shared UI schema file.
@@ -154,9 +157,11 @@ repo's system prompt produces an obviously-invalid value that downstream structu
 validation rejects, instead of a silently-wrong one.
 
 **Update:** the Carpet registry now includes optional named fields for `togRating`,
-`suitability`, and `warranty` as specifications, plus `areaRoom` as an additional
-named field. These were promoted from catch-all evidence because they recur on
-vendor pages often enough to deserve stable field names in the extraction contract.
+`suitability`, and `warranty` as specifications. Room suitability is represented by
+`suitableRooms`, an exact list backed by the shared Sanity room taxonomy, rather
+than the retired free-text `areaRoom` field. These were promoted from catch-all
+evidence because they recur on vendor pages often enough to deserve stable field
+names in the extraction contract.
 When promoting a catch-all attribute into a named field, update both the shared
 registry tests and any consumer fixtures that previously asserted it under
 `additionalSpecifications` or `additionalFeatures`.

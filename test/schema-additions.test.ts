@@ -1,8 +1,30 @@
 import { describe, expect, it } from 'vitest'
 import { crawlRequestMessageSchema, renderCompleteSchema, renderRequestSchema, renderResponseSchema } from '../src/queues/contracts.js'
-import { getRegistryEntriesForTrade } from '../src/registry/index.js'
+import { IMAGE_GENERATION_PRODUCT_REGISTRY, IMAGE_GENERATION_PROFILE_ESTIMATES, estimateImageGenerationCostEur, getRegistryEntriesForTrade, mapTradeToSanityProductType, SANITY_PRODUCT_TYPES, SANITY_SUITABLE_ROOMS } from '../src/registry/index.js'
 import { crawlPageTableSchema } from '../src/storage/page.schema.js'
+import { crawlRunSummaryTableSchema } from '../src/storage/run-summary.schema.js'
 import { manualCrawlEnqueueSchema } from '../src/requests/contracts.js'
+
+describe('Sanity ingestion run summary', () => {
+  it('accepts a non-published outcome and document IDs', () => {
+    const parsed = crawlRunSummaryTableSchema.parse({
+      partitionKey: 'run-1',
+      rowKey: 'run-1',
+      runId: 'run-1',
+      status: 'publish_deferred',
+      sanityOutcome: 'mixed',
+      sanityDocumentIds: '["drafts.product-1","candidate-1"]',
+      sanityDraftCount: 1,
+      sanityCandidateCount: 1
+    })
+
+    expect(parsed).toMatchObject({
+      sanityOutcome: 'mixed',
+      sanityDraftCount: 1,
+      sanityCandidateCount: 1
+    })
+  })
+})
 
 // regression coverage for the visible-text plumbing added alongside the render pipeline: render
 // uploads a hidden-aware, tag-free rendering of the page (previously only its length was kept),
@@ -69,8 +91,24 @@ describe('carpet registry additions', () => {
       expect.objectContaining({ field: 'togRating', requiredLevel: 'optional', category: 'specifications' }),
       expect.objectContaining({ field: 'suitability', requiredLevel: 'optional', category: 'specifications' }),
       expect.objectContaining({ field: 'warranty', requiredLevel: 'optional', category: 'specifications' }),
-      expect.objectContaining({ field: 'areaRoom', requiredLevel: 'optional', category: 'additional' })
+      expect.objectContaining({
+        field: 'suitableRooms',
+        requiredLevel: 'optional',
+        category: 'additional',
+        valueType: 'text-list',
+        allowedValues: SANITY_SUITABLE_ROOMS
+      })
     ]))
+  })
+
+  it('uses the canonical room list for every trade', () => {
+    for (const trade of ['Carpet', 'Carpet Tile', 'Laminate', 'Vinyl', 'Engineered Wood', 'Unknown']) {
+      expect(getRegistryEntriesForTrade(trade)).toContainEqual(expect.objectContaining({
+        field: 'suitableRooms',
+        valueType: 'text-list',
+        allowedValues: SANITY_SUITABLE_ROOMS
+      }))
+    }
   })
 
   // regression test: pileWeight used to be free 'text' (e.g. "40oz and 50oz" for a multi-weight
@@ -91,6 +129,36 @@ describe('carpet registry additions', () => {
       expect.objectContaining({ field: 'additionalSpecifications', valueType: 'attribute-list' }),
       expect.objectContaining({ field: 'additionalFeatures', valueType: 'attribute-list' })
     ]))
+  })
+})
+
+describe('Sanity publication taxonomy', () => {
+  it('maps source trades to the static Sanity product type list', () => {
+    expect(mapTradeToSanityProductType('Carpet')).toBe('carpet')
+    expect(mapTradeToSanityProductType('Carpet Tile')).toBe('carpet-tile')
+    expect(mapTradeToSanityProductType('Engineered Wood')).toBe('engineered-wood')
+    expect(mapTradeToSanityProductType('Vinyl', 'luxury vinyl tile')).toBe('lvt')
+    expect(mapTradeToSanityProductType('Carpet', 'rug')).toBe('rug')
+    expect(mapTradeToSanityProductType('Unknown')).toBeUndefined()
+    expect(SANITY_PRODUCT_TYPES).toContain('vinyl')
+    expect(Object.keys(IMAGE_GENERATION_PRODUCT_REGISTRY).sort()).toEqual([...SANITY_PRODUCT_TYPES].sort())
+    expect(IMAGE_GENERATION_PRODUCT_REGISTRY['carpet-tile'].layDirectionOptions).toContain('quarter-turn')
+    expect(IMAGE_GENERATION_PRODUCT_REGISTRY.rug.layDirectionOptions).toEqual([])
+    expect(estimateImageGenerationCostEur('flux-roomshot-v1', 20)).toBe(0.78)
+    expect(estimateImageGenerationCostEur('flux-kontext-pattern-v1', 20)).toBe(1.22)
+    expect(IMAGE_GENERATION_PROFILE_ESTIMATES['flux-roomshot-v1'].pricingRevision).toBe('bfl-2026-08-31')
+  })
+
+  it('defines one canonical suitable-room list for extraction and Sanity', () => {
+    expect(SANITY_SUITABLE_ROOMS).toEqual(expect.arrayContaining([
+      'bedroom',
+      'living-room',
+      'stairs',
+      'kitchen',
+      'bathroom',
+      'utility-room'
+    ]))
+    expect(new Set(SANITY_SUITABLE_ROOMS).size).toBe(SANITY_SUITABLE_ROOMS.length)
   })
 })
 
