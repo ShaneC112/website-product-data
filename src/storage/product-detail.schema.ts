@@ -7,6 +7,13 @@ import {
   extractedReviewModelSchema
 } from './page-detail.schema.js'
 
+export {
+  parseRawWidthHint,
+  rawWidthHintSchema,
+  stringifyRawWidthHint,
+  type RawWidthHint
+} from './page-detail.schema.js'
+
 export const crawlProductDetailTableSchema = z.object({
   partitionKey: z.string().trim().min(1),
   rowKey: z.string().trim().min(1),
@@ -21,6 +28,13 @@ export const crawlProductDetailTableSchema = z.object({
   vendorSku: z.string().trim().min(1).optional(),
   rawPriceMinor: z.number().optional(),
   vatRate: z.number().optional(),
+  // merchant-set box price, same trust tier as rawPriceMinor - not a vendor-page claim to verify.
+  rawBoxPriceMinor: z.number().optional(),
+  boxUnit: z.string().trim().min(1).optional(),
+  packInfoHintJson: z.string().trim().min(1).optional(),
+  // this row's own matched m2crm SKU's roll width(s), same trust tier as rawPriceMinor - see
+  // rawWidthHintSchema in page-detail.schema.ts. JSON-stringified, consistent with the other hint columns.
+  rawWidthHintJson: z.string().trim().min(1).optional(),
   styleCode: z.string().trim().min(1).optional(),
   trade: z.string().trim().min(1).optional(),
   status: crawlProductDetailStatusSchema.optional(),

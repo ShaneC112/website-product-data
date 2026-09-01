@@ -11,6 +11,24 @@ export const extractedScalarMeasurementSchema = z.object({
   unit: z.string().trim().min(1)
 })
 
+export type ExtractedScalarMeasurement = z.infer<typeof extractedScalarMeasurementSchema>
+
+// m2crm's per-SKU roll width(s) (confirmed live via m2crm's native `width` product field, e.g.
+// "13'1\"" on the /400 SKU vs "16'5\"" on the /500 SKU of the same range) - authoritative business
+// data like rawPriceMinor, not a bias hint. Persisted as a JSON-stringified column on Table Storage
+// rows, consistent with variantUrlsJson/packInfoHintJson.
+export const rawWidthHintSchema = z.array(extractedScalarMeasurementSchema)
+
+export type RawWidthHint = z.infer<typeof rawWidthHintSchema>
+
+export function parseRawWidthHint(value: string): RawWidthHint {
+  return rawWidthHintSchema.parse(JSON.parse(value))
+}
+
+export function stringifyRawWidthHint(value: unknown): string {
+  return JSON.stringify(rawWidthHintSchema.parse(value))
+}
+
 export const extractedAdditionalAttributeSchema = z.object({
   description: z.string().trim().min(1),
   value: z.string().trim().min(1)
@@ -157,6 +175,9 @@ export type CrawlProductDetailStatusValue = z.infer<typeof crawlProductDetailSta
 export type PageDetailSummary = z.infer<typeof pageDetailSummarySchema>
 export type RangeDetailSummary = z.infer<typeof rangeDetailSummarySchema>
 export type ExtractedVendorVariant = z.infer<typeof extractedVendorVariantSchema>
+export type ExtractedReviewKnownAttribute = z.infer<typeof extractedReviewKnownAttributeSchema>
+export type ExtractedReviewAdditionalAttribute = z.infer<typeof extractedReviewAdditionalAttributeSchema>
+export type ExtractedReviewModel = z.infer<typeof extractedReviewModelSchema>
 export type CrawlPageDetailParsed =
   | {
       row: CrawlPageDetailTable

@@ -1,7 +1,17 @@
 import { z } from 'zod'
-import { crawlPageRoleSchema } from './page-detail.schema.js'
+import { crawlPageRoleSchema, extractedScalarMeasurementSchema } from './page-detail.schema.js'
 
 export const crawlPageVariantUrlsSchema = z.array(z.string().trim().min(1))
+
+// m2crm's plank/tile size + coverage + pieces-per-box - a bias hint for AI extraction only,
+// mirrors pileWeightHint. Persisted as a JSON-stringified column, consistent with variantUrlsJson.
+export const crawlPagePackInfoHintSchema = z.object({
+  length: extractedScalarMeasurementSchema.optional(),
+  width: extractedScalarMeasurementSchema.optional(),
+  height: extractedScalarMeasurementSchema.optional(),
+  coverage: extractedScalarMeasurementSchema.optional(),
+  piecesPerPack: z.number().int().positive().optional()
+})
 
 export const crawlPageTableSchema = z.object({
   partitionKey: z.string().trim().min(1),
@@ -31,12 +41,17 @@ export const crawlPageTableSchema = z.object({
   etag: z.string().trim().min(1).optional(),
   rawPriceMinor: z.number().optional(),
   vatRate: z.number().optional(),
+  // merchant-set box price, same trust tier as rawPriceMinor - not a vendor-page claim to verify.
+  rawBoxPriceMinor: z.number().optional(),
+  boxUnit: z.string().trim().min(1).optional(),
+  packInfoHintJson: z.string().trim().min(1).optional(),
   vendorSku: z.string().trim().min(1).optional(),
   sourceRowKey: z.string().trim().min(1).optional(),
   pileWeightHint: z.string().trim().min(1).optional()
 })
 
 export type CrawlPageVariantUrls = z.infer<typeof crawlPageVariantUrlsSchema>
+export type CrawlPagePackInfoHint = z.infer<typeof crawlPagePackInfoHintSchema>
 export type CrawlPageTable = z.infer<typeof crawlPageTableSchema>
 export type CrawlPageParsed = {
   row: CrawlPageTable
@@ -53,6 +68,14 @@ export function parseCrawlPageVariantUrls(value: string): CrawlPageVariantUrls {
 
 export function stringifyCrawlPageVariantUrls(value: unknown): string {
   return JSON.stringify(crawlPageVariantUrlsSchema.parse(value))
+}
+
+export function parseCrawlPagePackInfoHint(value: string): CrawlPagePackInfoHint {
+  return crawlPagePackInfoHintSchema.parse(JSON.parse(value))
+}
+
+export function stringifyCrawlPagePackInfoHint(value: unknown): string {
+  return JSON.stringify(crawlPagePackInfoHintSchema.parse(value))
 }
 
 export function parseCrawlPage(row: CrawlPageTable): CrawlPageParsed {

@@ -1,11 +1,11 @@
 import {randomUUID} from 'node:crypto'
 import type {AssetUpload, SanityImage, SanityIngestionPlan, SanityProductDraft} from './ingestion.js'
 import {buildInitialSourceFields, mergeProductUpdate} from './mergeProductUpdate.js'
-import {evaluatePublicationGate} from './publicationGate.js'
+import {evaluateBridgeEligibility} from './bridgeContract.schema.js'
 
 export type PublishDraftResult =
   | {outcome: 'draft'; draftId: string; assetIds: string[]; conflictCount: number}
-  | {outcome: 'candidate'; candidateId: string; blockingReasons: string[]}
+  | {outcome: 'held'; reasons: string[]}
 
 export type SanityPublisherClient = {
   fetch<T>(query: string, params?: Record<string, unknown>, options?: {perspective?: string}): Promise<T>
@@ -44,35 +44,17 @@ export async function publishProductDraft(
   const resolution = await resolveExistingProduct(client, plan, lookup)
   const versions = resolution.versions
   const existing = versions.drafts[0] ?? versions.published[0]
-  const blockingReasons = evaluateIngestionPlan(plan)
-  if (resolution.duplicateIdentity) blockingReasons.push('duplicate_identity')
-  if (existing?.importMeta.contentLocked) blockingReasons.push('content_locked')
 
-  if (blockingReasons.length > 0) {
-    const candidate = await client.create({
-      _type: 'productImportCandidate',
-      identityKey: plan.identityKey ?? `${plan.vendorId}:unidentified:${plan.externalId}`,
-      vendorId: plan.vendorId,
-      styleCode: plan.document.importMeta.styleCode,
-      styleCodeNormalized: plan.styleCodeNormalized,
-      externalId: plan.externalId,
-      targetProduct: versions.published[0]
-        ? {_type: 'reference', _ref: versions.published[0]._id}
-        : undefined,
-      receivedAt: plan.document.importMeta.importedAt,
-      status: 'pending',
-      detailScore: plan.document.importMeta.detailScore,
-      accuracyScore: plan.document.importMeta.accuracyScore,
-      blockingReasons: [...new Set(blockingReasons)],
-      proposedPayloadJson: JSON.stringify(plan.document),
-      assetSources: plan.assets.map((asset, index) => ({
-        _key: `asset-${index + 1}`,
-        sourceUrl: asset.sourceUrl,
-        role: asset.role,
-        alt: asset.alt,
-      })),
-    })
-    return {outcome: 'candidate', candidateId: candidate._id, blockingReasons: [...new Set(blockingReasons)]}
+  // Bridge-eligibility must see the swatch image a pending asset upload will produce, not the
+  // still-empty field on the just-built document (uploads happen further down, after this gate).
+  const eligibility = evaluateBridgeEligibility(withPendingSwatchMarkers(plan))
+  const reasons = [...plan.blockingReasons, ...(eligibility.eligible ? [] : eligibility.reasons)]
+  if (resolution.duplicateIdentity) reasons.push('duplicate_identity')
+  if (existing?.importMeta.contentLocked) reasons.push('content_locked')
+
+  if (reasons.length > 0) {
+    // No Sanity document is created or updated - if `existing` is set, it is left untouched.
+    return {outcome: 'held', reasons: [...new Set(reasons)]}
   }
 
   const draftId = toDraftId(existing?._id ?? randomUUID())
@@ -137,17 +119,15 @@ async function resolveExistingProduct(
   }
 }
 
-function evaluateIngestionPlan(plan: SanityIngestionPlan): string[] {
+function withPendingSwatchMarkers(plan: SanityIngestionPlan): SanityProductDraft {
   const product = structuredClone(plan.document)
-  const imageTarget = plan.assets.find((asset) =>
-    asset.target.scope === 'variant' && ['primaryImage', 'swatchImage'].includes(asset.target.field),
-  )
-  if (imageTarget?.target.scope === 'variant') {
-    const target = imageTarget.target
+  for (const asset of plan.assets) {
+    const target = asset.target
+    if (target.scope !== 'variant' || target.field !== 'swatchImage') continue
     const variant = product.variants.find((item) => item._key === target.variantKey)
-    if (variant) variant.primaryImage = {pendingAsset: true} as never
+    if (variant) variant.swatchImage = {pendingAsset: true} as never
   }
-  return [...new Set([...product.importMeta.blockingReasons, ...evaluatePublicationGate(product)])]
+  return product
 }
 
 function stripSystemFields(document: SanityProductDraft & Record<string, unknown>): {_type: string; [key: string]: unknown} {

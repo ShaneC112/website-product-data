@@ -39,6 +39,10 @@ export const fieldRegistryEntrySchema = z.object({
   valueType: fieldValueTypeSchema,
   category: fieldCategorySchema,
   publishable: z.boolean(),
+  // true when this field follows the product-default/child-overrides-only-if-different model
+  // (e.g. Carpet's width) - a variant's own value is only populated when it genuinely differs
+  // (by unit-normalized physical size) from the product-level default. Falsy for every other field.
+  allowVariantOverride: z.boolean().optional(),
   exampleValue: z.string().trim().min(1).optional(),
   promptHint: z.string().trim().min(1).optional(),
   allowedValues: z.array(z.string().trim().min(1)).optional()
@@ -77,6 +81,7 @@ function createEntry(
     publishBlockOnLowConfidence?: boolean
     category?: FieldCategory
     publishable?: boolean
+    allowVariantOverride?: boolean
     exampleValue?: string
     promptHint?: string
     allowedValues?: string[]
@@ -94,6 +99,7 @@ function createEntry(
     valueType,
     category: options?.category ?? 'specifications',
     publishable: options?.publishable ?? true,
+    allowVariantOverride: options?.allowVariantOverride,
     exampleValue: options?.exampleValue,
     promptHint: options?.promptHint,
     allowedValues: options?.allowedValues
@@ -133,7 +139,7 @@ export const fieldRegistry: FieldRegistryEntry[] = [
   createEntry('Carpet', 'pileFibreComposition', 'Pile fibre composition text such as wool content, yarn ply, or dye treatment when explicitly stated.', 'recommended', 'text', { exampleValue: '100% Pure New Wool' }),
   createEntry('Carpet', 'gauge', 'Gauge text when explicitly stated.', 'recommended', 'text', { exampleValue: '10 gauge', promptHint: 'May appear as a standalone gauge value, as part of construction (e.g. 1/10 gauge), or labelled Gauge in a spec table.' }),
   createEntry('Carpet', 'stitchCount', 'Number of stitches per square metre when explicitly stated.', 'recommended', 'text', { exampleValue: '252,000 per m²' }),
-  createEntry('Carpet', 'width', 'Available roll width(s) when explicitly stated, as one measurement entry per distinct width.', 'recommended', 'measurement-list', { exampleValue: '[{"value": <the number found on the page>, "unit": "<cm or m, matching the page>"}]', promptHint: 'Return one array entry per distinct available roll width, each as {"value": number, "unit": string}, using the unit exactly as shown on the page (do not convert between cm and m). Prefer standalone roll width statements over full dimension sets. May be labelled Width in cm or Available widths.' }),
+  createEntry('Carpet', 'width', 'Available roll width(s) when explicitly stated, as one measurement entry per distinct width.', 'recommended', 'measurement-list', { allowVariantOverride: true, exampleValue: '[{"value": <the number found on the page>, "unit": "<cm or m, matching the page>"}]', promptHint: 'Return one array entry per distinct available roll width, each as {"value": number, "unit": string}, using the unit exactly as shown on the page (do not convert between cm and m). Prefer standalone roll width statements over full dimension sets. May be labelled Width in cm or Available widths.' }),
   createEntry('Carpet', 'totalWeight', 'Overall carpet weight including backing when explicitly stated.', 'recommended', 'text', { exampleValue: '2320 g/m²' }),
   createEntry('Carpet', 'fireRating', 'Fire classification when explicitly stated.', 'recommended', 'text', { exampleValue: 'Cfl-s1', promptHint: 'European fire classification codes. Common values: Bfl-s1, Bfl-s2, Cfl-s1, Cfl-s2, Dfl-s1. May appear in a spec table or accreditation section.' }),
   createEntry('Carpet', 'totalHeight', 'Overall carpet height including backing when explicitly stated.', 'optional', 'measurement', { exampleValue: '9 mm' }),
@@ -162,6 +168,7 @@ export const fieldRegistry: FieldRegistryEntry[] = [
   createEntry('Carpet Tile', 'backing', 'Backing material or construction when explicitly stated in carpet tile specifications.', 'recommended', 'text', { exampleValue: 'Bitumen', promptHint: 'Common values: Bitumen, PVC, Cushioned, Hardback. Usually found in a specification table.' }),
   createEntry('Carpet Tile', 'gauge', 'Gauge text when explicitly stated.', 'recommended', 'text', { exampleValue: '1/10 gauge', promptHint: 'May appear as gauge, 1/10 gauge, or inline with construction details in a spec table.' }),
   createEntry('Carpet Tile', 'dimensions', 'Tile dimensions when explicitly stated.', 'recommended', 'text', { exampleValue: '500 x 500 mm', promptHint: 'Return the full tile dimensions including both length and width.' }),
+  createEntry('Carpet Tile', 'suitability', 'Suitability classification when explicitly stated, such as General Domestic, Heavy Domestic, or Commercial.', 'optional', 'text', { exampleValue: 'Heavy Contract' }),
   createEntry('Carpet Tile', 'totalWeight', 'Overall carpet tile weight including backing when explicitly stated.', 'recommended', 'text', { exampleValue: '5000 g/m²' }),
   createEntry('Carpet Tile', 'fireRating', 'Fire classification when explicitly stated.', 'recommended', 'text', { exampleValue: 'Bfl-s1', promptHint: 'European fire classification codes. Common values: Bfl-s1, Cfl-s1, Cfl-s2. May appear in a spec table or accreditation section.' }),
   createEntry('Carpet Tile', 'totalHeight', 'Overall carpet tile height including backing when explicitly stated.', 'optional', 'measurement', { exampleValue: '7 mm' }),
@@ -184,6 +191,7 @@ export const fieldRegistry: FieldRegistryEntry[] = [
   createEntry('Laminate', 'dimensions', 'Plank dimensions when explicitly present.', 'required', 'text', { exampleValue: '1200 x 190 mm', promptHint: 'Return the full plank dimensions including both length and width.' }),
   createEntry('Laminate', 'packInfo', 'Canonical pack details including coverage, pieces per pack, and pack dimensions when explicitly present.', 'recommended', 'text', { exampleValue: '8 planks, 2.22 m² per pack', promptHint: 'Look for coverage per pack (m²), number of planks per pack, and pack dimensions. May appear as a table or inline text.' }),
   createEntry('Laminate', 'look', 'Visual layout or style when explicitly stated by the product or range, not inferred from room-set imagery.', 'recommended', 'text', { exampleValue: 'plank', allowedValues: ['plank', 'tile', 'herringbone', 'chevron', 'large format', 'stone effect', 'wood effect', 'parquet'] }),
+  createEntry('Laminate', 'suitability', 'Suitability classification when explicitly stated, such as General Domestic, Heavy Domestic, or Commercial.', 'optional', 'text', { exampleValue: 'Heavy Domestic' }),
   createEntry('Laminate', 'waterResistant', 'Boolean true when water resistant or waterproof laminate performance is explicitly stated.', 'recommended', 'boolean', { category: 'features' }),
   createEntry('Laminate', 'suitabilityUfH', 'Boolean true when suitable for underfloor heating is explicitly stated.', 'recommended', 'boolean', { category: 'features' }),
   createEntry('Laminate', 'wearRating', 'Abrasion or wear class when explicitly stated, such as AC4.', 'optional', 'text'),
@@ -210,6 +218,7 @@ export const fieldRegistry: FieldRegistryEntry[] = [
   createEntry('Vinyl', 'thickness', 'Explicit vinyl thickness measurement.', 'required', 'measurement', { exampleValue: '2.5 mm' }),
   createEntry('Vinyl', 'dimensions', 'Roll or tile dimensions when explicitly stated.', 'required', 'text', { exampleValue: '457 x 457 mm', promptHint: 'Return the full dimensions including both length and width. For rolls, return the roll width.' }),
   createEntry('Vinyl', 'look', 'Visual layout or style when explicitly stated.', 'recommended', 'text', { exampleValue: 'plank', promptHint: 'Common values: plank, tile, herringbone, chevron, large format, stone effect, wood effect, parquet.', allowedValues: ['plank', 'tile', 'herringbone', 'chevron', 'large format', 'stone', 'stone effect', 'wood', 'wood effect', 'parquet'] }),
+  createEntry('Vinyl', 'suitability', 'Suitability classification when explicitly stated, such as General Domestic, Heavy Domestic, or Commercial.', 'optional', 'text', { exampleValue: 'Commercial & Domestic' }),
   createEntry('Vinyl', 'waterResistant', 'Boolean true when water resistant or waterproof performance is explicitly stated.', 'recommended', 'boolean', { category: 'features' }),
   createEntry('Vinyl', 'suitabilityUfH', 'Boolean true when suitable for underfloor heating is explicitly stated.', 'recommended', 'boolean', { category: 'features' }),
   createEntry('Vinyl', 'packInfo', 'Canonical pack details including coverage, pieces per pack, and pack dimensions when explicitly present.', 'recommended', 'text', { exampleValue: '6 planks, 2.10 m² per pack' }),
@@ -240,9 +249,12 @@ export const fieldRegistry: FieldRegistryEntry[] = [
   createEntry('Engineered Wood', 'packInfo', 'Canonical pack details including coverage, pieces per pack, and pack dimensions when explicitly present.', 'recommended', 'text'),
   createEntry('Engineered Wood', 'finish', 'Surface finish when explicitly stated, such as extra matt lacquered or oiled.', 'recommended', 'text'),
   createEntry('Engineered Wood', 'look', 'Visual layout or style when explicitly stated by the product or range, not inferred from room-set imagery.', 'recommended', 'text', { exampleValue: 'chevron', allowedValues: ['plank', 'herringbone', 'chevron', 'parquet'] }),
+  createEntry('Engineered Wood', 'species', 'Wood species when explicitly stated, such as European Oak or American Walnut.', 'recommended', 'text', { exampleValue: 'European Oak' }),
   createEntry('Engineered Wood', 'suitabilityUfH', 'Boolean true when suitable for underfloor heating is explicitly stated.', 'recommended', 'boolean', { category: 'features' }),
   createEntry('Engineered Wood', 'installationMethod', 'Installation method when explicitly stated, such as click, glue-down, or floating.', 'recommended', 'text'),
   createEntry('Engineered Wood', 'lockingSystem', 'Named locking or click system when explicitly stated.', 'optional', 'text'),
+  createEntry('Engineered Wood', 'suitability', 'Suitability classification when explicitly stated, such as General Domestic, Heavy Domestic, or Commercial.', 'optional', 'text', { exampleValue: 'Heavy Domestic' }),
+  createEntry('Engineered Wood', 'refinishable', 'Boolean true when refinishable, sandable, or can be resurfaced/recoated multiple times is explicitly stated.', 'optional', 'boolean', { category: 'features' }),
   createEntry('Engineered Wood', 'bevel', 'Board bevel construction when explicitly stated.', 'optional', 'text'),
   createEntry('Engineered Wood', 'warranty', 'Warranty text when explicitly stated.', 'optional', 'text'),
   createEntry('Engineered Wood', 'fireRating', 'Fire classification when explicitly stated.', 'optional', 'text', { exampleValue: 'Bfl-s1' }),

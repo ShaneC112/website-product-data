@@ -1,5 +1,47 @@
 # Learnings
 
+## `buildVariant` applying one row's price to every colour was a real bug, not just a missing feature
+
+`buildSanityIngestionPlan` took a single flat `rawPriceMinor` from whichever one
+`webcrawlproductdetail` row was passed in and applied it to every variant, even
+though `crawlTransformWorker.ts` already writes one row per matched m2crm SKU
+(each with its own price) and `publishWorker.ts` already computes a per-variant
+match proposal (`matchVariantToCandidates`) before publishing. The two systems
+were never connected.
+
+**Fix:** `buildSanityIngestionPlan`'s new `options.variantOverrides` (keyed by
+`variantId`) lets a caller supply per-colour `rawPriceMinor`/`rawBoxPriceMinor`
+resolved from the existing match ledger, overriding the row-level default only
+for variants that have a resolved override. `publishWorker.ts` now builds this
+map from the matching pass it already runs, and publishes once per distinct
+`urlKey` (not once per matched row) so a shared page's colours aren't published
+as separate, redundant Sanity documents with each other's prices flickering in
+depending on iteration order.
+
+**Best practice:** when a per-colour matching/resolution system already exists
+for one purpose (here: swatch/variant matching), check whether a "known bug"
+elsewhere in the same product (uniform pricing) is actually just that same
+system not being wired to the place that needs it, before assuming a new
+resolution mechanism must be built from scratch.
+
+## Width has to be re-derived from a display-string label at the ingestion boundary
+
+`ExtractedWidthSlot` (`vendorProductPage.widths` / `variant.widths`) is `{widthLabel:
+string}`, e.g. `"4 m"` - the structured `{value, unit}` measurement that
+extraction actually produces is flattened into a display string by
+`buildWidthSlots` (azure) before it ever reaches the shared blob. Any
+unit-normalized physical-size comparison downstream (the width parent/child
+model) has no structured data to work with unless it re-parses that label.
+
+**Best practice:** `readWidthSlot` in `ingestion.ts` parses `"${value} ${unit}"`
+back into a measurement deliberately narrowly (exact format only) rather than
+attempting a general free-text width parser - the format is fully controlled by
+`buildWidthSlots` on the write side, so a strict parse is safe and any drift in
+that format would be a build-time contract change, not a runtime data
+surprise. `areMeasurementSetsEquivalent` (unit-normalized to mm) is the reusable
+comparison utility for this and future product-default/child-override fields
+(`packInfo`, pattern fields).
+
 ## Catch-all fields need a structured registry type
 
 Live enrichment data exposed `additionalFeatures` as string arrays even though
@@ -112,6 +154,24 @@ is refreshed. Confirmed consumers as of this change:
 `website-product-enrichment-azure`, `website-product-enrichment-ui`,
 `website-product-enrichment-render`.
 
+## `crawlUrlLinkTableSchema` doesn't own every field `CrawlUrlLinkEntity` actually persists
+
+`rawPriceMinor`/`vatRate` (and now `rawBoxPriceMinor`/`boxUnit`) are read/written by
+`website-product-enrichment-azure`'s `crawlUrlLinksStore.ts` via a locally-declared
+`CrawlUrlLinkEntity = CrawlUrlLinkTable & {...}` type extension, not via this package's
+shared `crawlUrlLinkTableSchema` in `src/storage/url-link.schema.ts`. This is an
+existing, asymmetric pattern (contrast with `crawlPageTableSchema`/`crawlProductDetailTableSchema`,
+which both own their `rawPriceMinor`/`vatRate` fields directly) - there is no runtime
+zod validation of these fields on the `webcrawlurllinks` table today, only a
+compile-time TS shape.
+
+**Best practice:** when adding a new field to the box-price/pack-info family, add it
+to the consumer-local `CrawlUrlLinkEntity`/`CrawlUrlLinkInput` type (mirroring
+`rawPriceMinor`/`vatRate`) rather than only to the shared schema - the shared schema
+alone will not make the field reach the table today. Promoting these fields into the
+shared schema (so they get real runtime validation) is a separate, deliberate future
+change, not an automatic consequence of adding one more field this way.
+
 ## A field registry `exampleValue` is prompt content, not documentation, and models will copy it
 
 The `width` field's registry entry (Carpet trade) had
@@ -205,3 +265,102 @@ The extraction batch ledger is keyed by group, operation, and URL so retries can
 **Solution:** carry optional `runId` on `crawlExtractBatchTableSchema` and test it at the shared package boundary. Azure can then preserve idempotency within a run while resetting terminal rows when ownership moves to a new run.
 
 **Best practice:** when a durable work ledger outlives an orchestration run, store both business identity and run identity; keys alone are not enough to express retry ownership.
+
+## Width's parent/child model needed a real per-colour width source, not just a comparison utility
+
+`areMeasurementSetsEquivalent` alone doesn't fix width inheritance if the only per-variant width
+data available is page-extracted `variant.widths` - the same noisy, single-pass source the
+pre-existing `crawlTransformWorker.ts` comment already warned couldn't be trusted alone. Price had
+the identical problem and was fixed by resolving per-colour data from the matched m2crm source
+row (`variantOverrides`); width needed the same authoritative channel, not a second bespoke one.
+
+**Fix:** `rawWidthHint` rides the same `variantOverrides` map `rawPriceMinor` already uses. A
+variant's resolved width set is the union of its page-extracted `widths` and its matched source
+row's `rawWidthHint`, computed once per variant before `product.widths` is determined (so the
+range-level default can itself fall back to that union when no range-level width was extracted),
+then compared against the product default via `areMeasurementSetsEquivalent`.
+
+**Best practice:** when adding a hint/override channel for a field that already has one for a
+sibling field (price), reuse the same map and resolution order instead of adding a parallel one -
+the two fields are resolved by the same match, at the same point in the pipeline.
+
+## The bridge gate's packInfo requirement was left informational, not blocking
+
+Phase 03 asked whether a Carpet Tile/Laminate/Vinyl/Engineered Wood product with no
+`packInfo`/`packPrice` should fail `evaluateBridgeEligibility`, explicitly flagging it as a softer
+call than the width check and asking for confirmation before implementing either way.
+
+**Decision:** `SANITY_CONTENT_REQUIREMENTS[productType].requiresPackInfo` is defined (shared with
+the Studio gate, Phase 05) but `evaluateBridgeEligibility` does not currently block on it - only
+`requiresWidth` blocks. Box price/pack info is already authoritative business data (present or
+not, per Phase 02) rather than a page-extraction quality signal the bridge should gate on; a
+missing value there is more useful as an Azure/Nuxt-side informational signal than a hard block.
+Revisit if real data shows products are reaching Sanity without pack info that customers need to
+see, at which point this becomes an explicit, confirmed decision to add `missing_required_pack_info`
+as a blocking reason.
+
+## `buildSanityIngestionPlan` was rebuilding specs/features from raw fields, bypassing the pipeline's own inclusion decision
+
+`composeProductDetail.ts` (Azure) already builds a four-array review model
+(`knownSpecifications`/`knownFeatures`/`additionalSpecifications`/`additionalFeatures`) with a
+per-field `included` flag - required registry fields default `included: true`, optional/low-
+confidence fields default `included: false`. `buildSpecs`/`readFeatureLabels` ignored this
+entirely and rebuilt specs/features straight from `blob.extracted.fields[]`, so every registry-
+categorized field reached Sanity regardless of what the pipeline itself had decided was ready to
+publish.
+
+**Fix:** `buildSpecs`/`buildFeatures` now read `blob.review` directly, filtering each of the four
+arrays by `included` before mapping. Named entries keep the registry field name as a stable `key`
+(`source: 'vendor'`); catch-all entries get a key slugified from their own description
+(`source: 'ai_discovered'`), since they have no canonical registry field to key against.
+
+**Best practice:** when a pipeline stage already computes a inclusion/confidence decision for a
+review workflow, a downstream transform must consume that decision, not silently re-derive its own
+narrower or wider one from the same raw inputs - the two will drift the moment either side changes
+independently.
+
+## The `held` outcome replaces `productImportCandidate` entirely - no Sanity call at all, not a different document type
+
+The old `productImportCandidate` branch still created a Sanity document (a triage queue entry) for
+data that failed the publication gate. `evaluateBridgeEligibility` (Phase 03) replaces that with a
+`held` outcome that makes **no Sanity call whatsoever** - not even a holding document - and never
+touches an existing draft/published product for the same identity if a re-crawl's plan fails the
+bridge.
+
+**Best practice:** `publishProductDraft` evaluates bridge eligibility (plus `duplicate_identity`/
+`content_locked`) before any asset upload or `createOrReplace` call, and returns immediately on
+failure. Do not reorder this - uploading assets or touching an existing document before the gate
+check would either waste API calls on data that should never reach Sanity or leave partial state
+behind if the plan is later found ineligible.
+
+## `evaluatePublicationGate` was reused for two unrelated gates - split into bridge vs Studio gates
+
+`evaluatePublicationGate` used to be Studio's document-level Publish validation, and it re-checked
+`importMeta.gateStatus`/`detailScore`/`accuracyScore`/`blockingReasons` - read-only pipeline
+internals an editor has no way to fix. It was never the bridge gate (that's
+`evaluateBridgeEligibility`, Phase 03), but it blurred the same line: a technical, Azure-owned
+readiness check leaking into a content editor's surface.
+
+**Fix (Phase 05):** `evaluatePublicationGate` is replaced by `evaluateStudioPublishReadiness`,
+which only checks fields an editor can see and fix (name, shortDescription, productType, per-
+variant colourName/hex/colourFamily/image) plus the same shared
+`SANITY_CONTENT_REQUIREMENTS[productType]` trade-specific width/pack-info checks the bridge gate
+uses - never a score, gate status, or blocking-reasons list. `importMeta` no longer carries
+`detailScore`/`accuracyScore`/`gateStatus`/`blockingReasons`/`needsReview` at all; the one
+surviving, deliberately narrow hint is `importAiConfidence: 'high'|'medium'|'low'`.
+
+**Best practice:** never let a single function serve both the bridge gate and the Studio publish
+gate, even when they overlap on a shared fact (e.g. "does this trade need a width") - factor the
+shared fact into a table both consult (`SANITY_CONTENT_REQUIREMENTS`), but keep the two gate
+functions themselves entirely separate so one never silently grows a pipeline-only check on the
+editor-facing side.
+
+## Review corrections: source ownership and per-SKU pack data
+
+Product-level `widths` must be included in `SOURCE_MANAGED_FIELDS`; otherwise re-import starts from
+the existing document and silently ignores changed source widths. Pack requirements belong in the
+bridge gate as well as the Studio gate, because missing crawl-owned pack data cannot be repaired by
+an editor. For source rows that share one URL, `packInfoHintJson` must remain attached to each URL
+link/product-detail row and flow through the approved variant override, just like price and width.
+
+**Best practice:** test shared-URL products with distinct source-row pack hints, not only distinct prices.

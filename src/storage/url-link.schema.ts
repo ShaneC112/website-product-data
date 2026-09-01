@@ -15,7 +15,8 @@ export const crawlUrlLinkTableSchema = z.object({
   sourceRowKey: z.string().trim().min(1),
   m2crmUuid: z.string().trim().min(1).optional(),
   vendorSku: z.string().trim().min(1).optional(),
-  crawlUrl: z.string().trim().min(1).optional()
+  crawlUrl: z.string().trim().min(1).optional(),
+  packInfoHintJson: z.string().trim().min(1).optional()
 })
 
 export type CrawlUrlLinkTable = z.infer<typeof crawlUrlLinkTableSchema>

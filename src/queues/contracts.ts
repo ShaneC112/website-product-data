@@ -7,6 +7,15 @@ import {
   isImageLayDirectionAllowed
 } from '../registry/product-taxonomy.js'
 import { IMAGE_GENERATION_PROFILE_KEYS } from '../registry/image-generation-profiles.js'
+import { extractedScalarMeasurementSchema } from '../storage/page-detail.schema.js'
+
+export const packInfoHintSchema = z.object({
+  length: extractedScalarMeasurementSchema.optional(),
+  width: extractedScalarMeasurementSchema.optional(),
+  height: extractedScalarMeasurementSchema.optional(),
+  coverage: extractedScalarMeasurementSchema.optional(),
+  piecesPerPack: z.number().int().positive().optional()
+})
 
 const httpsUrlSchema = z.string().url().startsWith('https://')
 
@@ -38,6 +47,16 @@ export const crawlRequestMessageSchema = z.object({
   changedFields: z.array(z.string().trim().min(1)).default([]),
   rawPriceMinor: z.number().int().optional(),
   vatRate: z.number().optional(),
+  // merchant-set box price, same trust tier as rawPriceMinor - not a vendor-page claim to verify.
+  rawBoxPriceMinor: z.number().int().optional(),
+  boxUnit: z.string().trim().min(1).optional(),
+  // this SKU's own roll width(s) from m2crm's native `width` product field (confirmed live, e.g.
+  // "13'1\"" on a /400 SKU vs "16'5\"" on a /500 SKU of the same range) - authoritative business
+  // data like rawPriceMinor, not a bias hint like pileWeightHint/packInfoHint.
+  rawWidthHint: z.array(extractedScalarMeasurementSchema).optional(),
+  // m2crm's own plank/tile size + coverage + pieces-per-box - a bias hint for AI extraction only,
+  // mirrors pileWeightHint. Does NOT override the AI-extracted packInfo registry field.
+  packInfoHint: packInfoHintSchema.optional(),
   validationErrors: z.array(queueValidationErrorSchema).default([]),
   force: z.boolean().default(false),
   requestedAt: z.string().trim().min(1)

@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { packInfoHintSchema } from '../queues/contracts.js'
+import { extractedScalarMeasurementSchema } from '../storage/page-detail.schema.js'
 
 export const manualCrawlEnqueueSchema = z.object({
   tableName: z.enum(['m2crmproducts']),
@@ -11,6 +13,12 @@ export const manualCrawlEnqueueSchema = z.object({
   // see crawlRequestMessageSchema's pileWeightHint - same disambiguation contract, just entering
   // via the manual HTTP path instead of the sync path.
   pileWeightHint: z.string().trim().min(1).optional(),
+  // see crawlRequestMessageSchema - same authoritative box price / AI-bias pack hint contract.
+  rawBoxPriceMinor: z.number().int().optional(),
+  boxUnit: z.string().trim().min(1).optional(),
+  packInfoHint: packInfoHintSchema.optional(),
+  // see crawlRequestMessageSchema's rawWidthHint - same authoritative per-SKU roll width contract.
+  rawWidthHint: z.array(extractedScalarMeasurementSchema).optional(),
   productOnlinePdfUrl: z.string().url().startsWith('https://').optional(),
   force: z.boolean().default(false),
   testMode: z.boolean().optional()

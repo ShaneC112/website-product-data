@@ -1,0 +1,140 @@
+import { describe, expect, it, vi } from 'vitest'
+import { buildSanityIngestionPlan } from '../src/sanity/ingestion.js'
+import { publishProductDraft, type SanityPublisherClient } from '../src/sanity/publishDraft.js'
+import type { ComposedProductDetailBlob, CrawlProductDetailTable } from '../src/storage/index.js'
+
+function baseRow(overrides: Partial<CrawlProductDetailTable> = {}): CrawlProductDetailTable {
+  return {
+    partitionKey: 'group-1',
+    rowKey: 'row-1',
+    sourceGroupKey: 'group-1',
+    styleCode: 'VICTORIA/BURFORDTWIST',
+    trade: 'Carpet',
+    vatRate: 0.23,
+    ...overrides,
+  }
+}
+
+function buildBlob(vendorProductPage: Record<string, unknown>): ComposedProductDetailBlob {
+  return {
+    summary: { url: 'https://example.com/range', pageRole: 'range', visibleTextLength: 1000, renderedAt: '2026-08-01T00:00:00.000Z' },
+    source: { styleCode: 'VICTORIA/BURFORDTWIST' },
+    extracted: {
+      trade: 'Carpet',
+      fields: [{ field: 'title', value: 'Burford Twist', confidence: 1 }],
+      status: 'ready',
+      vendorProductPage: {
+        url: 'https://example.com/range',
+        pageRole: 'range',
+        rangeName: 'Burford Twist',
+        features: [],
+        specifications: [],
+        widths: [],
+        dynamicFields: [],
+        variants: [],
+        ...vendorProductPage,
+      },
+    },
+    review: { knownSpecifications: [], knownFeatures: [], additionalSpecifications: [], additionalFeatures: [] },
+    composition: { readinessReasons: [], hasExtractedDetail: true },
+  } as unknown as ComposedProductDetailBlob
+}
+
+function fakeClient(overrides: Partial<SanityPublisherClient> = {}): SanityPublisherClient {
+  return {
+    fetch: vi.fn(async () => ({ drafts: [], published: [], aliasTargetIds: [] })),
+    create: vi.fn(async () => ({ _id: 'created-id' })),
+    createOrReplace: vi.fn(async () => ({})),
+    assets: { upload: vi.fn(async () => ({ _id: 'image-asset-1' })) },
+    ...overrides,
+  } as unknown as SanityPublisherClient
+}
+
+const fetchImageOk = vi.fn(async () => ({ ok: true, status: 200, blob: async () => new Blob() }) as unknown as Response)
+
+// regression coverage for Phase 04 task 7/8: evaluateBridgeEligibility (Phase 03) replaces the old
+// productImportCandidate branch entirely - an ineligible plan must never reach Sanity, and an
+// already-published product must be left untouched (not deleted/unpublished/partially patched).
+describe('publishProductDraft - held outcome', () => {
+  it('holds (no Sanity call) and returns reasons when the plan fails bridge eligibility', async () => {
+    const row = baseRow()
+    // valid hex/colourFamily so the schema itself parses, but no swatch image asset and no width
+    // anywhere - isolates the two business-rule reasons from generic schema-shape failures.
+    const blob = buildBlob({ variants: [{ variantId: 'blue', colourName: 'Blue', swatchHex: '#1122ff' }] })
+    const plan = buildSanityIngestionPlan(row, blob, { vendorId: 'victoria-carpets' })
+    const client = fakeClient()
+
+    const result = await publishProductDraft(client, plan, fetchImageOk)
+
+    expect(result.outcome).toBe('held')
+    if (result.outcome === 'held') {
+      expect(result.reasons).toEqual(expect.arrayContaining(['missing_swatch_image', 'missing_required_width']))
+    }
+    expect(client.create).not.toHaveBeenCalled()
+    expect(client.createOrReplace).not.toHaveBeenCalled()
+  })
+
+  it('leaves an existing Sanity product untouched when a re-crawl plan fails the bridge', async () => {
+    const row = baseRow()
+    const blob = buildBlob({ variants: [{ variantId: 'blue', colourName: 'Blue', swatchHex: '#1122ff' }] })
+    const plan = buildSanityIngestionPlan(row, blob, { vendorId: 'victoria-carpets' })
+    const existing = {
+      _id: 'drafts.existing-product',
+      _type: 'product',
+      importMeta: { contentLocked: false },
+      variants: [],
+    }
+    const client = fakeClient({
+      fetch: vi.fn(async () => ({ drafts: [existing], published: [], aliasTargetIds: [] })),
+    })
+
+    const result = await publishProductDraft(client, plan, fetchImageOk)
+
+    expect(result.outcome).toBe('held')
+    expect(client.createOrReplace).not.toHaveBeenCalled()
+    expect(client.create).not.toHaveBeenCalled()
+  })
+
+  it('holds with content_locked when the existing product has been locked by an editor, even if the plan is otherwise eligible', async () => {
+    const row = baseRow()
+    const blob = buildBlob({
+      widths: [{ widthLabel: '4 m' }],
+      variants: [{ variantId: 'blue', colourName: 'Blue', swatchHex: '#1122ff', swatchImageUrl: 'https://example.com/swatch-blue.jpg' }],
+    })
+    const plan = buildSanityIngestionPlan(row, blob, { vendorId: 'victoria-carpets' })
+    const existing = {
+      _id: 'drafts.existing-product',
+      _type: 'product',
+      importMeta: { contentLocked: true },
+      variants: [],
+    }
+    const client = fakeClient({
+      fetch: vi.fn(async () => ({ drafts: [existing], published: [], aliasTargetIds: [] })),
+    })
+
+    const result = await publishProductDraft(client, plan, fetchImageOk)
+
+    expect(result.outcome).toBe('held')
+    if (result.outcome === 'held') {
+      expect(result.reasons).toContain('content_locked')
+    }
+    expect(client.createOrReplace).not.toHaveBeenCalled()
+  })
+})
+
+describe('publishProductDraft - draft outcome', () => {
+  it('creates a Sanity draft when the plan passes bridge eligibility', async () => {
+    const row = baseRow({ rawPriceMinor: 10000 })
+    const blob = buildBlob({
+      widths: [{ widthLabel: '4 m' }],
+      variants: [{ variantId: 'blue', colourName: 'Blue', swatchHex: '#1122ff', swatchImageUrl: 'https://example.com/swatch-blue.jpg' }],
+    })
+    const plan = buildSanityIngestionPlan(row, blob, { vendorId: 'victoria-carpets' })
+    const client = fakeClient()
+
+    const result = await publishProductDraft(client, plan, fetchImageOk)
+
+    expect(result.outcome).toBe('draft')
+    expect(client.createOrReplace).toHaveBeenCalledTimes(1)
+  })
+})

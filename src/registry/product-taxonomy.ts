@@ -89,6 +89,43 @@ export function isImageLayDirectionAllowed(productType: SanityProductType, layDi
   return (IMAGE_GENERATION_PRODUCT_REGISTRY[productType].layDirectionOptions as readonly ImageLayDirection[]).includes(layDirection)
 }
 
+// shared by the bridge gate (Phase 03) and the Studio publish gate (Phase 05) so width/pack-info
+// requirements are defined once, not independently duplicated/possibly-drifting between the two.
+// rug/matting/artificial-grass borrow another trade's fields today and have no registry trade of
+// their own yet, so both requirements are false for them for now - revisit once real per-trade
+// data exists for those types.
+export type SanityContentRequirements = {
+  requiresWidth: boolean
+  requiresPackInfo: boolean
+}
+
+export const SANITY_CONTENT_REQUIREMENTS = {
+  carpet: {requiresWidth: true, requiresPackInfo: false},
+  'carpet-tile': {requiresWidth: false, requiresPackInfo: true},
+  laminate: {requiresWidth: false, requiresPackInfo: true},
+  vinyl: {requiresWidth: false, requiresPackInfo: true},
+  lvt: {requiresWidth: false, requiresPackInfo: true},
+  'engineered-wood': {requiresWidth: false, requiresPackInfo: true},
+  rug: {requiresWidth: false, requiresPackInfo: false},
+  matting: {requiresWidth: false, requiresPackInfo: false},
+  'artificial-grass': {requiresWidth: false, requiresPackInfo: false},
+} as const satisfies Record<SanityProductType, SanityContentRequirements>
+
+// reverse lookup used by the live registry-description component (Phase 04): productType is the
+// trade aliased for ecommerce terminology, so a Studio component can map a document's productType
+// back to its registry trade and look up a named spec/feature entry's description on demand.
+export const SANITY_PRODUCT_TYPE_TO_TRADE = {
+  carpet: 'Carpet',
+  'carpet-tile': 'Carpet Tile',
+  laminate: 'Laminate',
+  vinyl: 'Vinyl',
+  lvt: 'Vinyl',
+  'engineered-wood': 'Engineered Wood',
+  rug: 'Carpet',
+  matting: undefined,
+  'artificial-grass': undefined,
+} as const satisfies Record<SanityProductType, string | undefined>
+
 export const SANITY_SUITABLE_ROOMS = [
   'bedroom',
   'sitting-room',

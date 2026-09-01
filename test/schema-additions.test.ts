@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { crawlRequestMessageSchema, renderCompleteSchema, renderRequestSchema, renderResponseSchema } from '../src/queues/contracts.js'
 import { IMAGE_GENERATION_PRODUCT_REGISTRY, IMAGE_GENERATION_PROFILE_ESTIMATES, estimateImageGenerationCostEur, getRegistryEntriesForTrade, mapTradeToSanityProductType, SANITY_PRODUCT_TYPES, SANITY_SUITABLE_ROOMS } from '../src/registry/index.js'
-import { crawlPageTableSchema } from '../src/storage/page.schema.js'
+import { crawlPageTableSchema, parseCrawlPagePackInfoHint, stringifyCrawlPagePackInfoHint } from '../src/storage/page.schema.js'
+import { crawlProductDetailTableSchema, parseRawWidthHint, stringifyRawWidthHint } from '../src/storage/product-detail.schema.js'
 import { crawlRunSummaryTableSchema } from '../src/storage/run-summary.schema.js'
 import { manualCrawlEnqueueSchema } from '../src/requests/contracts.js'
 
@@ -13,15 +14,17 @@ describe('Sanity ingestion run summary', () => {
       runId: 'run-1',
       status: 'publish_deferred',
       sanityOutcome: 'mixed',
-      sanityDocumentIds: '["drafts.product-1","candidate-1"]',
+      sanityDocumentIds: '["drafts.product-1"]',
       sanityDraftCount: 1,
-      sanityCandidateCount: 1
+      sanityHeldCount: 1,
+      sanityHeldReasonsJson: '["missing_swatch_image"]'
     })
 
     expect(parsed).toMatchObject({
       sanityOutcome: 'mixed',
       sanityDraftCount: 1,
-      sanityCandidateCount: 1
+      sanityHeldCount: 1,
+      sanityHeldReasonsJson: '["missing_swatch_image"]'
     })
   })
 })
@@ -101,12 +104,42 @@ describe('carpet registry additions', () => {
     ]))
   })
 
+  // regression coverage for the width parent/child model (Phase 02a): allowVariantOverride is the
+  // source of truth for which fields follow the product-default/child-overrides-only-if-different
+  // model - it must be true on Carpet's width, and falsy on every other field (e.g. pileWeight).
+  it('sets allowVariantOverride on Carpet width only', () => {
+    const entries = getRegistryEntriesForTrade('Carpet')
+
+    expect(entries).toContainEqual(expect.objectContaining({ field: 'width', allowVariantOverride: true }))
+    expect(entries.find((entry) => entry.field === 'pileWeight')?.allowVariantOverride).toBeFalsy()
+  })
+
   it('uses the canonical room list for every trade', () => {
     for (const trade of ['Carpet', 'Carpet Tile', 'Laminate', 'Vinyl', 'Engineered Wood', 'Unknown']) {
       expect(getRegistryEntriesForTrade(trade)).toContainEqual(expect.objectContaining({
         field: 'suitableRooms',
         valueType: 'text-list',
         allowedValues: SANITY_SUITABLE_ROOMS
+      }))
+    }
+  })
+
+  it('includes species and refinishable for Engineered Wood', () => {
+    const entries = getRegistryEntriesForTrade('Engineered Wood')
+
+    expect(entries).toEqual(expect.arrayContaining([
+      expect.objectContaining({ field: 'species', requiredLevel: 'recommended', valueType: 'text', category: 'specifications' }),
+      expect.objectContaining({ field: 'refinishable', requiredLevel: 'optional', valueType: 'boolean', category: 'features' })
+    ]))
+  })
+
+  it('includes suitability for Vinyl, Laminate, Carpet Tile, and Engineered Wood', () => {
+    for (const trade of ['Vinyl', 'Laminate', 'Carpet Tile', 'Engineered Wood']) {
+      expect(getRegistryEntriesForTrade(trade)).toContainEqual(expect.objectContaining({
+        field: 'suitability',
+        requiredLevel: 'optional',
+        valueType: 'text',
+        category: 'specifications'
       }))
     }
   })
@@ -249,6 +282,147 @@ describe('pileWeightHint plumbing (multi-weight product disambiguation)', () => 
     })
 
     expect(parsed.pileWeightHint).toBe('40oz')
+  })
+})
+
+// regression coverage for the m2crm box-price/pack-info wiring (Laminate/Vinyl/Engineered Wood):
+// rawBoxPriceMinor/boxUnit are authoritative (same trust tier as rawPriceMinor), packInfoHint is
+// a bias hint only (mirrors pileWeightHint). Each must survive both queue-boundary schemas plus
+// the page/product-detail table schemas independently - missing any one silently drops the field.
+describe('m2crm box price / pack info hint plumbing', () => {
+  const packInfoHint = {
+    length: {value: 1200, unit: 'mm'},
+    width: {value: 190, unit: 'mm'},
+    coverage: {value: 2.22, unit: 'm2'},
+    piecesPerPack: 8
+  }
+
+  it('accepts rawBoxPriceMinor/boxUnit/packInfoHint on the crawl request message', () => {
+    const parsed = crawlRequestMessageSchema.parse({
+      source: 'manual',
+      tableName: 'm2crmproducts',
+      rowKey: '123',
+      url: 'https://example.com/range',
+      crawlType: 'Range',
+      styleCode: 'PERGO/ORIGINAL',
+      trade: 'Laminate',
+      reason: 'new',
+      requestedAt: '2026-01-01T00:00:00.000Z',
+      rawBoxPriceMinor: 8999,
+      boxUnit: 'box',
+      packInfoHint
+    })
+
+    expect(parsed.rawBoxPriceMinor).toBe(8999)
+    expect(parsed.boxUnit).toBe('box')
+    expect(parsed.packInfoHint).toEqual(packInfoHint)
+  })
+
+  it('accepts the same fields at the manual HTTP boundary', () => {
+    const parsed = manualCrawlEnqueueSchema.parse({
+      tableName: 'm2crmproducts',
+      rowKey: '123',
+      url: 'https://example.com/range',
+      crawlType: 'Range',
+      styleCode: 'PERGO/ORIGINAL',
+      trade: 'Laminate',
+      rawBoxPriceMinor: 8999,
+      boxUnit: 'box',
+      packInfoHint
+    })
+
+    expect(parsed.rawBoxPriceMinor).toBe(8999)
+    expect(parsed.boxUnit).toBe('box')
+    expect(parsed.packInfoHint).toEqual(packInfoHint)
+  })
+
+  it('accepts rawBoxPriceMinor/boxUnit on the crawl page table row', () => {
+    const parsed = crawlPageTableSchema.parse({
+      partitionKey: 'p',
+      rowKey: 'r',
+      url: 'https://example.com',
+      urlKey: 'url-key-1',
+      rawBoxPriceMinor: 8999,
+      boxUnit: 'box'
+    })
+
+    expect(parsed.rawBoxPriceMinor).toBe(8999)
+    expect(parsed.boxUnit).toBe('box')
+  })
+
+  it('round-trips packInfoHint on the crawl page table row as a JSON-stringified column', () => {
+    const packInfoHintJson = stringifyCrawlPagePackInfoHint(packInfoHint)
+    const parsed = crawlPageTableSchema.parse({
+      partitionKey: 'p',
+      rowKey: 'r',
+      url: 'https://example.com',
+      urlKey: 'url-key-1',
+      packInfoHintJson
+    })
+
+    expect(parseCrawlPagePackInfoHint(parsed.packInfoHintJson!)).toEqual(packInfoHint)
+  })
+
+  it('accepts rawBoxPriceMinor/boxUnit on the crawl product detail table row', () => {
+    const parsed = crawlProductDetailTableSchema.parse({
+      partitionKey: 'p',
+      rowKey: 'r',
+      rawBoxPriceMinor: 8999,
+      boxUnit: 'box'
+    })
+
+    expect(parsed.rawBoxPriceMinor).toBe(8999)
+    expect(parsed.boxUnit).toBe('box')
+  })
+})
+
+// regression coverage for the m2crm per-SKU width-hint wiring (Phase 02a): rawWidthHint is
+// authoritative business data (same trust tier as rawPriceMinor, confirmed live against m2crm's
+// native `width` product field), not a bias hint like packInfoHint. Each schema boundary it
+// crosses must round-trip it independently, same rationale as the box price/pack info block above.
+describe('m2crm width hint plumbing', () => {
+  const rawWidthHint = [{value: 4, unit: 'm'}, {value: 5, unit: 'm'}]
+
+  it('accepts rawWidthHint on the crawl request message', () => {
+    const parsed = crawlRequestMessageSchema.parse({
+      source: 'manual',
+      tableName: 'm2crmproducts',
+      rowKey: '123',
+      url: 'https://example.com/range',
+      crawlType: 'Range',
+      styleCode: 'VICTORIA/BURFORDTWIST/50OZ',
+      trade: 'Carpet',
+      reason: 'new',
+      requestedAt: '2026-01-01T00:00:00.000Z',
+      rawWidthHint
+    })
+
+    expect(parsed.rawWidthHint).toEqual(rawWidthHint)
+  })
+
+  it('accepts rawWidthHint at the manual HTTP boundary', () => {
+    const parsed = manualCrawlEnqueueSchema.parse({
+      tableName: 'm2crmproducts',
+      rowKey: '123',
+      url: 'https://example.com/range',
+      crawlType: 'Range',
+      styleCode: 'VICTORIA/BURFORDTWIST/50OZ',
+      trade: 'Carpet',
+      rawWidthHint
+    })
+
+    expect(parsed.rawWidthHint).toEqual(rawWidthHint)
+  })
+
+  it('round-trips rawWidthHint on the crawl product detail table row as a JSON-stringified column', () => {
+    const rawWidthHintJson = stringifyRawWidthHint(rawWidthHint)
+    const parsed = crawlProductDetailTableSchema.parse({
+      partitionKey: 'p',
+      rowKey: 'r',
+      rawWidthHintJson
+    })
+
+    expect(parseRawWidthHint(parsed.rawWidthHintJson!)).toEqual(rawWidthHint)
   })
 })
 
