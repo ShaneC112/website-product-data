@@ -226,10 +226,10 @@ const sanityImageDesignSchema = z.object({
   lighting: z.enum(['morning', 'afternoon', 'sunset']),
   pipeline: z.enum(['direct', 'patterned-kontext']),
   generationProfile: z.enum(IMAGE_GENERATION_PROFILE_KEYS),
-  presetId: z.string().trim().min(1),
-  presetKey: z.string().trim().min(1),
-  presetTitle: z.string().trim().min(1),
-  presetVersion: z.number().int().positive()
+  presetId: z.string().trim().min(1).optional(),
+  presetKey: z.string().trim().min(1).optional(),
+  presetTitle: z.string().trim().min(1).optional(),
+  presetVersion: z.number().int().positive().optional()
 })
 
 const sanityImageCommandBaseSchema = z.object({
@@ -245,7 +245,7 @@ const sanityImageCommandBaseSchema = z.object({
 
 export const sanityImagePrepareCommandSchema = sanityImageCommandBaseSchema.extend({
   phase: z.literal('prepare'),
-  autoCreate: z.boolean().default(false),
+  autoCreate: z.boolean().default(true),
   product: z.object({
     name: z.string().trim().min(1),
     productType: z.enum(SANITY_PRODUCT_TYPES),
@@ -301,6 +301,8 @@ export const sanityImageGenerateCommandSchema = sanityImageCommandBaseSchema.ext
   runs: z.array(z.object({
     runId: z.string().trim().min(1),
     variantId: z.string().trim().min(1),
+    colourName: z.string().trim().min(1),
+    productType: z.enum(SANITY_PRODUCT_TYPES),
     room: z.string().trim().min(1),
     pipeline: z.enum(['direct', 'patterned-kontext']),
     generationProfile: z.enum(IMAGE_GENERATION_PROFILE_KEYS),

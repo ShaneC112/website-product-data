@@ -7,6 +7,7 @@ import {
   mapTradeToSanityProductType,
   registryFieldLabel,
   type RegistryFieldValue,
+  type SanitySuitableRoom,
 } from '../registry/index.js'
 import type {
   ComposedProductDetailBlob,
@@ -163,6 +164,8 @@ export type SanityImage = {
   alt: string
   role: AssetUpload['role']
   sourceUrl: string
+  room?: SanitySuitableRoom | 'not-specified'
+  generationPrompt?: string
 }
 
 export type SanityIngestionPlan = {

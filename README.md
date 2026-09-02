@@ -43,6 +43,8 @@ Local integration pattern:
 - build this repo before consumers that require the emitted `dist/` output
 - the Azure Functions repo currently imports built `dist/` subpaths directly for compatibility with its current TypeScript module resolution
 
+Package manager: this repo uses **npm** (`package-lock.json` is the source of truth). Do not run `pnpm install`/`pnpm` commands here, even when working across sibling repos that do use pnpm (`website-product-enrichment-sanity-studio`, `website-product-enrichment-ui`) - a `pnpm` command run with the wrong working directory has previously created stray `pnpm-lock.yaml`/`pnpm-workspace.yaml` files in this repo by mistake. If you see either file, it is drift, not an intentional migration - delete it.
+
 Exports:
 - `@shane-corrigan/website-product-data/registry`
 - `@shane-corrigan/website-product-data/queues`
