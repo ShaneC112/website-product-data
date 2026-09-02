@@ -8,6 +8,7 @@ export const crawlRunSummaryTableSchema = z.object({
   urlKey: z.string().trim().min(1).optional(),
   styleCode: z.string().trim().min(1).optional(),
   sourceTableName: z.string().trim().min(1).optional(),
+  force: z.boolean().optional(),
   status: z.string().trim().min(1).optional(),
   requestedAt: z.string().trim().min(1).optional(),
   renderStartedAt: z.string().trim().min(1).optional(),

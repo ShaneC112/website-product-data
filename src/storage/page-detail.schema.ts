@@ -62,6 +62,7 @@ export const extractedVendorVariantSchema = z.object({
   swatchImageUrls: z.array(z.string().trim().min(1)).optional(),
   classifiedImages: z.array(classifiedImageSchema).optional(),
   swatchHex: z.string().trim().min(1).optional(),
+  hasDecorativePattern: z.boolean().optional(),
   variantFields: z.array(variantRegistryFieldValueSchema).optional(),
   widths: z.array(extractedWidthSlotSchema).optional(),
   dynamicFields: z.array(extractedDynamicFieldSchema).optional(),

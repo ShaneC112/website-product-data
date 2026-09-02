@@ -94,7 +94,8 @@ export const renderRequestSchema = z.object({
   m2crmUuid: z.string().trim().min(1).optional(),
   trade: z.string().trim().min(1).optional(),
   sourceGroupKey: z.string().trim().min(1).optional(),
-  productOnlinePdfUrl: httpsUrlSchema.optional()
+  productOnlinePdfUrl: httpsUrlSchema.optional(),
+  force: z.boolean().default(false)
 })
 
 export const renderJobSchema = renderRequestSchema
@@ -145,12 +146,14 @@ export const renderCompleteSchema = z.object({
   styleCodeStorageKey: z.string().trim().min(1).optional(),
   m2crmUuid: z.string().trim().min(1).optional(),
   trade: z.string().trim().min(1).optional(),
-  sourceGroupKey: z.string().trim().min(1).optional()
+  sourceGroupKey: z.string().trim().min(1).optional(),
+  force: z.boolean().default(false)
 })
 
 export const extractJobSchema = z.object({
   urlKey: z.string().trim().min(1),
-  runId: z.string().trim().min(1).optional()
+  runId: z.string().trim().min(1).optional(),
+  force: z.boolean().default(false)
 })
 
 export const variantJobSchema = z.object({
@@ -162,7 +165,8 @@ export const variantJobSchema = z.object({
   styleCodeStorageKey: z.string().trim().min(1).optional(),
   m2crmUuid: z.string().trim().min(1).optional(),
   trade: z.string().trim().min(1).optional(),
-  sourceGroupKey: z.string().trim().min(1).optional()
+  sourceGroupKey: z.string().trim().min(1).optional(),
+  force: z.boolean().default(false)
 })
 
 export const transformJobSchema = z.object({
@@ -198,6 +202,7 @@ const sanityImageSpecSchema = z.object({
 const sanityImageVariantSchema = z.object({
   variantId: z.string().trim().min(1),
   colourName: z.string().trim().min(1),
+  colourFamily: z.string().trim().min(1).optional(),
   hex: z.string().regex(/^#[0-9a-f]{6}$/i).optional(),
   swatchUrl: httpsUrlSchema,
   patternRepeatCm: z.number().positive().optional(),

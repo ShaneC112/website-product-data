@@ -32,7 +32,8 @@ export const variantDetailSummarySchema = z.object({
   imageUrls: z.array(z.string().trim().min(1)).optional(),
   swatchImageUrls: z.array(z.string().trim().min(1)).optional(),
   classifiedImages: z.array(classifiedImageSchema).optional(),
-  swatchHex: z.string().trim().min(1).optional()
+  swatchHex: z.string().trim().min(1).optional(),
+  hasDecorativePattern: z.boolean().optional()
 })
 
 export type CrawlVariantDetailTable = z.infer<typeof crawlVariantDetailTableSchema>
