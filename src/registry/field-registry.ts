@@ -5,7 +5,20 @@ export const fieldRequiredLevelSchema = z.enum(['required', 'recommended', 'opti
 export const fieldValueTypeSchema = z.enum(['text', 'boolean', 'measurement', 'measurement-list', 'text-list', 'attribute-list'])
 export const registryPageRoleSchema = z.enum(['range', 'variant', 'single'])
 export const variantFieldRequiredLevelSchema = z.enum(['required', 'recommended', 'optional'])
+// `additional` is reserved for bounded catch-all extraction values; it is not a general-purpose
+// bucket for named facts that belong in a first-class registry field.
 export const fieldCategorySchema = z.enum(['identity', 'specifications', 'features', 'additional', 'meta'])
+
+// A registry key in this table is extracted for the named Sanity document field instead of being
+// emitted as a Feature or Specification. It therefore has no `registryFieldDefinition` projection.
+export const SANITY_FIELD_PATH_BY_REGISTRY_KEY = {
+  title: 'name',
+  description: 'shortDescription',
+  productType: 'productType',
+  width: 'widths',
+  suitableRooms: 'suitableRooms',
+  packInfo: 'packInfo',
+} as const
 
 const registryJsonPrimitiveSchema = z.union([z.string(), z.number(), z.boolean(), z.null()])
 export const registryJsonValueSchema: z.ZodType<unknown> = z.lazy(() =>
@@ -17,43 +30,73 @@ export const registryJsonValueSchema: z.ZodType<unknown> = z.lazy(() =>
 )
 
 export const registryFieldValueSchema = z.object({
+  // Stable field name from the product field registry.
   field: z.string().trim().min(1),
+  // Extracted value in the shape required by that registry entry.
   value: registryJsonValueSchema,
+  // Model confidence in the extracted value, from 0 through 1.
   confidence: z.number().min(0).max(1)
 })
 
 export const variantRegistryFieldValueSchema = z.object({
+  // Stable field name from the variant-specific registry.
   field: z.string().trim().min(1),
+  // Extracted value in the shape required by that registry entry.
   value: registryJsonValueSchema,
+  // Model confidence in the extracted value, from 0 through 1.
   confidence: z.number().min(0).max(1)
 })
 
 export const fieldRegistryEntrySchema = z.object({
+  // Stable machine key used in extraction, review, and content storage.
   field: z.string().trim().min(1),
+  // Editor-facing display name for the stable key.
+  label: z.string().trim().min(1),
+  // Product trade to which this extraction rule applies.
   trade: z.string().trim().min(1),
+  // Extraction and editor guidance explaining the fact being captured.
   description: z.string().trim().min(1),
+  // Requiredness used when evaluating extraction readiness.
   requiredLevel: fieldRequiredLevelSchema,
+  // Page shapes from which the field may be extracted.
   applicableTo: z.array(registryPageRoleSchema).min(1),
+  // Minimum confidence accepted for the field's publish-gate behavior.
   confidenceThreshold: z.number().min(0).max(1),
+  // Whether confidence below the threshold blocks publication.
   publishBlockOnLowConfidence: z.boolean(),
+  // Expected JSON shape of the extracted value.
   valueType: fieldValueTypeSchema,
+  // Review/editor grouping; `additional` permits only documented catch-all values.
   category: fieldCategorySchema,
+  // Whether this extracted field may be included in published product content.
   publishable: z.boolean(),
+  // Direct product or variant field destination. Its presence excludes this key from the synced
+  // Feature/Specification definition catalog and from generated features/specifications.
+  sanityFieldPath: z.string().trim().min(1).optional(),
   // true when this field follows the product-default/child-overrides-only-if-different model
   // (e.g. Carpet's width) - a variant's own value is only populated when it genuinely differs
   // (by unit-normalized physical size) from the product-level default. Falsy for every other field.
   allowVariantOverride: z.boolean().optional(),
+  // Representative prompt-only example, never a fallback product value.
   exampleValue: z.string().trim().min(1).optional(),
+  // Additional extraction instructions for ambiguous vendor terminology.
   promptHint: z.string().trim().min(1).optional(),
+  // Canonical values accepted for fields with a fixed vocabulary.
   allowedValues: z.array(z.string().trim().min(1)).optional()
 })
 
 export const variantFieldRegistryEntrySchema = z.object({
+  // Stable machine key for variant-only AI content.
   field: z.string().trim().min(1),
+  // Extraction guidance for the variant-only fact.
   description: z.string().trim().min(1),
+  // Requiredness used when evaluating variant extraction readiness.
   requiredLevel: variantFieldRequiredLevelSchema,
+  // Minimum confidence accepted for the field's publish-gate behavior.
   confidenceThreshold: z.number().min(0).max(1),
+  // Whether confidence below the threshold blocks publication.
   publishBlockOnLowConfidence: z.boolean(),
+  // Expected JSON shape of the extracted variant value.
   valueType: fieldValueTypeSchema
 })
 
@@ -69,6 +112,16 @@ export type VariantFieldRegistryEntry = z.infer<typeof variantFieldRegistryEntry
 
 const ALL_PAGE_ROLES: RegistryPageRole[] = ['range', 'variant', 'single']
 
+export function registryFieldLabel(key: string): string {
+  return key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (letter) => letter.toUpperCase())
+}
+
+export function isRegistryFieldMappedToSanity(field: string): boolean {
+  return field in SANITY_FIELD_PATH_BY_REGISTRY_KEY
+}
+
+// Keeps every concrete registry entry consistent: descriptions explain the captured fact, while
+// these shared options describe how the field is extracted, reviewed, gated, and projected.
 function createEntry(
   trade: string,
   field: string,
@@ -90,6 +143,7 @@ function createEntry(
   return {
     trade,
     field,
+    label: registryFieldLabel(field),
     description,
     requiredLevel,
     applicableTo: options?.applicableTo ?? ALL_PAGE_ROLES,
@@ -99,6 +153,7 @@ function createEntry(
     valueType,
     category: options?.category ?? 'specifications',
     publishable: options?.publishable ?? true,
+    sanityFieldPath: SANITY_FIELD_PATH_BY_REGISTRY_KEY[field as keyof typeof SANITY_FIELD_PATH_BY_REGISTRY_KEY],
     allowVariantOverride: options?.allowVariantOverride,
     exampleValue: options?.exampleValue,
     promptHint: options?.promptHint,

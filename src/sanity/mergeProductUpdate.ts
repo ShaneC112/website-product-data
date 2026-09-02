@@ -18,8 +18,9 @@ export type ImportConflict = {
 // finer sub-structure a manual edit could partially diverge from. `features`/`specs` (per-entry
 // `key`) and `variants` (per (variantId, field)) are tracked at finer granularity below instead.
 export const SOURCE_MANAGED_FIELDS = [
-  'name', 'slug', 'productType', 'brand', 'shortDescription', 'suitableRooms',
-  'price', 'priceOnRequest', 'widths', 'image', 'lifestyleImage', 'gallery',
+  'name', 'slug', 'productType', 'categoryKey', 'brand', 'shortDescription', 'suitableRooms',
+  'price', 'priceOnRequest', 'packPrice', 'packInfo', 'patternRepeatCm', 'repeatsInSwatch',
+  'widths', 'image', 'lifestyleImage', 'gallery',
 ] as const
 export type ManagedProductField = (typeof SOURCE_MANAGED_FIELDS)[number]
 
@@ -28,7 +29,8 @@ export type ManagedProductField = (typeof SOURCE_MANAGED_FIELDS)[number]
 // vendorSku/sourceUrl/primaryImage/images are pipeline-owned (always reflect the latest crawl) and
 // have no editorial-preserve concept, so they are intentionally excluded from this list.
 const VARIANT_MANAGED_FIELDS = [
-  'colourName', 'hex', 'colourFamily', 'widths', 'price', 'packPrice', 'packInfo', 'swatchImage', 'suitableRooms', 'specs',
+  'colourName', 'hex', 'colourFamily', 'overrides', 'widths', 'price', 'packPrice', 'packInfo',
+  'patternRepeatCm', 'repeatsInSwatch', 'swatchImage', 'suitableRooms', 'specs',
 ] as const
 
 type Variant = SanityProductDraft['variants'][number]

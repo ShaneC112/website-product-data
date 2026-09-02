@@ -68,6 +68,44 @@ Current request-contract adoption:
 - `matchingLedgerApproval` is shared between Nuxt and Azure.
 - `manualCrawlEnqueue` is shared between Nuxt and Azure using the Azure-owned payload shape.
 
+## Sanity registry synchronization
+
+The code-owned `fieldRegistry` is the canonical definition of extraction fields. It provides each
+field's stable key, display label, trade, category, description, value type, applicability, and
+publication metadata. Azure must use this registry without a live Sanity request, so Sanity is a
+synchronized editor-facing projection, not the source of truth.
+
+The `sanity` export provides `buildSanityRegistryFieldDefinitions` and
+`planSanityRegistryFieldSync`. They project only registry entries without a `sanityFieldPath` into
+deterministic `registryFieldDefinition` documents, keyed by `trade:field`, and compare them with
+Sanity's existing code-managed documents. A `sanityFieldPath` means the extraction has a direct
+product or variant destination (for example, `width -> widths`), so it must not also become a
+Feature or Specification selector option. The planner creates new definitions, updates changed
+metadata, and deactivates definitions removed from code. It never deletes a definition, so
+historical product fields stay interpretable.
+
+`FieldRegistryEntry.label` and `registryFieldLabel` are the canonical display-label contract.
+Crawl-to-Sanity ingestion uses that label for a known specification or feature. An unrecognized
+review field keeps its generated key and label, which Studio treats as `Custom`.
+
+Changing the registry requires rebuilding this package and refreshing each file-dependency
+consumer before testing or deployment. After the shared package, Azure Function, Studio schema,
+and Nuxt UI are deployed, use Nuxt's Registry Sync screen to inspect a preview before applying it.
+
+## Product type and category intent
+
+`productType` is normalized from the extracted trade/product-type evidence to a developer-defined
+`SanityProductType`. `categoryKey` is not independently extracted or selected by the AI: it is a
+derived output of `SANITY_PRODUCT_TYPE_TO_CATEGORY_KEY` in `src/registry/product-taxonomy.ts`.
+That mapping defines the product types for which developers have created the necessary Sanity and
+website render support; `SANITY_CATEGORY_KEYS` is derived from its values for the bridge and Studio
+validation lists.
+
+Do not add a category key directly to an option list. Add the product type's explicit mapping only
+when its schema and website behavior exist. An unsupported or unrecognized type resolves to no
+category key, fails the bridge contract, and cannot be published to Sanity. This prevents
+conflicting classifications such as a Carpet product type paired with a wood-flooring category.
+
 ## Storage and messaging reference
 
 Canonical key helpers now shipped in this package:

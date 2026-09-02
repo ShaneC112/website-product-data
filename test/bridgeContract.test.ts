@@ -8,6 +8,7 @@ function baseVariant(overrides: Record<string, unknown> = {}) {
     colourName: 'Blue',
     colourFamily: 'blue',
     hex: '#1122ff',
+    overrides: {price: false, packPrice: false, packInfo: false, widths: false, suitableRooms: false, pattern: false, specs: false},
     swatchImage: {asset: {_type: 'reference', _ref: 'image-abc'}},
     ...overrides,
   }
@@ -18,6 +19,7 @@ function baseDraft(overrides: Record<string, unknown> = {}) {
     name: 'Burford Twist',
     slug: {current: 'burford-twist'},
     productType: 'carpet',
+    categoryKey: 'carpets',
     variants: [baseVariant()],
     widths: [{value: 4, unit: 'm'}],
     importMeta: {
@@ -60,7 +62,7 @@ describe('evaluateBridgeEligibility', () => {
     const draft = baseDraft({
       productType: 'lvt',
       widths: [],
-      variants: [baseVariant({packInfo: {coverage: {value: 2.2, unit: 'm2'}}})],
+      variants: [baseVariant({overrides: {price: false, packPrice: false, packInfo: true, widths: false, suitableRooms: false, pattern: false, specs: false}, packInfo: {coverage: {value: 2.2, unit: 'm2'}}})],
     })
     expect(evaluateBridgeEligibility(draft)).toEqual({eligible: true, reasons: []})
   })
@@ -75,11 +77,11 @@ describe('evaluateBridgeEligibility', () => {
   )
 
   it('accepts pack price as sufficient pack data', () => {
-    const packPrice = {currency: 'GBP', unit: 'pack', retailExVatMinor: 1000, vatRate: 0.2, retailIncVatMinor: 1200}
+    const packPrice = {currency: 'GBP', unit: 'pack', retailExVat: 10, vatRate: 0.2, retailIncVat: 12}
     expect(evaluateBridgeEligibility(baseDraft({
       productType: 'laminate',
       widths: [],
-      variants: [baseVariant({packPrice})],
+      variants: [baseVariant({overrides: {price: false, packPrice: true, packInfo: false, widths: false, suitableRooms: false, pattern: false, specs: false}, packPrice})],
     }))).toEqual({eligible: true, reasons: []})
   })
 })
@@ -90,6 +92,7 @@ describe('sanityBridgeProductSchema', () => {
       name: 'Minimal',
       slug: {current: 'minimal'},
       productType: 'carpet',
+      categoryKey: 'carpets',
       variants: [baseVariant({swatchImage: undefined})],
       importMeta: {
         externalId: 'ext-1',

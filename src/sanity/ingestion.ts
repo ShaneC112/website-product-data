@@ -1,7 +1,11 @@
 import {
   deriveSecondaryColourNameFromHex,
+  getRegistryEntriesForTrade,
+  isRegistryFieldMappedToSanity,
   isSanitySuitableRoom,
+  mapSanityProductTypeToCategoryKey,
   mapTradeToSanityProductType,
+  registryFieldLabel,
   type RegistryFieldValue,
 } from '../registry/index.js'
 import type {
@@ -15,15 +19,19 @@ type SanityPrice = {
   _type: 'productPrice'
   currency: 'EUR'
   unit: 'm2' | 'linear-metre' | 'pack' | 'each'
-  retailExVatMinor: number
+  retailExVat: number
   vatRate: 0.23
-  retailIncVatMinor: number
+  retailIncVat: number
 }
 
 type SanityMeasurement = {
   _type: 'measurement'
   value: number
   unit: string
+}
+
+type SanityArrayMeasurement = SanityMeasurement & {
+  _key?: string
 }
 
 type SanityPackInfo = {
@@ -33,6 +41,17 @@ type SanityPackInfo = {
   length?: SanityMeasurement
   width?: SanityMeasurement
   height?: SanityMeasurement
+}
+
+type SanityVariantOverrides = {
+  _type: 'variantOverrides'
+  price: boolean
+  packPrice: boolean
+  packInfo: boolean
+  widths: boolean
+  suitableRooms: boolean
+  pattern: boolean
+  specs: boolean
 }
 
 type PackInfoHint = {
@@ -76,6 +95,7 @@ export type SanityProductDraft = {
   name?: string
   slug?: {_type: 'slug'; current: string}
   productType?: string
+  categoryKey?: string
   brand?: string
   shortDescription?: string
   features: SanityProductFeature[]
@@ -83,7 +103,11 @@ export type SanityProductDraft = {
   suitableRooms: string[]
   price?: SanityPrice
   priceOnRequest: boolean
-  widths: SanityMeasurement[]
+  packPrice?: SanityPrice
+  packInfo?: SanityPackInfo
+  patternRepeatCm?: number
+  repeatsInSwatch?: number
+  widths: SanityArrayMeasurement[]
   variants: Array<{
     _key: string
     _type: 'productVariant'
@@ -93,11 +117,14 @@ export type SanityProductDraft = {
     hex?: string
     colourFamily?: string
     sourceUrl?: string
-    suitableRooms: string[]
+    suitableRooms?: string[]
+    overrides: SanityVariantOverrides
     price?: SanityPrice
     packPrice?: SanityPrice
     packInfo?: SanityPackInfo
-    widths: SanityMeasurement[]
+    patternRepeatCm?: number
+    repeatsInSwatch?: number
+    widths?: SanityArrayMeasurement[]
     primaryImage?: SanityImage
     swatchImage?: SanityImage
     images?: SanityImage[]
@@ -166,11 +193,11 @@ export type BuildIngestionOptions = {
   variantOverrides?: Record<string, {rawPriceMinor?: number; rawBoxPriceMinor?: number; rawWidthHint?: {value: number; unit: string}[]; packInfoHint?: PackInfoHint}>
 }
 
-export function calculateRetailIncVatMinor(retailExVatMinor: number): number {
+export function calculateRetailIncVat(retailExVatMinor: number): number {
   if (!Number.isSafeInteger(retailExVatMinor) || retailExVatMinor < 0) {
-    throw new RangeError('Retail ex VAT price must be a non-negative integer in minor units')
+    throw new RangeError('Retail ex VAT price must be a non-negative integer number of cents')
   }
-  return Math.round(retailExVatMinor * 1.23)
+  return Math.round(retailExVatMinor * 1.23) / 100
 }
 
 export function buildSanityIngestionPlan(
@@ -184,6 +211,7 @@ export function buildSanityIngestionPlan(
   const name = readString(fieldMap.get('title')?.value) ?? vendorPage?.rangeName
   const description = readString(fieldMap.get('description')?.value) ?? vendorPage?.description
   const productType = mapTradeToSanityProductType(blob.extracted.trade, readString(fieldMap.get('productType')?.value))
+  const categoryKey = mapSanityProductTypeToCategoryKey(productType)
   const suitableRooms = readSuitableRooms(fieldMap.get('suitableRooms')?.value)
   const vendorId = normalizeIdentityPart(options.vendorId)
   const styleCode = row.styleCode ?? blob.source.styleCode ?? blob.extracted.styleCode
@@ -199,7 +227,7 @@ export function buildSanityIngestionPlan(
   // no range-level width claim to default to - fall back to the union of what each colour's own
   // matched source product(s)/page extraction resolved, so a still-populated product.widths is
   // available for the parent/child comparison below.
-  const productWidths = rangeWidths.length > 0 ? rangeWidths : dedupeMeasurements(variantOwnWidths.flat())
+  const productWidths = withMeasurementKeys(rangeWidths.length > 0 ? rangeWidths : dedupeMeasurements(variantOwnWidths.flat()))
   const accuracyScore = fields.length === 0 ? 0 : fields.reduce((sum, field) => sum + field.confidence, 0) / fields.length
   const importAiConfidence: 'high' | 'medium' | 'low' = accuracyScore >= 0.85 ? 'high' : accuracyScore >= 0.6 ? 'medium' : 'low'
   const variants = (vendorPage?.variants ?? []).map((variant, index) =>
@@ -224,13 +252,16 @@ export function buildSanityIngestionPlan(
       name,
       slug: name ? {_type: 'slug', current: slugify(name)} : undefined,
       productType,
+      categoryKey,
       brand: vendorPage?.brandName,
       shortDescription: description,
-      features: buildFeatures(blob.review, fieldMap),
-      specs: buildSpecs(blob.review, fieldMap),
+      features: buildFeatures(blob.review, fieldMap, blob.extracted.trade),
+      specs: buildSpecs(blob.review, fieldMap, blob.extracted.trade),
       suitableRooms,
       price,
-      priceOnRequest: price == null,
+      priceOnRequest: price == null && variants.every((variant) => variant.price == null),
+      packPrice,
+      packInfo,
       widths: productWidths,
       variants,
       status: 'draft',
@@ -259,7 +290,7 @@ export function normalizeStyleCode(value: string): string {
 }
 
 function buildPrice(retailExVatMinor: number, unit: SanityPrice['unit']): SanityPrice {
-  return {_type: 'productPrice', currency: 'EUR', unit, retailExVatMinor, vatRate: 0.23, retailIncVatMinor: calculateRetailIncVatMinor(retailExVatMinor)}
+  return {_type: 'productPrice', currency: 'EUR', unit, retailExVat: retailExVatMinor / 100, vatRate: 0.23, retailIncVat: calculateRetailIncVat(retailExVatMinor)}
 }
 
 function buildVariant(
@@ -270,7 +301,7 @@ function buildVariant(
   vendorSku: string | undefined,
   packPrice: SanityPrice | undefined,
   packInfo: SanityPackInfo | undefined,
-  productWidths: SanityMeasurement[],
+  productWidths: SanityArrayMeasurement[],
   ownWidths: SanityMeasurement[],
   variantOverrides: Record<string, {rawPriceMinor?: number; rawBoxPriceMinor?: number; rawWidthHint?: {value: number; unit: string}[]; packInfoHint?: PackInfoHint}> | undefined,
   pricingUnit: SanityPrice['unit'],
@@ -281,15 +312,46 @@ function buildVariant(
   const resolvedPackPrice = override?.rawBoxPriceMinor != null ? buildPrice(override.rawBoxPriceMinor, 'pack') : packPrice
   const resolvedPackInfo = override?.packInfoHint ? readPackInfo(override.packInfoHint) : packInfo
   const widths = ownWidths.length > 0 && !areMeasurementSetsEquivalent(ownWidths, productWidths) ? ownWidths : []
+  const resolvedRooms = variant.suitability?.filter(isSanitySuitableRoom) ?? productRooms
+  const overrides = {
+    _type: 'variantOverrides' as const,
+    price: !arePricesEquivalent(resolvedPrice, price),
+    packPrice: !arePricesEquivalent(resolvedPackPrice, packPrice),
+    packInfo: !arePackInfosEquivalent(resolvedPackInfo, packInfo),
+    widths: widths.length > 0,
+    suitableRooms: !areStringSetsEquivalent(resolvedRooms, productRooms),
+    pattern: false,
+    specs: false,
+  }
   return {
     _key: stableKey(variantId), _type: 'productVariant', variantId, vendorSku,
     colourName: variant.colourName ?? variant.label ?? variantId,
     hex: variant.swatchHex,
     colourFamily: deriveSecondaryColourNameFromHex(variant.swatchHex) ?? undefined,
     sourceUrl: variant.url,
-    suitableRooms: variant.suitability?.filter(isSanitySuitableRoom) ?? productRooms,
-    price: resolvedPrice, packPrice: resolvedPackPrice, packInfo: resolvedPackInfo, widths,
+    overrides,
+    suitableRooms: overrides.suitableRooms ? resolvedRooms : undefined,
+    price: overrides.price ? resolvedPrice : undefined,
+    packPrice: overrides.packPrice ? resolvedPackPrice : undefined,
+    packInfo: overrides.packInfo ? resolvedPackInfo : undefined,
+    widths: overrides.widths ? withMeasurementKeys(widths) : undefined,
   }
+}
+
+function arePricesEquivalent(left: SanityPrice | undefined, right: SanityPrice | undefined): boolean {
+  return left?.currency === right?.currency
+    && left?.unit === right?.unit
+    && left?.retailExVat === right?.retailExVat
+    && left?.vatRate === right?.vatRate
+    && left?.retailIncVat === right?.retailIncVat
+}
+
+function arePackInfosEquivalent(left: SanityPackInfo | undefined, right: SanityPackInfo | undefined): boolean {
+  return JSON.stringify(left) === JSON.stringify(right)
+}
+
+function areStringSetsEquivalent(left: string[], right: string[]): boolean {
+  return left.length === right.length && [...left].sort().every((value, index) => value === [...right].sort()[index])
 }
 
 // this colour's resolved width set = page-extracted variant.widths unioned with its matched
@@ -334,6 +396,13 @@ function dedupeMeasurements(measurements: SanityMeasurement[]): SanityMeasuremen
     result.push(measurement)
   }
   return result
+}
+
+function withMeasurementKeys(measurements: SanityMeasurement[]): SanityArrayMeasurement[] {
+  return measurements.map((measurement) => ({
+    ...measurement,
+    _key: stableKey(`measurement:${measurement.value}:${measurement.unit.toLowerCase()}`),
+  }))
 }
 
 const LENGTH_UNIT_TO_MM: Record<string, number> = {
@@ -415,13 +484,13 @@ function buildAssetUploads(variants: ExtractedVendorVariant[], productName: stri
 // filterable `key`; catch-all (`additionalSpecifications`) entries have no canonical registry
 // field, so their key is slugified from the AI's own description and marked `source: 'ai_discovered'`
 // (vs. `'vendor'` for named fields) so editors/devs can tell curated fields apart from AI extras.
-function buildSpecs(review: ExtractedReviewModel, fieldMap: Map<string, RegistryFieldValue>): SanitySpec[] {
-  const known = review.knownSpecifications.filter((attribute) => attribute.included).flatMap((attribute) => {
+function buildSpecs(review: ExtractedReviewModel, fieldMap: Map<string, RegistryFieldValue>, trade: string | undefined): SanitySpec[] {
+  const known = review.knownSpecifications.filter((attribute) => attribute.included && !isRegistryFieldMappedToSanity(attribute.key)).flatMap((attribute) => {
     const value = formatValue(attribute.value)
     if (!value) return []
     return [{
       _key: stableKey(attribute.key), _type: 'specification' as const, key: attribute.key,
-      label: titleFromKey(attribute.key), value, source: 'vendor' as const,
+      label: knownRegistryLabel(trade, attribute.key, 'specifications'), value, source: 'vendor' as const,
       confidence: fieldMap.get(attribute.key)?.confidence,
     }]
   })
@@ -439,10 +508,10 @@ function buildSpecs(review: ExtractedReviewModel, fieldMap: Map<string, Registry
 // Mirrors buildSpecs above. productFeature has no `value` field (see schemaTypes/objects/productFeature.ts) -
 // a known feature's presence already means "true"; a catch-all feature's own description/value pair
 // (which does carry a value string, unlike a named boolean feature) is folded into `label`.
-function buildFeatures(review: ExtractedReviewModel, fieldMap: Map<string, RegistryFieldValue>): SanityProductFeature[] {
-  const known = review.knownFeatures.filter((attribute) => attribute.included && attribute.value === true).map((attribute) => ({
+function buildFeatures(review: ExtractedReviewModel, fieldMap: Map<string, RegistryFieldValue>, trade: string | undefined): SanityProductFeature[] {
+  const known = review.knownFeatures.filter((attribute) => attribute.included && attribute.value === true && !isRegistryFieldMappedToSanity(attribute.key)).map((attribute) => ({
     _key: stableKey(attribute.key), _type: 'productFeature' as const, key: attribute.key,
-    label: titleFromKey(attribute.key), source: 'vendor' as const,
+    label: knownRegistryLabel(trade, attribute.key, 'features'), source: 'vendor' as const,
     confidence: fieldMap.get(attribute.key)?.confidence,
   }))
   const additional = review.additionalFeatures.filter((attribute) => attribute.included).map((attribute, index) => {
@@ -478,8 +547,9 @@ function readString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined
 }
 
-function titleFromKey(value: string): string {
-  return value.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (letter) => letter.toUpperCase())
+function knownRegistryLabel(trade: string | undefined, key: string, category: 'features' | 'specifications'): string {
+  const entry = getRegistryEntriesForTrade(trade).find((candidate) => candidate.field === key && candidate.category === category)
+  return entry?.label ?? registryFieldLabel(key)
 }
 
 function slugify(value: string): string {

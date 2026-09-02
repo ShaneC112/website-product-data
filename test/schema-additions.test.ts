@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { crawlRequestMessageSchema, renderCompleteSchema, renderRequestSchema, renderResponseSchema } from '../src/queues/contracts.js'
-import { IMAGE_GENERATION_PRODUCT_REGISTRY, IMAGE_GENERATION_PROFILE_ESTIMATES, estimateImageGenerationCostEur, getRegistryEntriesForTrade, mapTradeToSanityProductType, SANITY_PRODUCT_TYPES, SANITY_SUITABLE_ROOMS } from '../src/registry/index.js'
+import { IMAGE_GENERATION_PRODUCT_REGISTRY, IMAGE_GENERATION_PROFILE_ESTIMATES, estimateImageGenerationCostEur, getRegistryEntriesForTrade, mapTradeToSanityProductType, SANITY_CATEGORY_KEYS, SANITY_PRODUCT_TYPES, SANITY_SUITABLE_ROOMS } from '../src/registry/index.js'
+import { mapSanityProductTypeToCategoryKey } from '../src/registry/index.js'
 import { crawlPageTableSchema, parseCrawlPagePackInfoHint, stringifyCrawlPagePackInfoHint } from '../src/storage/page.schema.js'
 import { crawlProductDetailTableSchema, parseRawWidthHint, stringifyRawWidthHint } from '../src/storage/product-detail.schema.js'
 import { crawlRunSummaryTableSchema } from '../src/storage/run-summary.schema.js'
@@ -180,6 +181,16 @@ describe('Sanity publication taxonomy', () => {
     expect(estimateImageGenerationCostEur('flux-roomshot-v1', 20)).toBe(0.78)
     expect(estimateImageGenerationCostEur('flux-kontext-pattern-v1', 20)).toBe(1.22)
     expect(IMAGE_GENERATION_PROFILE_ESTIMATES['flux-roomshot-v1'].pricingRevision).toBe('bfl-2026-08-31')
+  })
+
+  it('maps canonical product types to their website render category key', () => {
+    expect(mapSanityProductTypeToCategoryKey('carpet')).toBe('carpets')
+    expect(mapSanityProductTypeToCategoryKey('laminate')).toBe('wood-flooring')
+    expect(mapSanityProductTypeToCategoryKey('lvt')).toBe('lvt')
+    expect(mapSanityProductTypeToCategoryKey('vinyl')).toBe('vinyl')
+    expect(mapSanityProductTypeToCategoryKey('matting')).toBeUndefined()
+    expect(SANITY_CATEGORY_KEYS).toEqual(['carpets', 'wood-flooring', 'lvt', 'vinyl'])
+    expect(SANITY_CATEGORY_KEYS).not.toContain('stair-runners')
   })
 
   it('defines one canonical suitable-room list for extraction and Sanity', () => {

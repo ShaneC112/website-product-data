@@ -1,5 +1,5 @@
 import {z} from 'zod'
-import {SANITY_CONTENT_REQUIREMENTS, SANITY_PRODUCT_TYPES, type SanityProductType} from '../registry/product-taxonomy.js'
+import {SANITY_CATEGORY_KEYS, SANITY_CONTENT_REQUIREMENTS, SANITY_PRODUCT_TYPES, type SanityCategoryKey, type SanityProductType} from '../registry/product-taxonomy.js'
 
 // This schema covers exactly the fields Azure guarantees to produce for a transform plan to cross
 // the bridge into Sanity - it deliberately does NOT restrict what the real Studio schema can have.
@@ -14,9 +14,9 @@ const sanityBridgeMeasurementSchema = z.object({
 const sanityBridgePriceSchema = z.object({
   currency: z.string().trim().min(1),
   unit: z.string().trim().min(1),
-  retailExVatMinor: z.number(),
+  retailExVat: z.number(),
   vatRate: z.number(),
-  retailIncVatMinor: z.number(),
+  retailIncVat: z.number(),
 })
 
 const sanityBridgePackInfoSchema = z.object({
@@ -25,6 +25,16 @@ const sanityBridgePackInfoSchema = z.object({
   length: sanityBridgeMeasurementSchema.optional(),
   width: sanityBridgeMeasurementSchema.optional(),
   height: sanityBridgeMeasurementSchema.optional(),
+})
+
+const sanityBridgeVariantOverridesSchema = z.object({
+  price: z.boolean(),
+  packPrice: z.boolean(),
+  packInfo: z.boolean(),
+  widths: z.boolean(),
+  suitableRooms: z.boolean(),
+  pattern: z.boolean(),
+  specs: z.boolean(),
 })
 
 const sanityBridgeVariantSchema = z.object({
@@ -38,9 +48,12 @@ const sanityBridgeVariantSchema = z.object({
   // the point this schema is evaluated, not yet the final asset reference.
   swatchImage: z.unknown().optional(),
   widths: z.array(sanityBridgeMeasurementSchema).optional(),
+  overrides: sanityBridgeVariantOverridesSchema,
   price: sanityBridgePriceSchema.optional(),
   packPrice: sanityBridgePriceSchema.optional(),
   packInfo: sanityBridgePackInfoSchema.optional(),
+  patternRepeatCm: z.number().positive().optional(),
+  repeatsInSwatch: z.number().int().positive().optional(),
   suitableRooms: z.array(z.string()).optional(),
   specs: z.array(z.unknown()).optional(),
 })
@@ -49,6 +62,11 @@ export const sanityBridgeProductSchema = z.object({
   name: z.string().trim().min(1),
   slug: z.object({current: z.string().trim().min(1)}),
   productType: z.enum(SANITY_PRODUCT_TYPES),
+  // Must be one of the developer-defined outputs derived from a supported product type, rather
+  // than an independently extracted category choice that could conflict with that product type.
+  categoryKey: z.custom<SanityCategoryKey>((value) => typeof value === 'string' && SANITY_CATEGORY_KEYS.includes(value as SanityCategoryKey), {
+    message: 'Category key must be mapped from a supported product type',
+  }),
   brand: z.string().trim().min(1).optional(),
   shortDescription: z.string().trim().min(1).optional(),
   features: z.array(z.unknown()).optional(),
@@ -56,6 +74,10 @@ export const sanityBridgeProductSchema = z.object({
   suitableRooms: z.array(z.string()).optional(),
   price: sanityBridgePriceSchema.optional(),
   priceOnRequest: z.boolean().optional(),
+  packPrice: sanityBridgePriceSchema.optional(),
+  packInfo: sanityBridgePackInfoSchema.optional(),
+  patternRepeatCm: z.number().positive().optional(),
+  repeatsInSwatch: z.number().int().positive().optional(),
   widths: z.array(sanityBridgeMeasurementSchema).optional(),
   variants: z.array(sanityBridgeVariantSchema).min(1),
   importMeta: z.object({
@@ -95,7 +117,8 @@ export function evaluateBridgeEligibility(draft: unknown): BridgeEligibilityResu
     reasons.push('missing_required_width')
   }
 
-  if (requirements.requiresPackInfo && !product.variants.some((variant) => variant.packInfo || variant.packPrice)) {
+  if (requirements.requiresPackInfo && !product.packInfo && !product.packPrice
+    && !product.variants.some((variant) => variant.packInfo || variant.packPrice)) {
     reasons.push('missing_required_pack_info')
   }
 

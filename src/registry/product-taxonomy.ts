@@ -12,6 +12,28 @@ export const SANITY_PRODUCT_TYPES = [
 
 export type SanityProductType = (typeof SANITY_PRODUCT_TYPES)[number]
 
+// Developer-defined product types with an implemented website category. Category keys are derived
+// output values, never independently extracted input: each map entry represents a product type for
+// which developers have deliberately created the corresponding website/Sanity support. Types
+// omitted from this map intentionally have no Sanity destination until that support is added.
+export const SANITY_PRODUCT_TYPE_TO_CATEGORY_KEY = {
+  carpet: 'carpets',
+  'carpet-tile': 'carpets',
+  laminate: 'wood-flooring',
+  lvt: 'lvt',
+  vinyl: 'vinyl',
+  'engineered-wood': 'wood-flooring',
+  rug: 'carpets',
+} as const satisfies Partial<Record<SanityProductType, string>>
+
+export type SanityCategoryKey = (typeof SANITY_PRODUCT_TYPE_TO_CATEGORY_KEY)[keyof typeof SANITY_PRODUCT_TYPE_TO_CATEGORY_KEY]
+
+// Derived from the product types developers have explicitly mapped above; never add an option here
+// independently, because it would be selectable in Studio without a corresponding bridge mapping.
+export const SANITY_CATEGORY_KEYS: readonly SanityCategoryKey[] = [
+  ...new Set(Object.values(SANITY_PRODUCT_TYPE_TO_CATEGORY_KEY)),
+]
+
 export const IMAGE_LAY_DIRECTIONS = [
   'lengthways',
   'widthways',
@@ -187,6 +209,14 @@ export function mapTradeToSanityProductType(trade?: string, sourceProductType?: 
     : undefined
   if (sourceType) return sourceType
   return trade ? TRADE_TO_SANITY_PRODUCT_TYPE[trade.trim().toLowerCase()] : undefined
+}
+
+// This derived key chooses the website render template. Do not guess for a product type whose
+// navigation/render category has not been created in Sanity: returning undefined keeps it from
+// satisfying the bridge contract and therefore from being published.
+export function mapSanityProductTypeToCategoryKey(productType: SanityProductType | undefined): SanityCategoryKey | undefined {
+  const categoryKeysByProductType: Partial<Record<SanityProductType, SanityCategoryKey>> = SANITY_PRODUCT_TYPE_TO_CATEGORY_KEY
+  return productType ? categoryKeysByProductType[productType] : undefined
 }
 
 export function isSanitySuitableRoom(value: string): value is SanitySuitableRoom {

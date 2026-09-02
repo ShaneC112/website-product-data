@@ -59,6 +59,12 @@ export const groupReprocessSchema = z.object({
 
 export type GroupReprocessInput = z.infer<typeof groupReprocessSchema>
 
+export const sanityRegistrySyncSchema = z.object({
+  apply: z.boolean().default(false),
+})
+
+export type SanityRegistrySyncInput = z.infer<typeof sanityRegistrySyncSchema>
+
 export const manualGroupPdfUploadSchema = z.object({
   sourceGroupKey: z.string().min(1),
   fileName: z.string().min(1),

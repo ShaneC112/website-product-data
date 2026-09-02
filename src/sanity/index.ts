@@ -1,5 +1,6 @@
 export * from './bridgeContract.schema.js'
 export * from './ingestion.js'
 export * from './mergeProductUpdate.js'
+export * from './registrySync.js'
 export * from './publicationGate.js'
 export * from './publishDraft.js'

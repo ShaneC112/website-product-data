@@ -42,6 +42,21 @@ function buildBlob(vendorProductPage: Record<string, unknown>): ComposedProductD
 // apply one row-level price to every colour, even when the match ledger had already resolved
 // distinct prices per colour via variantOverrides.
 describe('per-colour price resolution', () => {
+  it('marks a product as price on request only when neither the product nor any colour has a price', () => {
+    const noPrices = buildSanityIngestionPlan(baseRow(), buildBlob({
+      variants: [{variantId: 'blue', colourName: 'Blue'}],
+    }), {vendorId: 'example'})
+    const variantPrice = buildSanityIngestionPlan(baseRow(), buildBlob({
+      variants: [{variantId: 'blue', colourName: 'Blue'}],
+    }), {
+      vendorId: 'example',
+      variantOverrides: {blue: {rawPriceMinor: 10000}},
+    })
+
+    expect(noPrices.document.priceOnRequest).toBe(true)
+    expect(variantPrice.document.priceOnRequest).toBe(false)
+  })
+
   it('resolves distinct prices per colour from variantOverrides instead of the row-level default', () => {
     const row = baseRow({ rawPriceMinor: 9999 })
     const blob = buildBlob({
@@ -59,8 +74,8 @@ describe('per-colour price resolution', () => {
       },
     })
 
-    expect(plan.document.variants[0].price?.retailExVatMinor).toBe(10000)
-    expect(plan.document.variants[1].price?.retailExVatMinor).toBe(12000)
+    expect(plan.document.variants[0]).toMatchObject({overrides: {price: true}, price: {retailExVat: 100}})
+    expect(plan.document.variants[1]).toMatchObject({overrides: {price: true}, price: {retailExVat: 120}})
   })
 
   it('resolves distinct pack metadata from each matched source row', () => {
@@ -78,6 +93,7 @@ describe('per-colour price resolution', () => {
       },
     })
 
+    expect(plan.document.variants.map((variant) => variant.overrides.packInfo)).toEqual([true, true])
     expect(plan.document.variants.map((variant) => variant.packInfo)).toEqual([
       {_type: 'packInfo', coverage: {_type: 'measurement', value: 1.8, unit: 'm2'}, piecesPerPack: 8},
       {_type: 'packInfo', coverage: {_type: 'measurement', value: 2.4, unit: 'm2'}, piecesPerPack: 10},
@@ -100,16 +116,18 @@ describe('width parent/child inheritance model', () => {
     const plan = buildSanityIngestionPlan(row, blob, { vendorId: 'victoria-carpets' })
     const byId = Object.fromEntries(plan.document.variants.map((variant) => [variant.variantId, variant]))
 
-    expect(byId.identical.widths).toEqual([])
+    expect(byId.identical).toMatchObject({overrides: {widths: false}, widths: undefined})
+    expect(byId.superset.overrides.widths).toBe(true)
+    expect(byId.subset.overrides.widths).toBe(true)
     expect(byId.superset.widths).toEqual([
-      { _type: 'measurement', value: 1, unit: 'm' },
-      { _type: 'measurement', value: 2, unit: 'm' },
-      { _type: 'measurement', value: 3, unit: 'm' },
-      { _type: 'measurement', value: 4, unit: 'm' },
+      { _type: 'measurement', _key: 'measurement-1-m', value: 1, unit: 'm' },
+      { _type: 'measurement', _key: 'measurement-2-m', value: 2, unit: 'm' },
+      { _type: 'measurement', _key: 'measurement-3-m', value: 3, unit: 'm' },
+      { _type: 'measurement', _key: 'measurement-4-m', value: 4, unit: 'm' },
     ])
     expect(byId.subset.widths).toEqual([
-      { _type: 'measurement', value: 3, unit: 'm' },
-      { _type: 'measurement', value: 4, unit: 'm' },
+      { _type: 'measurement', _key: 'measurement-3-m', value: 3, unit: 'm' },
+      { _type: 'measurement', _key: 'measurement-4-m', value: 4, unit: 'm' },
     ])
   })
 
@@ -127,7 +145,7 @@ describe('width parent/child inheritance model', () => {
       variantOverrides: { natureborn: { rawWidthHint: [{ value: 400, unit: 'cm' }] } },
     })
 
-    expect(plan.document.variants[0].widths).toEqual([])
+    expect(plan.document.variants[0]).toMatchObject({overrides: {widths: false}, widths: undefined})
   })
 
   it('populates a variant width from rawWidthHint when it genuinely differs from the range default', () => {
@@ -142,7 +160,7 @@ describe('width parent/child inheritance model', () => {
       variantOverrides: { natureborn: { rawWidthHint: [{ value: 500, unit: 'cm' }] } },
     })
 
-    expect(plan.document.variants[0].widths).toEqual([{ _type: 'measurement', value: 500, unit: 'cm' }])
+    expect(plan.document.variants[0]).toMatchObject({overrides: {widths: true}, widths: [{ _type: 'measurement', _key: 'measurement-500-cm', value: 500, unit: 'cm' }]})
   })
 
   it('falls back product.widths to the union of variants own resolved widths when no range-level width is present', () => {
@@ -159,11 +177,11 @@ describe('width parent/child inheritance model', () => {
     const byId = Object.fromEntries(plan.document.variants.map((variant) => [variant.variantId, variant]))
 
     expect(plan.document.widths).toEqual([
-      { _type: 'measurement', value: 4, unit: 'm' },
-      { _type: 'measurement', value: 5, unit: 'm' },
+      { _type: 'measurement', _key: 'measurement-4-m', value: 4, unit: 'm' },
+      { _type: 'measurement', _key: 'measurement-5-m', value: 5, unit: 'm' },
     ])
-    expect(byId.a.widths).toEqual([{ _type: 'measurement', value: 4, unit: 'm' }])
-    expect(byId.b.widths).toEqual([{ _type: 'measurement', value: 5, unit: 'm' }])
+    expect(byId.a.widths).toEqual([{ _type: 'measurement', _key: 'measurement-4-m', value: 4, unit: 'm' }])
+    expect(byId.b.widths).toEqual([{ _type: 'measurement', _key: 'measurement-5-m', value: 5, unit: 'm' }])
   })
 })
 
@@ -229,6 +247,8 @@ describe('specs/features from the review model', () => {
         source: 'ai_discovered',
       }),
     ])
+    expect(plan.document.specs[0]).toMatchObject({key: 'pileWeight', label: 'Pile Weight'})
+    expect(plan.document.features[0]).toMatchObject({key: 'waterResistant', label: 'Water Resistant'})
   })
 
   it('produces an empty specs/features array when the review model has nothing included', () => {
@@ -239,6 +259,27 @@ describe('specs/features from the review model', () => {
 
     expect(plan.document.specs).toEqual([])
     expect(plan.document.features).toEqual([])
+  })
+
+  it('does not duplicate direct Sanity fields in specs or features', () => {
+    const blob = buildBlob({variants: [{variantId: 'blue', colourName: 'Blue'}]})
+    blob.review = {
+      knownSpecifications: [
+        {key: 'packInfo', value: '2.2 m2 per pack', required: false, included: true},
+        {key: 'dimensions', value: '1200 x 190 mm', required: false, included: true},
+      ],
+      knownFeatures: [
+        {key: 'suitableRooms', value: true, required: false, included: true},
+        {key: 'waterResistant', value: true, required: false, included: true},
+      ],
+      additionalSpecifications: [],
+      additionalFeatures: [],
+    }
+
+    const plan = buildSanityIngestionPlan(baseRow(), blob, {vendorId: 'victoria-carpets'})
+
+    expect(plan.document.specs).toEqual([expect.objectContaining({key: 'dimensions'})])
+    expect(plan.document.features).toEqual([expect.objectContaining({key: 'waterResistant'})])
   })
 })
 
@@ -322,7 +363,7 @@ describe('scenario (b): carpet range with swatch + width + mapped trade produces
 
     expect(plan.document.productType).toBe('carpet')
     expect(plan.document.variants[0].colourFamily).toBe('blue')
-    expect(plan.document.widths).toEqual([{ _type: 'measurement', value: 4, unit: 'm' }])
+    expect(plan.document.widths).toEqual([{ _type: 'measurement', _key: expect.any(String), value: 4, unit: 'm' }])
     expect(plan.document.specs).toEqual([expect.objectContaining({ key: 'pileWeight', source: 'vendor' })])
     expect(plan.document.features).toEqual([expect.objectContaining({ key: 'waterResistant', source: 'vendor' })])
     expect(['high', 'medium', 'low']).toContain(plan.document.importMeta.importAiConfidence)
@@ -330,10 +371,10 @@ describe('scenario (b): carpet range with swatch + width + mapped trade produces
 })
 
 // Phase 09 task 3 scenario (c): a Laminate/Engineered Wood/LVT range with m2crm box price and
-// pack data produces a Sanity variant carrying both `price` (m2) and `packPrice` (box), plus
+// pack data produces product defaults for both `price` (m2) and `packPrice` (box), plus
 // `packInfo` (coverage/pieces/dimensions) from the AI-extracted value - not the m2crm bias hint.
 describe('scenario (c): hard-flooring variant carries both price and packPrice plus AI-extracted packInfo', () => {
-  it('populates price, packPrice, and packInfo together on a Laminate variant', () => {
+  it('stores price, packPrice, and packInfo as Laminate defaults when every variant inherits them', () => {
     const row = baseRow({ trade: 'Laminate', rawPriceMinor: 2500, rawBoxPriceMinor: 8999 })
     const blob = buildBlob({ variants: [{ variantId: 'oak', colourName: 'Oak' }] })
     blob.extracted.trade = 'Laminate'
@@ -345,9 +386,14 @@ describe('scenario (c): hard-flooring variant carries both price and packPrice p
     const variant = plan.document.variants[0]
 
     expect(plan.document.productType).toBe('laminate')
-    expect(variant.price).toEqual(expect.objectContaining({ unit: 'm2', retailExVatMinor: 2500 }))
-    expect(variant.packPrice).toEqual(expect.objectContaining({ unit: 'pack', retailExVatMinor: 8999 }))
-    expect(variant.packInfo).toEqual(expect.objectContaining({
+    expect(variant.overrides.price).toBe(false)
+    expect(variant.price).toBeUndefined()
+    expect(variant.overrides.packPrice).toBe(false)
+    expect(variant.overrides.packInfo).toBe(false)
+    expect(variant.packPrice).toBeUndefined()
+    expect(variant.packInfo).toBeUndefined()
+    expect(plan.document.packPrice).toEqual(expect.objectContaining({ unit: 'pack', retailExVat: 89.99 }))
+    expect(plan.document.packInfo).toEqual(expect.objectContaining({
       coverage: { _type: 'measurement', value: 2.22, unit: 'm2' },
       piecesPerPack: 8,
     }))
