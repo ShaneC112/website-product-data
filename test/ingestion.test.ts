@@ -65,6 +65,24 @@ describe('per-colour price resolution', () => {
     expect(variantPrice.document.priceOnRequest).toBe(false)
   })
 
+  it('adds stable Sanity keys to generated surface palette entries', () => {
+    const plan = buildSanityIngestionPlan(baseRow(), buildBlob({
+      variants: [{
+        variantId: 'stone-path',
+        colourName: 'Stone Path',
+        surfaceAppearance: {
+          surfaceType: 'tufted', pileCharacter: 'dense', sheen: 'matte', tonalVariation: 'mottled', textureScale: 'medium',
+          palette: [{hex: '#4A4338', coveragePercent: 55}, {hex: '#35312E', coveragePercent: 45}],
+        },
+      }],
+    }), {vendorId: 'lano'})
+
+    expect(plan.document.variants[0]?.surfaceAppearance?.palette).toEqual([
+      {hex: '#4A4338', coveragePercent: 55, _key: 'surface-palette-4a4338-0'},
+      {hex: '#35312E', coveragePercent: 45, _key: 'surface-palette-35312e-1'},
+    ])
+  })
+
   it('resolves distinct prices per colour from variantOverrides instead of the row-level default', () => {
     const row = baseRow({ price: 9999 })
     const blob = buildBlob({
@@ -365,6 +383,25 @@ describe('classified vendor gallery images', () => {
       expect.objectContaining({sourceUrl: 'https://example.com/blue-room.jpg', role: 'roomshot', target: {scope: 'product', field: 'gallery'}}),
       expect.objectContaining({sourceUrl: 'https://example.com/blue-backing.jpg', role: 'technical', target: {scope: 'product', field: 'gallery'}}),
     ]))
+  })
+
+  it('does not let a secondary swatch candidate overwrite the selected swatch asset', () => {
+    const plan = buildSanityIngestionPlan(baseRow(), buildBlob({
+      variants: [{
+        variantId: 'stone-path',
+        colourName: 'Stone Path',
+        swatchImageUrl: 'https://example.com/stone-path-full.jpg',
+        swatchImageUrls: [
+          'https://example.com/stone-path-full.jpg',
+          'https://example.com/stone-path-thumbnail.jpg',
+        ],
+      }],
+    }), {vendorId: 'lano'})
+
+    const swatchAssets = plan.assets.filter((asset) => asset.target.scope === 'variant' && asset.target.field === 'swatchImage')
+    expect(swatchAssets).toEqual([
+      expect.objectContaining({sourceUrl: 'https://example.com/stone-path-full.jpg'}),
+    ])
   })
 })
 

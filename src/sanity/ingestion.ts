@@ -118,6 +118,7 @@ export type SanityProductDraft = {
     colourName: string
     hex?: string
     colourFamily?: string
+    surfaceAppearance?: ExtractedVendorVariant['surfaceAppearance']
     sourceUrl?: string
     suitableRooms?: string[]
     overrides: SanityVariantOverrides
@@ -340,6 +341,7 @@ function buildVariant(
     colourName: variant.colourName ?? variant.label ?? variantId,
     hex: variant.swatchHex,
     colourFamily: deriveSecondaryColourNameFromHex(variant.swatchHex) ?? undefined,
+    surfaceAppearance: withSurfaceAppearancePaletteKeys(variant.surfaceAppearance),
     sourceUrl: variant.url,
     overrides,
     suitableRooms: overrides.suitableRooms ? resolvedRooms : undefined,
@@ -418,6 +420,17 @@ function withMeasurementKeys(measurements: SanityMeasurement[]): SanityArrayMeas
   }))
 }
 
+function withSurfaceAppearancePaletteKeys(appearance: ExtractedVendorVariant['surfaceAppearance']) {
+  if (!appearance) return undefined
+  return {
+    ...appearance,
+    palette: appearance.palette.map((colour, index) => ({
+      ...colour,
+      _key: stableKey(`surface-palette:${colour.hex}:${index}`),
+    })),
+  }
+}
+
 const LENGTH_UNIT_TO_MM: Record<string, number> = {
   mm: 1,
   cm: 10,
@@ -473,12 +486,13 @@ function buildAssetUploads(variants: ExtractedVendorVariant[], productName: stri
     const variantKey = stableKey(variant.variantId ?? variant.label ?? `variant-${variantIndex + 1}`)
     const colourName = variant.colourName ?? variant.label ?? `variant ${variantIndex + 1}`
     const classified = new Map((variant.classifiedImages ?? []).map((image) => [image.url, image.role]))
-    const swatches = new Set([variant.swatchImageUrl, ...(variant.swatchImageUrls ?? [])].filter(Boolean) as string[])
-    const allUrls = [...new Set([...(variant.imageUrls ?? []), ...swatches])]
+    const primarySwatchUrl = variant.swatchImageUrl ?? variant.swatchImageUrls?.[0]
+    const secondarySwatches = new Set((variant.swatchImageUrls ?? []).filter((url) => url !== primarySwatchUrl))
+    const allUrls = [...new Set([...(variant.imageUrls ?? []), primarySwatchUrl, ...secondarySwatches].filter(Boolean) as string[])]
     let hasPrimaryImage = false
     allUrls.forEach((sourceUrl) => {
       const classifiedRole = classified.get(sourceUrl)
-      const role = swatches.has(sourceUrl) || classifiedRole === 'swatch'
+      const role = sourceUrl === primarySwatchUrl || (classifiedRole === 'swatch' && !secondarySwatches.has(sourceUrl))
         ? 'swatch'
         : classifiedRole === 'roomshot' || classifiedRole === 'technical'
           ? classifiedRole

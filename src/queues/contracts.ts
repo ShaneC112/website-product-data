@@ -8,6 +8,7 @@ import {
 } from '../registry/product-taxonomy.js'
 import { IMAGE_GENERATION_PROFILE_KEYS } from '../registry/image-generation-profiles.js'
 import { extractedScalarMeasurementSchema } from '../storage/page-detail.schema.js'
+import { surfaceAppearanceSchema } from '../storage/page-detail.schema.js'
 
 export const packInfoHintSchema = z.object({
   length: extractedScalarMeasurementSchema.optional(),
@@ -204,6 +205,7 @@ const sanityImageVariantSchema = z.object({
   colourName: z.string().trim().min(1),
   colourFamily: z.string().trim().min(1).optional(),
   hex: z.string().regex(/^#[0-9a-f]{6}$/i).optional(),
+  surfaceAppearance: surfaceAppearanceSchema.optional(),
   swatchUrl: httpsUrlSchema,
   patternRepeatCm: z.number().positive().optional(),
   repeatsInSwatch: z.number().int().positive().optional(),
@@ -308,6 +310,7 @@ export const sanityImageGenerateCommandSchema = sanityImageCommandBaseSchema.ext
     variantId: z.string().trim().min(1),
     colourName: z.string().trim().min(1),
     productType: z.enum(SANITY_PRODUCT_TYPES),
+    surfaceAppearance: surfaceAppearanceSchema.optional(),
     room: z.string().trim().min(1),
     pipeline: z.enum(['direct', 'patterned-kontext']),
     generationProfile: z.enum(IMAGE_GENERATION_PROFILE_KEYS),

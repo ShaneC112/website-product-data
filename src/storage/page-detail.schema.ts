@@ -52,6 +52,25 @@ export const extractedWidthSlotSchema = z.object({
   widthLabel: z.string().trim().min(1)
 })
 
+export const surfaceAppearanceSchema = z.object({
+  surfaceType: z.enum(['cut-pile', 'loop-pile', 'woven', 'tufted', 'smooth', 'textured', 'unknown']),
+  pileCharacter: z.enum(['plush', 'dense', 'low-profile', 'flat', 'unknown']),
+  sheen: z.enum(['matte', 'soft-lustre', 'reflective', 'unknown']),
+  tonalVariation: z.enum(['uniform', 'heathered', 'mottled', 'directional-shading', 'unknown']),
+  textureScale: z.enum(['fine', 'medium', 'coarse', 'unknown']),
+  palette: z.array(z.object({
+    hex: z.string().regex(/^#[0-9a-f]{6}$/i),
+    coveragePercent: z.number().int().min(1).max(100)
+  })).min(1).max(3)
+}).superRefine((appearance, context) => {
+  const coveragePercent = appearance.palette.reduce((total, colour) => total + colour.coveragePercent, 0)
+  if (coveragePercent !== 100) {
+    context.addIssue({code: z.ZodIssueCode.custom, path: ['palette'], message: 'Palette coverage percentages must total 100.'})
+  }
+})
+
+export type SurfaceAppearance = z.infer<typeof surfaceAppearanceSchema>
+
 export const extractedVendorVariantSchema = z.object({
   variantId: z.string().trim().min(1).optional(),
   label: z.string().trim().min(1).optional(),
@@ -63,6 +82,7 @@ export const extractedVendorVariantSchema = z.object({
   classifiedImages: z.array(classifiedImageSchema).optional(),
   swatchHex: z.string().trim().min(1).optional(),
   hasDecorativePattern: z.boolean().optional(),
+  surfaceAppearance: surfaceAppearanceSchema.optional(),
   variantFields: z.array(variantRegistryFieldValueSchema).optional(),
   widths: z.array(extractedWidthSlotSchema).optional(),
   dynamicFields: z.array(extractedDynamicFieldSchema).optional(),
