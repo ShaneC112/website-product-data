@@ -36,7 +36,8 @@ export const crawlRunSummaryTableSchema = z.object({
   aiCompletionTokens: z.number().int().nonnegative().optional(),
   failedStage: z.string().trim().min(1).optional(),
   failedAt: z.string().trim().min(1).optional(),
-  failureMessage: z.string().trim().min(1).optional()
+  failureMessage: z.string().trim().min(1).optional(),
+  attemptFailuresJson: z.string().trim().min(1).optional()
 })
 
 export type CrawlRunSummaryTable = z.infer<typeof crawlRunSummaryTableSchema>

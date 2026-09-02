@@ -15,7 +15,7 @@ export type ExtractedScalarMeasurement = z.infer<typeof extractedScalarMeasureme
 
 // m2crm's per-SKU roll width(s) (confirmed live via m2crm's native `width` product field, e.g.
 // "13'1\"" on the /400 SKU vs "16'5\"" on the /500 SKU of the same range) - authoritative business
-// data like rawPriceMinor, not a bias hint. Persisted as a JSON-stringified column on Table Storage
+// data like price, not a bias hint. Persisted as a JSON-stringified column on Table Storage
 // rows, consistent with variantUrlsJson/packInfoHintJson.
 export const rawWidthHintSchema = z.array(extractedScalarMeasurementSchema)
 

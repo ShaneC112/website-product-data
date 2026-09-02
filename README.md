@@ -261,7 +261,7 @@ Important fields:
 - `blobVisibleTextPath`: blob path to the hidden-aware, tag-free visible-text rendering, when non-empty
 - `visibleTextLength`: compact render telemetry
 - `ttlExpiresAt`: transient retention cutoff
-- `rawPriceMinor`, `vatRate`, `vendorSku`: source-product pricing identity carried forward for fallback and transform
+- `price`, `vatRate`, `vendorSku`: source-product pricing identity carried forward for fallback and transform
 
 #### `webcrawlpagedetail`
 
@@ -373,7 +373,7 @@ Important fields:
 - `urlKey`: originating canonical page identity
 - `sourceGroupKey`, `sourceGroupStorageKey`: group identity
 - `sourceTableName`, `sourceRowKey`: source product identity
-- `vendorSku`, `rawPriceMinor`, `vatRate`: source-product pricing identity preserved per product row
+- `vendorSku`, `price`, `vatRate`: source-product pricing identity preserved per product row
 - `styleCode`, `trade`: operator-facing metadata when available
 - `status`: `draft` or `ready`
 - `detailJson`: compact composed summary payload stored in-table
@@ -404,7 +404,7 @@ Important fields:
 - `sourceGroupKey`, `sourceGroupStorageKey`: group identity
 - `sourceTableName`, `sourceRowKey`: source product identity
 - `styleCode`, `trade`: operator-facing metadata
-- `vendorSku`, `rawPriceMinor`, `vatRate`: source-product pricing identity
+- `vendorSku`, `price`, `vatRate`: source-product pricing identity
 - `crawlUrl`: optional original crawl URL when available
 
 #### `webcrawlvalidations`
@@ -727,7 +727,7 @@ This appendix is a compact field-level glossary for the most reused shared contr
 | `blobVisibleTextPath` | Blob path to the hidden-aware, tag-free visible-text rendering, when non-empty. Preferred over raw HTML for the AI extraction excerpt. |
 | `visibleTextLength` | Compact render telemetry used for diagnostics and review. |
 | `ttlExpiresAt` | Transient retention cutoff timestamp. |
-| `rawPriceMinor` | Source price in minor currency units carried forward for composition. |
+| `price` | Source price in minor currency units carried forward for composition. |
 | `vatRate` | Source VAT rate carried forward for composition. |
 | `vendorSku` | Source vendor SKU carried forward for composition. |
 

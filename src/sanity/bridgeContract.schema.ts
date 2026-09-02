@@ -40,8 +40,10 @@ const sanityBridgeVariantOverridesSchema = z.object({
 const sanityBridgeVariantSchema = z.object({
   variantId: z.string().trim().min(1),
   colourName: z.string().trim().min(1),
-  colourFamily: z.string().trim().min(1),
-  hex: z.string().trim().min(1),
+  // These are optional derived colour enrichments. A named variant with a swatch source remains
+  // publishable when automated colour classification cannot confidently populate them.
+  colourFamily: z.string().trim().min(1).optional(),
+  hex: z.string().trim().min(1).optional(),
   // a swatch source marker - NOT required on every variant (only "at least one variant" is
   // enforced, by evaluateBridgeEligibility). Left loose (z.unknown) rather than the full uploaded
   // SanityImage shape, since the built transform plan may only carry a pending-upload marker at

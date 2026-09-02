@@ -13,8 +13,12 @@ export const manualCrawlEnqueueSchema = z.object({
   // see crawlRequestMessageSchema's pileWeightHint - same disambiguation contract, just entering
   // via the manual HTTP path instead of the sync path.
   pileWeightHint: z.string().trim().min(1).optional(),
-  // see crawlRequestMessageSchema - same authoritative box price / AI-bias pack hint contract.
-  rawBoxPriceMinor: z.number().int().optional(),
+  // M2CRM vendor name supplied as an identity candidate for page-evidence confirmation.
+  brandNameHint: z.string().trim().min(1).optional(),
+  // Authoritative M2CRM prices in minor currency units. Both must be explicit: use 0 when a
+  // product has no sell price rather than dropping the source evidence at the queue boundary.
+  price: z.number().int().nonnegative(),
+  boxSalesPrice: z.number().int().nonnegative(),
   boxUnit: z.string().trim().min(1).optional(),
   packInfoHint: packInfoHintSchema.optional(),
   // see crawlRequestMessageSchema's rawWidthHint - same authoritative per-SKU roll width contract.

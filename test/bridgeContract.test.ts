@@ -44,6 +44,13 @@ describe('evaluateBridgeEligibility', () => {
     expect(result.reasons).toContain('missing_swatch_image')
   })
 
+  it('accepts named variants with swatch sources when derived colour enrichment is unavailable', () => {
+    const draft = baseDraft({
+      variants: [baseVariant({colourFamily: undefined, hex: undefined})],
+    })
+    expect(evaluateBridgeEligibility(draft)).toEqual({eligible: true, reasons: []})
+  })
+
   it('fails with the trade reason when productType is not a mapped SanityProductType', () => {
     const draft = baseDraft({productType: 'not-a-real-type'})
     const result = evaluateBridgeEligibility(draft)

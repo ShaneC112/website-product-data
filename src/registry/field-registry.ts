@@ -13,6 +13,7 @@ export const fieldCategorySchema = z.enum(['identity', 'specifications', 'featur
 // emitted as a Feature or Specification. It therefore has no `registryFieldDefinition` projection.
 export const SANITY_FIELD_PATH_BY_REGISTRY_KEY = {
   title: 'name',
+  brandName: 'brand',
   description: 'shortDescription',
   productType: 'productType',
   width: 'widths',
@@ -185,6 +186,7 @@ function createVariantEntry(
 export const fieldRegistry: FieldRegistryEntry[] = [
   // ── Carpet ──────────────────────────────────────────────────────────────────
   createEntry('Carpet', 'title', 'Primary product or range name shown in headings, titles, or hero content. Not including the manufacturer or collection name.', 'required', 'text', { category: 'identity', exampleValue: 'Royal Twist 40oz' }),
+  createEntry('Carpet', 'brandName', 'Manufacturer or brand name for the product range when confirmed by the vendor page.', 'optional', 'text', { category: 'identity', promptHint: 'An m2crm brandNameHint may be provided as a candidate. Confirm it from the page, correct it if the page identifies a different brand, and omit it when the page does not support either value.' }),
   createEntry('Carpet', 'description', 'Concise commercial description summarising the product from meta description, intro copy, or lead paragraph.', 'required', 'text', { category: 'identity' }),
   createEntry('Carpet', 'productType', 'Concise flooring category such as carpet when explicitly stated.', 'required', 'text', { category: 'identity', exampleValue: 'carpet', allowedValues: ['carpet', 'rug', 'matting', 'artificial grass'] }),
   createEntry('Carpet', 'pileHeight', 'Explicit pile height measurement for carpet products.', 'recommended', 'measurement', { exampleValue: '8 mm' }),
@@ -216,6 +218,7 @@ export const fieldRegistry: FieldRegistryEntry[] = [
 
   // ── Carpet Tile ─────────────────────────────────────────────────────────────
   createEntry('Carpet Tile', 'title', 'Primary product or range name shown in headings, titles, or hero content.', 'required', 'text', { category: 'identity', exampleValue: 'Tessera Create Space' }),
+  createEntry('Carpet Tile', 'brandName', 'Manufacturer or brand name for the product range when confirmed by the vendor page.', 'optional', 'text', { category: 'identity', promptHint: 'An m2crm brandNameHint may be provided as a candidate. Confirm it from the page, correct it if the page identifies a different brand, and omit it when the page does not support either value.' }),
   createEntry('Carpet Tile', 'description', 'Concise commercial description summarising the product from meta description, intro copy, or lead paragraph.', 'required', 'text', { category: 'identity' }),
   createEntry('Carpet Tile', 'productType', 'Concise flooring category such as carpet tile when explicitly stated.', 'required', 'text', { category: 'identity', exampleValue: 'carpet tile', allowedValues: ['carpet tile', 'carpet tiles', 'modular carpet', 'modular tile'] }),
   createEntry('Carpet Tile', 'features', 'Performance or treatment claims evidenced in the page, such as Moth Resistant, Stain Resistant, or Anti-static.', 'required', 'text-list', { category: 'features' }),
@@ -240,6 +243,7 @@ export const fieldRegistry: FieldRegistryEntry[] = [
 
   // ── Laminate ─────────────────────────────────────────────────────────────────
   createEntry('Laminate', 'title', 'Primary product or range name shown in headings, titles, or hero content.', 'required', 'text', { category: 'identity', exampleValue: 'Pergo Original Excellence' }),
+  createEntry('Laminate', 'brandName', 'Manufacturer or brand name for the product range when confirmed by the vendor page.', 'optional', 'text', { category: 'identity', promptHint: 'An m2crm brandNameHint may be provided as a candidate. Confirm it from the page, correct it if the page identifies a different brand, and omit it when the page does not support either value.' }),
   createEntry('Laminate', 'description', 'Concise commercial description summarising the product from meta description, intro copy, or lead paragraph.', 'required', 'text', { category: 'identity' }),
   createEntry('Laminate', 'productType', 'Concise flooring category such as laminate when explicitly stated.', 'required', 'text', { category: 'identity', exampleValue: 'laminate', allowedValues: ['laminate', 'laminate flooring', 'laminate floor', 'laminate wood'] }),
   createEntry('Laminate', 'thickness', 'Explicit laminate thickness measurement.', 'required', 'measurement', { exampleValue: '12 mm' }),
@@ -268,6 +272,7 @@ export const fieldRegistry: FieldRegistryEntry[] = [
 
   // ── Vinyl ────────────────────────────────────────────────────────────────────
   createEntry('Vinyl', 'title', 'Primary product or range name shown in headings, titles, or hero content.', 'required', 'text', { category: 'identity', exampleValue: 'Karndean Knight Tile' }),
+  createEntry('Vinyl', 'brandName', 'Manufacturer or brand name for the product range when confirmed by the vendor page.', 'optional', 'text', { category: 'identity', promptHint: 'An m2crm brandNameHint may be provided as a candidate. Confirm it from the page, correct it if the page identifies a different brand, and omit it when the page does not support either value.' }),
   createEntry('Vinyl', 'description', 'Concise commercial description summarising the product from meta description, intro copy, or lead paragraph.', 'required', 'text', { category: 'identity' }),
   createEntry('Vinyl', 'productType', 'Concise flooring category such as sheet vinyl or vinyl tile when explicitly stated.', 'required', 'text', { category: 'identity', exampleValue: 'luxury vinyl tile', allowedValues: ['vinyl', 'sheet vinyl', 'vinyl tile', 'vinyl plank', 'lvt', 'luxury vinyl tile', 'luxury vinyl plank', 'luxury vinyl', 'vinyl flooring', 'lvp'] }),
   createEntry('Vinyl', 'thickness', 'Explicit vinyl thickness measurement.', 'required', 'measurement', { exampleValue: '2.5 mm' }),
@@ -295,6 +300,7 @@ export const fieldRegistry: FieldRegistryEntry[] = [
 
   // ── Engineered Wood ──────────────────────────────────────────────────────────
   createEntry('Engineered Wood', 'title', 'Primary product or range name shown in headings, titles, or hero content.', 'required', 'text', { category: 'identity', exampleValue: 'Quick-Step Cascada' }),
+  createEntry('Engineered Wood', 'brandName', 'Manufacturer or brand name for the product range when confirmed by the vendor page.', 'optional', 'text', { category: 'identity', promptHint: 'An m2crm brandNameHint may be provided as a candidate. Confirm it from the page, correct it if the page identifies a different brand, and omit it when the page does not support either value.' }),
   createEntry('Engineered Wood', 'description', 'Concise commercial description summarising the product from meta description, intro copy, or lead paragraph.', 'required', 'text', { category: 'identity' }),
   createEntry('Engineered Wood', 'productType', 'Concise wood-flooring category when explicitly stated.', 'required', 'text', { category: 'identity', exampleValue: 'engineered wood', allowedValues: ['engineered wood', 'engineered hardwood', 'wood flooring', 'hardwood flooring'] }),
   createEntry('Engineered Wood', 'thickness', 'Explicit overall board thickness measurement.', 'required', 'measurement', { exampleValue: '14 mm' }),
@@ -326,6 +332,7 @@ export const fieldRegistry: FieldRegistryEntry[] = [
 
   // ── Unknown ──────────────────────────────────────────────────────────────────
   createEntry('Unknown', 'title', 'Primary product or range name shown in headings, titles, or hero content.', 'required', 'text', { category: 'identity' }),
+  createEntry('Unknown', 'brandName', 'Manufacturer or brand name for the product range when confirmed by the vendor page.', 'optional', 'text', { category: 'identity', promptHint: 'An m2crm brandNameHint may be provided as a candidate. Confirm it from the page, correct it if the page identifies a different brand, and omit it when the page does not support either value.' }),
   createEntry('Unknown', 'description', 'Concise commercial description summarising the product from meta description, intro copy, or lead paragraph.', 'required', 'text', { category: 'identity' }),
   createEntry('Unknown', 'productType', 'Concise flooring category when explicitly stated.', 'optional', 'text', { category: 'identity' }),
   createEntry('Unknown', 'measurements', 'Explicit measurements found in the page.', 'optional', 'measurement-list'),

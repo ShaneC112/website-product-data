@@ -123,8 +123,40 @@ describe('publishProductDraft - held outcome', () => {
 })
 
 describe('publishProductDraft - draft outcome', () => {
+  it('reports the lifecycle of each uploaded source asset', async () => {
+    const blob = buildBlob({
+      widths: [{ widthLabel: '4 m' }],
+      variants: [{ variantId: 'blue', colourName: 'Blue', swatchImageUrl: 'https://example.com/swatch-blue.jpg' }],
+    })
+    const events: string[] = []
+
+    await publishProductDraft(
+      fakeClient(),
+      buildSanityIngestionPlan(baseRow(), blob, { vendorId: 'victoria-carpets' }),
+      fetchImageOk,
+      (event) => events.push(event.action),
+    )
+
+    expect(events).toEqual(['asset_fetch_started', 'asset_fetch_completed', 'asset_upload_completed'])
+  })
+
+  it('creates a draft when only optional registry recommendations are missing', async () => {
+    const blob = buildBlob({
+      widths: [{ widthLabel: '4 m' }],
+      variants: [{ variantId: 'blue', colourName: 'Blue', swatchImageUrl: 'https://example.com/swatch-blue.jpg' }],
+    })
+    blob.composition.readinessReasons = ['recommended_missing_pileHeight', 'recommended_missing_pileWeight']
+    const plan = buildSanityIngestionPlan(baseRow(), blob, { vendorId: 'victoria-carpets' })
+    const client = fakeClient()
+
+    const result = await publishProductDraft(client, plan, fetchImageOk)
+
+    expect(result.outcome).toBe('draft')
+    expect(client.createOrReplace).toHaveBeenCalledTimes(1)
+  })
+
   it('creates a Sanity draft when the plan passes bridge eligibility', async () => {
-    const row = baseRow({ rawPriceMinor: 10000 })
+    const row = baseRow({ price: 10000 })
     const blob = buildBlob({
       widths: [{ widthLabel: '4 m' }],
       variants: [{ variantId: 'blue', colourName: 'Blue', swatchHex: '#1122ff', swatchImageUrl: 'https://example.com/swatch-blue.jpg' }],
@@ -136,5 +168,55 @@ describe('publishProductDraft - draft outcome', () => {
 
     expect(result.outcome).toBe('draft')
     expect(client.createOrReplace).toHaveBeenCalledTimes(1)
+  })
+
+  it('updates an existing draft by vendor and external identity when the source lacks a style code', async () => {
+    const row = baseRow({sourceGroupKey: 'LANO/BASALTART', styleCode: undefined})
+    const blob = buildBlob({
+      widths: [{widthLabel: '4 m'}],
+      variants: [{variantId: 'camel', colourName: 'Camel', swatchImageUrl: 'https://example.com/swatch-camel.jpg'}],
+    })
+    delete blob.source.styleCode
+    const existing = {_id: 'drafts.existing-lano', _type: 'product', importMeta: {contentLocked: false}, variants: []}
+    const client = fakeClient({fetch: vi.fn(async () => ({drafts: [existing], published: [], aliasTargetIds: []}))})
+
+    const result = await publishProductDraft(client, buildSanityIngestionPlan(row, blob, {vendorId: 'lano-com'}), fetchImageOk)
+
+    expect(result).toMatchObject({outcome: 'draft', draftId: 'drafts.existing-lano'})
+    expect(client.fetch).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({vendorId: 'lano-com', externalId: 'LANO/BASALTART'}), {perspective: 'raw'})
+    expect(client.createOrReplace).toHaveBeenCalledWith(expect.objectContaining({_id: 'drafts.existing-lano'}))
+  })
+
+  it('updates a source-managed width when its stored measurement has a different property order', async () => {
+    const row = baseRow({sourceGroupKey: 'LANO/BASALTART', styleCode: undefined, rawWidthHintJson: JSON.stringify([{value: 4, unit: 'm'}])})
+    const blob = buildBlob({
+      widths: [],
+      variants: [{variantId: 'camel', colourName: 'Camel', swatchImageUrl: 'https://example.com/swatch-camel.jpg'}],
+    })
+    delete blob.source.styleCode
+    const existing = {
+      _id: 'drafts.existing-lano',
+      _type: 'product',
+      widths: [{_key: 'measurement-3-9878-m', _type: 'measurement', unit: 'm', value: 3.9878}],
+      importMeta: {
+        contentLocked: false,
+        sourceFields: [{
+          _key: 'widths',
+          _type: 'sourceFieldState',
+          path: 'widths',
+          valueHash: 'legacy-property-order-hash',
+          valueJson: '[{"value":3.9878,"unit":"m","_type":"measurement","_key":"measurement-3-9878-m"}]',
+          importedAt: '2026-08-01T00:00:00.000Z',
+        }],
+      },
+      variants: [],
+    }
+    const client = fakeClient({fetch: vi.fn(async () => ({drafts: [existing], published: [], aliasTargetIds: []}))})
+
+    await publishProductDraft(client, buildSanityIngestionPlan(row, blob, {vendorId: 'lano-com'}), fetchImageOk)
+
+    expect(client.createOrReplace).toHaveBeenCalledWith(expect.objectContaining({
+      widths: [{_key: 'measurement-4-m', _type: 'measurement', value: 4, unit: 'm'}],
+    }))
   })
 })

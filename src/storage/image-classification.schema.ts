@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const imageRoleSchema = z.enum(['primary', 'product', 'roomshot', 'swatch', 'unknown'])
+export const imageRoleSchema = z.enum(['primary', 'product', 'roomshot', 'swatch', 'technical', 'unknown'])
 
 export const classifiedImageSchema = z.object({
   url: z.string().trim().min(1),

@@ -1,8 +1,38 @@
 # Learnings
 
+## Deduping measurements must normalize units first, not just compare raw value+unit pairs
+
+`dedupeMeasurements` (used for `product.widths`) built its dedupe key from the raw
+`value`/`unit` pair as extracted, so `400 cm` and `4 m` - the same physical width
+from two different page passes or a range page vs. a variant page - survived as two
+"different" entries in the same array instead of one.
+
+**Fix:** normalize every measurement to metres (`normalizeMeasurementToMetres`,
+reusing the existing `normalizeMeasurementToMm` unit table) before building the
+dedupe key, and store the normalized value so Sanity's displayed widths are
+consistent regardless of which source unit a given pass happened to extract.
+
+**Best practice:** when deduping physical-unit values, always normalize to one
+canonical unit first - comparing raw extracted strings/units is not equality, it's
+just string equality that happens to work when every source agrees on units.
+
+## An identity-matching query needs a fallback when the primary key is absent
+
+`buildSanityIngestionPlan`'s `existingProductQuery` only matched an existing Sanity
+product by `styleCodeNormalized`, so a product row with no style code (still valid -
+`styleCode` is optional end-to-end) could never be matched to its own previously
+published draft; each ingestion run would create a new duplicate product instead of
+updating the existing one.
+
+**Fix:** when `styleCodeNormalized` is absent, fall back to matching on
+`importMeta.externalId` (the row's `sourceGroupKey`/`rowKey`) instead, which is
+always populated. Two query strings are still deliberately separate (rather than
+one query with optional params) so a missing style code doesn't loosen an
+otherwise-precise style-code match to a same-run coincidence.
+
 ## `buildVariant` applying one row's price to every colour was a real bug, not just a missing feature
 
-`buildSanityIngestionPlan` took a single flat `rawPriceMinor` from whichever one
+`buildSanityIngestionPlan` took a single flat `price` from whichever one
 `webcrawlproductdetail` row was passed in and applied it to every variant, even
 though `crawlTransformWorker.ts` already writes one row per matched m2crm SKU
 (each with its own price) and `publishWorker.ts` already computes a per-variant
@@ -10,7 +40,7 @@ match proposal (`matchVariantToCandidates`) before publishing. The two systems
 were never connected.
 
 **Fix:** `buildSanityIngestionPlan`'s new `options.variantOverrides` (keyed by
-`variantId`) lets a caller supply per-colour `rawPriceMinor`/`rawBoxPriceMinor`
+`variantId`) lets a caller supply per-colour `price`/`boxSalesPrice`
 resolved from the existing match ledger, overriding the row-level default only
 for variants that have a resolved override. `publishWorker.ts` now builds this
 map from the matching pass it already runs, and publishes once per distinct
@@ -156,18 +186,18 @@ is refreshed. Confirmed consumers as of this change:
 
 ## `crawlUrlLinkTableSchema` doesn't own every field `CrawlUrlLinkEntity` actually persists
 
-`rawPriceMinor`/`vatRate` (and now `rawBoxPriceMinor`/`boxUnit`) are read/written by
+`price`/`vatRate` (and now `boxSalesPrice`/`boxUnit`) are read/written by
 `website-product-enrichment-azure`'s `crawlUrlLinksStore.ts` via a locally-declared
 `CrawlUrlLinkEntity = CrawlUrlLinkTable & {...}` type extension, not via this package's
 shared `crawlUrlLinkTableSchema` in `src/storage/url-link.schema.ts`. This is an
 existing, asymmetric pattern (contrast with `crawlPageTableSchema`/`crawlProductDetailTableSchema`,
-which both own their `rawPriceMinor`/`vatRate` fields directly) - there is no runtime
+which both own their `price`/`vatRate` fields directly) - there is no runtime
 zod validation of these fields on the `webcrawlurllinks` table today, only a
 compile-time TS shape.
 
 **Best practice:** when adding a new field to the box-price/pack-info family, add it
 to the consumer-local `CrawlUrlLinkEntity`/`CrawlUrlLinkInput` type (mirroring
-`rawPriceMinor`/`vatRate`) rather than only to the shared schema - the shared schema
+`price`/`vatRate`) rather than only to the shared schema - the shared schema
 alone will not make the field reach the table today. Promoting these fields into the
 shared schema (so they get real runtime validation) is a separate, deliberate future
 change, not an automatic consequence of adding one more field this way.
@@ -289,7 +319,7 @@ pre-existing `crawlTransformWorker.ts` comment already warned couldn't be truste
 the identical problem and was fixed by resolving per-colour data from the matched m2crm source
 row (`variantOverrides`); width needed the same authoritative channel, not a second bespoke one.
 
-**Fix:** `rawWidthHint` rides the same `variantOverrides` map `rawPriceMinor` already uses. A
+**Fix:** `rawWidthHint` rides the same `variantOverrides` map `price` already uses. A
 variant's resolved width set is the union of its page-extracted `widths` and its matched source
 row's `rawWidthHint`, computed once per variant before `product.widths` is determined (so the
 range-level default can itself fall back to that union when no range-level width was extracted),

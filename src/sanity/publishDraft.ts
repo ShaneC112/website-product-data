@@ -16,6 +16,17 @@ export type SanityPublisherClient = {
   }
 }
 
+export type PublishAssetEvent = {
+  action: 'asset_fetch_started' | 'asset_fetch_completed' | 'asset_fetch_failed' | 'asset_upload_completed'
+  sourceUrl: string
+  role: AssetUpload['role']
+  target: AssetUpload['target']
+  durationMs?: number
+  status?: number
+  sizeBytes?: number
+  error?: string
+}
+
 type ExistingProduct = SanityProductDraft & {
   _id: string
   _rev?: string
@@ -34,13 +45,13 @@ export async function publishProductDraft(
   client: SanityPublisherClient,
   plan: SanityIngestionPlan,
   fetchImage: typeof fetch = fetch,
+  onAssetEvent?: (event: PublishAssetEvent) => void,
 ): Promise<PublishDraftResult> {
-  const lookup = plan.styleCodeNormalized
-    ? await client.fetch<ExistingProductVersions>(plan.existingProductQuery, {
-        vendorId: plan.vendorId,
-        styleCodeNormalized: plan.styleCodeNormalized,
-      }, {perspective: 'raw'})
-    : {drafts: [], published: [], aliasTargetIds: []}
+  const lookup = await client.fetch<ExistingProductVersions>(plan.existingProductQuery, {
+    vendorId: plan.vendorId,
+    styleCodeNormalized: plan.styleCodeNormalized,
+    externalId: plan.externalId,
+  }, {perspective: 'raw'})
   const resolution = await resolveExistingProduct(client, plan, lookup)
   const versions = resolution.versions
   const existing = versions.drafts[0] ?? versions.published[0]
@@ -61,17 +72,27 @@ export async function publishProductDraft(
   const document = structuredClone(plan.document)
   const assetIds: string[] = []
   for (const upload of plan.assets) {
-    const response = await fetchImage(upload.sourceUrl)
-    if (!response.ok) throw new Error(`Image download failed (${response.status}): ${upload.sourceUrl}`)
-    const asset = await client.assets.upload('image', await response.blob(), {filename: filenameFromUrl(upload.sourceUrl)})
-    assetIds.push(asset._id)
-    applyImage(document, upload, {
-      _type: 'productImage',
-      asset: {_type: 'reference', _ref: asset._id},
-      alt: upload.alt,
-      role: upload.role,
-      sourceUrl: upload.sourceUrl,
-    })
+    const startedAt = Date.now()
+    onAssetEvent?.({action: 'asset_fetch_started', sourceUrl: upload.sourceUrl, role: upload.role, target: upload.target})
+    try {
+      const response = await fetchImage(upload.sourceUrl)
+      if (!response.ok) throw new Error(`Image download failed (${response.status}): ${upload.sourceUrl}`)
+      const image = await response.blob()
+      onAssetEvent?.({action: 'asset_fetch_completed', sourceUrl: upload.sourceUrl, role: upload.role, target: upload.target, status: response.status, sizeBytes: image.size, durationMs: Date.now() - startedAt})
+      const asset = await client.assets.upload('image', image, {filename: filenameFromUrl(upload.sourceUrl)})
+      onAssetEvent?.({action: 'asset_upload_completed', sourceUrl: upload.sourceUrl, role: upload.role, target: upload.target, durationMs: Date.now() - startedAt})
+      assetIds.push(asset._id)
+      applyImage(document, upload, {
+        _type: 'productImage',
+        asset: {_type: 'reference', _ref: asset._id},
+        alt: upload.alt,
+        role: upload.role,
+        sourceUrl: upload.sourceUrl,
+      })
+    } catch (error) {
+      onAssetEvent?.({action: 'asset_fetch_failed', sourceUrl: upload.sourceUrl, role: upload.role, target: upload.target, durationMs: Date.now() - startedAt, error: error instanceof Error ? error.message : String(error)})
+      throw error
+    }
   }
 
   const importedAt = document.importMeta.importedAt

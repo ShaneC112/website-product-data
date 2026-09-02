@@ -42,6 +42,14 @@ function buildBlob(vendorProductPage: Record<string, unknown>): ComposedProductD
 // apply one row-level price to every colour, even when the match ledger had already resolved
 // distinct prices per colour via variantOverrides.
 describe('per-colour price resolution', () => {
+  it('maps an AI-confirmed registry brandName to the direct Sanity brand field', () => {
+    const blob = buildBlob({variants: []})
+    blob.extracted.fields = [{field: 'brandName', value: 'Lano', confidence: 0.99}]
+    const plan = buildSanityIngestionPlan(baseRow(), blob, {vendorId: 'lano'})
+
+    expect(plan.document.brand).toBe('Lano')
+  })
+
   it('marks a product as price on request only when neither the product nor any colour has a price', () => {
     const noPrices = buildSanityIngestionPlan(baseRow(), buildBlob({
       variants: [{variantId: 'blue', colourName: 'Blue'}],
@@ -50,7 +58,7 @@ describe('per-colour price resolution', () => {
       variants: [{variantId: 'blue', colourName: 'Blue'}],
     }), {
       vendorId: 'example',
-      variantOverrides: {blue: {rawPriceMinor: 10000}},
+      variantOverrides: {blue: {price: 10000}},
     })
 
     expect(noPrices.document.priceOnRequest).toBe(true)
@@ -58,7 +66,7 @@ describe('per-colour price resolution', () => {
   })
 
   it('resolves distinct prices per colour from variantOverrides instead of the row-level default', () => {
-    const row = baseRow({ rawPriceMinor: 9999 })
+    const row = baseRow({ price: 9999 })
     const blob = buildBlob({
       variants: [
         { variantId: 'blue', label: 'Blue', colourName: 'Blue' },
@@ -69,8 +77,8 @@ describe('per-colour price resolution', () => {
     const plan = buildSanityIngestionPlan(row, blob, {
       vendorId: 'victoria-carpets',
       variantOverrides: {
-        blue: { rawPriceMinor: 10000 },
-        green: { rawPriceMinor: 12000 },
+        blue: { price: 10000 },
+        green: { price: 12000 },
       },
     })
 
@@ -102,6 +110,18 @@ describe('per-colour price resolution', () => {
 })
 
 describe('width parent/child inheritance model', () => {
+  it('uses the source product raw width hint when the vendor range has no width evidence', () => {
+    const plan = buildSanityIngestionPlan(
+      baseRow({rawWidthHintJson: JSON.stringify([{value: 3.9878, unit: 'm'}])}),
+      buildBlob({variants: [{variantId: 'basalt', colourName: 'Basalt'}]}),
+      {vendorId: 'lano'},
+    )
+
+    expect(plan.document.widths).toMatchObject([
+      {_type: 'measurement', value: 3.9878, unit: 'm'},
+    ])
+  })
+
   it('leaves an identical variant width empty, and populates superset/subset variants with their full resolved set', () => {
     const row = baseRow()
     const blob = buildBlob({
@@ -160,7 +180,24 @@ describe('width parent/child inheritance model', () => {
       variantOverrides: { natureborn: { rawWidthHint: [{ value: 500, unit: 'cm' }] } },
     })
 
-    expect(plan.document.variants[0]).toMatchObject({overrides: {widths: true}, widths: [{ _type: 'measurement', _key: 'measurement-500-cm', value: 500, unit: 'cm' }]})
+    expect(plan.document.variants[0]).toMatchObject({overrides: {widths: true}, widths: [{ _type: 'measurement', _key: 'measurement-5-m', value: 5, unit: 'm' }]})
+  })
+
+  it('deduplicates equivalent vendor and M2CRM widths as canonical metres', () => {
+    const plan = buildSanityIngestionPlan(
+      baseRow({rawWidthHintJson: JSON.stringify([{value: 4, unit: 'm'}])}),
+      buildBlob({
+        widths: [{widthLabel: '400 cm'}, {widthLabel: '500 cm'}],
+        variants: [{variantId: 'bern-109', colourName: '109', widths: [{widthLabel: '400 cm'}, {widthLabel: '500 cm'}]}],
+      }),
+      {vendorId: 'best-wool'},
+    )
+
+    expect(plan.document.widths).toEqual([
+      {_type: 'measurement', _key: 'measurement-4-m', value: 4, unit: 'm'},
+      {_type: 'measurement', _key: 'measurement-5-m', value: 5, unit: 'm'},
+    ])
+    expect(plan.document.variants[0]).toMatchObject({overrides: {widths: false}, widths: undefined})
   })
 
   it('falls back product.widths to the union of variants own resolved widths when no range-level width is present', () => {
@@ -303,6 +340,34 @@ describe('colourFamily derivation', () => {
   })
 })
 
+describe('classified vendor gallery images', () => {
+  it('retains roomshots and technical images as product-gallery assets', () => {
+    const plan = buildSanityIngestionPlan(baseRow(), buildBlob({
+      variants: [{
+        variantId: 'blue',
+        colourName: 'Blue',
+        swatchImageUrl: 'https://example.com/blue-swatch.jpg',
+        imageUrls: [
+          'https://example.com/blue-swatch.jpg',
+          'https://example.com/blue-room.jpg',
+          'https://example.com/blue-backing.jpg',
+        ],
+        classifiedImages: [
+          {url: 'https://example.com/blue-swatch.jpg', role: 'swatch', confidence: 0.99},
+          {url: 'https://example.com/blue-room.jpg', role: 'roomshot', confidence: 0.97},
+          {url: 'https://example.com/blue-backing.jpg', role: 'technical', confidence: 0.95},
+        ],
+      }],
+    }), {vendorId: 'example'})
+
+    expect(plan.assets).toEqual(expect.arrayContaining([
+      expect.objectContaining({sourceUrl: 'https://example.com/blue-swatch.jpg', role: 'swatch', target: {scope: 'variant', variantKey: 'blue', field: 'swatchImage'}}),
+      expect.objectContaining({sourceUrl: 'https://example.com/blue-room.jpg', role: 'roomshot', target: {scope: 'product', field: 'gallery'}}),
+      expect.objectContaining({sourceUrl: 'https://example.com/blue-backing.jpg', role: 'technical', target: {scope: 'product', field: 'gallery'}}),
+    ]))
+  })
+})
+
 // regression coverage for Phase 04 task 6: importMeta must never carry gateStatus/detailScore/
 // accuracyScore/blockingReasons/needsReview - only a single bucketed importAiConfidence hint.
 describe('importAiConfidence bucketing', () => {
@@ -343,7 +408,7 @@ describe('importAiConfidence bucketing', () => {
 // review.included, and importAiConfidence set to a plausible label.
 describe('scenario (b): carpet range with swatch + width + mapped trade produces a full draft', () => {
   it('populates colourFamily, product.widths, review-filtered specs/features, and importAiConfidence together', () => {
-    const row = baseRow({ rawPriceMinor: 9999 })
+    const row = baseRow({ price: 9999 })
     const blob = buildBlob({
       widths: [{ widthLabel: '4 m' }],
       variants: [{ variantId: 'blue', colourName: 'Blue', swatchHex: '#1122ff', swatchImageUrl: 'https://example.com/swatch-blue.jpg' }],
@@ -375,7 +440,7 @@ describe('scenario (b): carpet range with swatch + width + mapped trade produces
 // `packInfo` (coverage/pieces/dimensions) from the AI-extracted value - not the m2crm bias hint.
 describe('scenario (c): hard-flooring variant carries both price and packPrice plus AI-extracted packInfo', () => {
   it('stores price, packPrice, and packInfo as Laminate defaults when every variant inherits them', () => {
-    const row = baseRow({ trade: 'Laminate', rawPriceMinor: 2500, rawBoxPriceMinor: 8999 })
+    const row = baseRow({ trade: 'Laminate', price: 2500, boxSalesPrice: 8999 })
     const blob = buildBlob({ variants: [{ variantId: 'oak', colourName: 'Oak' }] })
     blob.extracted.trade = 'Laminate'
     blob.extracted.fields = [

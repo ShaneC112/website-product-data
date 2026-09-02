@@ -42,17 +42,19 @@ export const crawlRequestMessageSchema = z.object({
   // share one crawled URL but are different m2crm products/groups) so extraction knows which
   // weight option this group's copy is describing. Absent/undefined for single-weight products.
   pileWeightHint: z.string().trim().min(1).optional(),
+  // M2CRM vendor name supplied as an identity candidate for page-evidence confirmation.
+  brandNameHint: z.string().trim().min(1).optional(),
   productOnlinePdfUrl: httpsUrlSchema.optional(),
   reason: z.enum(['new', 'url_changed', 'product_changed', 'manual']),
   changedFields: z.array(z.string().trim().min(1)).default([]),
-  rawPriceMinor: z.number().int().optional(),
+  price: z.number().int().optional(),
   vatRate: z.number().optional(),
-  // merchant-set box price, same trust tier as rawPriceMinor - not a vendor-page claim to verify.
-  rawBoxPriceMinor: z.number().int().optional(),
+  // merchant-set box price, same trust tier as price - not a vendor-page claim to verify.
+  boxSalesPrice: z.number().int().optional(),
   boxUnit: z.string().trim().min(1).optional(),
   // this SKU's own roll width(s) from m2crm's native `width` product field (confirmed live, e.g.
   // "13'1\"" on a /400 SKU vs "16'5\"" on a /500 SKU of the same range) - authoritative business
-  // data like rawPriceMinor, not a bias hint like pileWeightHint/packInfoHint.
+  // data like price, not a bias hint like pileWeightHint/packInfoHint.
   rawWidthHint: z.array(extractedScalarMeasurementSchema).optional(),
   // m2crm's own plank/tile size + coverage + pieces-per-box - a bias hint for AI extraction only,
   // mirrors pileWeightHint. Does NOT override the AI-extracted packInfo registry field.

@@ -26,13 +26,13 @@ export const crawlProductDetailTableSchema = z.object({
   sourceRowKey: z.string().trim().min(1).optional(),
   m2crmUuid: z.string().trim().min(1).optional(),
   vendorSku: z.string().trim().min(1).optional(),
-  rawPriceMinor: z.number().optional(),
+  price: z.number().optional(),
   vatRate: z.number().optional(),
-  // merchant-set box price, same trust tier as rawPriceMinor - not a vendor-page claim to verify.
-  rawBoxPriceMinor: z.number().optional(),
+  // merchant-set box price, same trust tier as price - not a vendor-page claim to verify.
+  boxSalesPrice: z.number().optional(),
   boxUnit: z.string().trim().min(1).optional(),
   packInfoHintJson: z.string().trim().min(1).optional(),
-  // this row's own matched m2crm SKU's roll width(s), same trust tier as rawPriceMinor - see
+  // this row's own matched m2crm SKU's roll width(s), same trust tier as price - see
   // rawWidthHintSchema in page-detail.schema.ts. JSON-stringified, consistent with the other hint columns.
   rawWidthHintJson: z.string().trim().min(1).optional(),
   styleCode: z.string().trim().min(1).optional(),

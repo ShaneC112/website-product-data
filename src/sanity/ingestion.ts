@@ -14,6 +14,7 @@ import type {
   ExtractedReviewModel,
   ExtractedVendorVariant,
 } from '../storage/index.js'
+import { parseRawWidthHint } from '../storage/product-detail.schema.js'
 
 type SanityPrice = {
   _type: 'productPrice'
@@ -83,7 +84,7 @@ type SanityProductFeature = {
 
 export type AssetUpload = {
   sourceUrl: string
-  role: 'product' | 'swatch' | 'roomshot'
+  role: 'product' | 'swatch' | 'roomshot' | 'technical'
   alt: string
   target:
     | {scope: 'variant'; variantKey: string; field: 'primaryImage' | 'images' | 'swatchImage'}
@@ -190,7 +191,7 @@ export type BuildIngestionOptions = {
   // variant falls back to the single row-level price/packPrice (today's product-wide default).
   // rawWidthHint is that same matched source row's own roll width(s) (m2crm's native `width`
   // field) - unioned with any page-extracted variant.widths to resolve that colour's own width set.
-  variantOverrides?: Record<string, {rawPriceMinor?: number; rawBoxPriceMinor?: number; rawWidthHint?: {value: number; unit: string}[]; packInfoHint?: PackInfoHint}>
+  variantOverrides?: Record<string, {price?: number; boxSalesPrice?: number; rawWidthHint?: {value: number; unit: string}[]; packInfoHint?: PackInfoHint}>
 }
 
 export function calculateRetailIncVat(retailExVatMinor: number): number {
@@ -217,10 +218,13 @@ export function buildSanityIngestionPlan(
   const styleCode = row.styleCode ?? blob.source.styleCode ?? blob.extracted.styleCode
   const styleCodeNormalized = styleCode ? normalizeStyleCode(styleCode) : undefined
   const identityKey = styleCodeNormalized ? `${vendorId}:${styleCodeNormalized}` : undefined
-  const price = row.rawPriceMinor == null ? undefined : buildPrice(row.rawPriceMinor, options.pricingUnit ?? 'm2')
-  const packPrice = row.rawBoxPriceMinor == null ? undefined : buildPrice(row.rawBoxPriceMinor, 'pack')
+  const price = row.price == null ? undefined : buildPrice(row.price, options.pricingUnit ?? 'm2')
+  const packPrice = row.boxSalesPrice == null ? undefined : buildPrice(row.boxSalesPrice, 'pack')
   const packInfo = readPackInfo(fieldMap.get('packInfo')?.value)
-  const rangeWidths = dedupeMeasurements((vendorPage?.widths ?? []).map(readWidthSlot).filter(isDefined))
+  const rangeWidths = dedupeMeasurements([
+    ...(vendorPage?.widths ?? []).map(readWidthSlot).filter(isDefined),
+    ...(row.rawWidthHintJson ? parseRawWidthHint(row.rawWidthHintJson).map(readMeasurement).filter(isDefined) : []),
+  ])
   const variantOwnWidths = (vendorPage?.variants ?? []).map((variant, index) =>
     resolveVariantOwnWidths(variant, index, options.variantOverrides),
   )
@@ -234,10 +238,15 @@ export function buildSanityIngestionPlan(
     buildVariant(variant, index, price, suitableRooms, row.vendorSku, packPrice, packInfo, productWidths, variantOwnWidths[index], options.variantOverrides, options.pricingUnit ?? 'm2'),
   )
   const blockingReasons = [...new Set([
-    ...blob.composition.readinessReasons.filter((reason) => reason !== 'extraction_warnings_informational'),
+    ...blob.composition.readinessReasons.filter(
+      (reason) => reason !== 'extraction_warnings_informational' && !reason.startsWith('recommended_'),
+    ),
     ...(options.blockingReasons ?? []),
   ])]
   const externalId = row.sourceGroupKey ?? row.rowKey
+  const existingProductQuery = styleCodeNormalized
+    ? '{"drafts": *[_type == "product" && _id in path("drafts.**") && importMeta.vendorId == $vendorId && (importMeta.styleCodeNormalized == $styleCodeNormalized || importMeta.externalId == $externalId)], "published": *[_type == "product" && !(_id in path("drafts.**")) && importMeta.vendorId == $vendorId && (importMeta.styleCodeNormalized == $styleCodeNormalized || importMeta.externalId == $externalId)], "aliasTargetIds": *[_type == "productIdentityAlias" && vendorId == $vendorId && styleCodeNormalized == $styleCodeNormalized && status == "active"].targetProduct._ref}'
+    : '{"drafts": *[_type == "product" && _id in path("drafts.**") && importMeta.vendorId == $vendorId && importMeta.externalId == $externalId], "published": *[_type == "product" && !(_id in path("drafts.**")) && importMeta.vendorId == $vendorId && importMeta.externalId == $externalId], "aliasTargetIds": []}'
   const assets = buildAssetUploads(vendorPage?.variants ?? [], name ?? 'Product')
 
   return {
@@ -245,7 +254,7 @@ export function buildSanityIngestionPlan(
     identityKey,
     vendorId,
     styleCodeNormalized,
-    existingProductQuery: '{"drafts": *[_type == "product" && _id in path("drafts.**") && importMeta.vendorId == $vendorId && importMeta.styleCodeNormalized == $styleCodeNormalized], "published": *[_type == "product" && !(_id in path("drafts.**")) && importMeta.vendorId == $vendorId && importMeta.styleCodeNormalized == $styleCodeNormalized], "aliasTargetIds": *[_type == "productIdentityAlias" && vendorId == $vendorId && styleCodeNormalized == $styleCodeNormalized && status == "active"].targetProduct._ref}',
+    existingProductQuery,
     productByIdQuery: '{"drafts": *[_type == "product" && _id == $draftId], "published": *[_type == "product" && _id == $publishedId]}',
     document: {
       _type: 'product',
@@ -253,7 +262,7 @@ export function buildSanityIngestionPlan(
       slug: name ? {_type: 'slug', current: slugify(name)} : undefined,
       productType,
       categoryKey,
-      brand: vendorPage?.brandName,
+      brand: readString(fieldMap.get('brandName')?.value) ?? vendorPage?.brandName,
       shortDescription: description,
       features: buildFeatures(blob.review, fieldMap, blob.extracted.trade),
       specs: buildSpecs(blob.review, fieldMap, blob.extracted.trade),
@@ -303,13 +312,13 @@ function buildVariant(
   packInfo: SanityPackInfo | undefined,
   productWidths: SanityArrayMeasurement[],
   ownWidths: SanityMeasurement[],
-  variantOverrides: Record<string, {rawPriceMinor?: number; rawBoxPriceMinor?: number; rawWidthHint?: {value: number; unit: string}[]; packInfoHint?: PackInfoHint}> | undefined,
+  variantOverrides: Record<string, {price?: number; boxSalesPrice?: number; rawWidthHint?: {value: number; unit: string}[]; packInfoHint?: PackInfoHint}> | undefined,
   pricingUnit: SanityPrice['unit'],
 ): SanityProductDraft['variants'][number] {
   const variantId = variant.variantId ?? variant.label ?? `variant-${index + 1}`
   const override = variantOverrides?.[variantId]
-  const resolvedPrice = override?.rawPriceMinor != null ? buildPrice(override.rawPriceMinor, pricingUnit) : price
-  const resolvedPackPrice = override?.rawBoxPriceMinor != null ? buildPrice(override.rawBoxPriceMinor, 'pack') : packPrice
+  const resolvedPrice = override?.price != null ? buildPrice(override.price, pricingUnit) : price
+  const resolvedPackPrice = override?.boxSalesPrice != null ? buildPrice(override.boxSalesPrice, 'pack') : packPrice
   const resolvedPackInfo = override?.packInfoHint ? readPackInfo(override.packInfoHint) : packInfo
   const widths = ownWidths.length > 0 && !areMeasurementSetsEquivalent(ownWidths, productWidths) ? ownWidths : []
   const resolvedRooms = variant.suitability?.filter(isSanitySuitableRoom) ?? productRooms
@@ -360,7 +369,7 @@ function areStringSetsEquivalent(left: string[], right: string[]): boolean {
 function resolveVariantOwnWidths(
   variant: ExtractedVendorVariant,
   index: number,
-  variantOverrides: Record<string, {rawPriceMinor?: number; rawBoxPriceMinor?: number; rawWidthHint?: {value: number; unit: string}[]; packInfoHint?: PackInfoHint}> | undefined,
+  variantOverrides: Record<string, {price?: number; boxSalesPrice?: number; rawWidthHint?: {value: number; unit: string}[]; packInfoHint?: PackInfoHint}> | undefined,
 ): SanityMeasurement[] {
   const variantId = variant.variantId ?? variant.label ?? `variant-${index + 1}`
   const override = variantOverrides?.[variantId]
@@ -390,10 +399,11 @@ function dedupeMeasurements(measurements: SanityMeasurement[]): SanityMeasuremen
   const seen = new Set<string>()
   const result: SanityMeasurement[] = []
   for (const measurement of measurements) {
-    const key = `${measurement.value}:${measurement.unit.toLowerCase()}`
+    const normalizedMeasurement = normalizeMeasurementToMetres(measurement)
+    const key = `${normalizedMeasurement.value}:${normalizedMeasurement.unit.toLowerCase()}`
     if (seen.has(key)) continue
     seen.add(key)
-    result.push(measurement)
+    result.push(normalizedMeasurement)
   }
   return result
 }
@@ -409,6 +419,12 @@ const LENGTH_UNIT_TO_MM: Record<string, number> = {
   mm: 1,
   cm: 10,
   m: 1000,
+}
+
+function normalizeMeasurementToMetres(measurement: SanityMeasurement): SanityMeasurement {
+  const millimetres = normalizeMeasurementToMm(measurement)
+  if (millimetres === undefined) return measurement
+  return {_type: 'measurement', value: Number((millimetres / 1000).toFixed(4)), unit: 'm'}
 }
 
 function normalizeMeasurementToMm(measurement: SanityMeasurement): number | undefined {
@@ -460,7 +476,10 @@ function buildAssetUploads(variants: ExtractedVendorVariant[], productName: stri
     allUrls.forEach((sourceUrl) => {
       const classifiedRole = classified.get(sourceUrl)
       const role = swatches.has(sourceUrl) || classifiedRole === 'swatch'
-        ? 'swatch' : classifiedRole === 'roomshot' ? 'roomshot' : 'product'
+        ? 'swatch'
+        : classifiedRole === 'roomshot' || classifiedRole === 'technical'
+          ? classifiedRole
+          : 'product'
       const target: AssetUpload['target'] = role === 'swatch'
         ? {scope: 'variant', variantKey, field: 'swatchImage'}
         : role === 'product' && !hasPrimaryImage
@@ -470,7 +489,11 @@ function buildAssetUploads(variants: ExtractedVendorVariant[], productName: stri
       const targetKey = target.scope === 'variant' ? `${target.variantKey}:${target.field}` : target.field
       uploads.set(`${targetKey}:${sourceUrl}`, {
         sourceUrl, role,
-        alt: role === 'roomshot' ? `${productName} in a room setting` : `${productName}, ${colourName}`,
+        alt: role === 'roomshot'
+          ? `${productName} in a room setting`
+          : role === 'technical'
+            ? `${productName} technical detail`
+            : `${productName}, ${colourName}`,
         target,
       })
     })

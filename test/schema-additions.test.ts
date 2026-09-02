@@ -290,14 +290,50 @@ describe('pileWeightHint plumbing (multi-weight product disambiguation)', () => 
       styleCode: 'VICTORIA/BURFORDTWIST/40OZ',
       trade: 'Carpet',
       pileWeightHint: '40oz'
+      ,price: 2500
+      ,boxSalesPrice: 0
     })
 
     expect(parsed.pileWeightHint).toBe('40oz')
   })
 })
 
+describe('brand name hint plumbing', () => {
+  const baseMessage = {
+    source: 'manual' as const,
+    tableName: 'm2crmproducts',
+    rowKey: '123',
+    url: 'https://example.com/range',
+    crawlType: 'Range' as const,
+    styleCode: 'LANO/BASALTART',
+    trade: 'Carpet',
+    reason: 'new' as const,
+    requestedAt: '2026-01-01T00:00:00.000Z'
+  }
+
+  it('round-trips brandNameHint across manual, queue, and crawl-page contracts', () => {
+    expect(manualCrawlEnqueueSchema.parse({
+      tableName: 'm2crmproducts', rowKey: '123', url: 'https://example.com/range',
+      crawlType: 'Range', styleCode: 'LANO/BASALTART', trade: 'Carpet',
+      price: 5841, boxSalesPrice: 700920, brandNameHint: 'Lano'
+    }).brandNameHint).toBe('Lano')
+    expect(crawlRequestMessageSchema.parse({...baseMessage, brandNameHint: 'Lano'}).brandNameHint).toBe('Lano')
+    expect(crawlPageTableSchema.parse({
+      partitionKey: 'p', rowKey: 'r', url: 'https://example.com', urlKey: 'url-key-1', brandNameHint: 'Lano'
+    }).brandNameHint).toBe('Lano')
+  })
+
+  it('registers direct Sanity brandName extraction for every trade', () => {
+    for (const trade of ['Carpet', 'Carpet Tile', 'Laminate', 'Vinyl', 'Engineered Wood', 'Unknown']) {
+      expect(getRegistryEntriesForTrade(trade)).toContainEqual(expect.objectContaining({
+        field: 'brandName', requiredLevel: 'optional', valueType: 'text', sanityFieldPath: 'brand'
+      }))
+    }
+  })
+})
+
 // regression coverage for the m2crm box-price/pack-info wiring (Laminate/Vinyl/Engineered Wood):
-// rawBoxPriceMinor/boxUnit are authoritative (same trust tier as rawPriceMinor), packInfoHint is
+// boxSalesPrice/boxUnit are authoritative (same trust tier as price), packInfoHint is
 // a bias hint only (mirrors pileWeightHint). Each must survive both queue-boundary schemas plus
 // the page/product-detail table schemas independently - missing any one silently drops the field.
 describe('m2crm box price / pack info hint plumbing', () => {
@@ -308,7 +344,7 @@ describe('m2crm box price / pack info hint plumbing', () => {
     piecesPerPack: 8
   }
 
-  it('accepts rawBoxPriceMinor/boxUnit/packInfoHint on the crawl request message', () => {
+  it('accepts boxSalesPrice/boxUnit/packInfoHint on the crawl request message', () => {
     const parsed = crawlRequestMessageSchema.parse({
       source: 'manual',
       tableName: 'm2crmproducts',
@@ -319,12 +355,12 @@ describe('m2crm box price / pack info hint plumbing', () => {
       trade: 'Laminate',
       reason: 'new',
       requestedAt: '2026-01-01T00:00:00.000Z',
-      rawBoxPriceMinor: 8999,
+      boxSalesPrice: 8999,
       boxUnit: 'box',
       packInfoHint
     })
 
-    expect(parsed.rawBoxPriceMinor).toBe(8999)
+    expect(parsed.boxSalesPrice).toBe(8999)
     expect(parsed.boxUnit).toBe('box')
     expect(parsed.packInfoHint).toEqual(packInfoHint)
   })
@@ -337,27 +373,29 @@ describe('m2crm box price / pack info hint plumbing', () => {
       crawlType: 'Range',
       styleCode: 'PERGO/ORIGINAL',
       trade: 'Laminate',
-      rawBoxPriceMinor: 8999,
+      price: 2500,
+      boxSalesPrice: 8999,
       boxUnit: 'box',
       packInfoHint
     })
 
-    expect(parsed.rawBoxPriceMinor).toBe(8999)
+    expect(parsed.price).toBe(2500)
+    expect(parsed.boxSalesPrice).toBe(8999)
     expect(parsed.boxUnit).toBe('box')
     expect(parsed.packInfoHint).toEqual(packInfoHint)
   })
 
-  it('accepts rawBoxPriceMinor/boxUnit on the crawl page table row', () => {
+  it('accepts boxSalesPrice/boxUnit on the crawl page table row', () => {
     const parsed = crawlPageTableSchema.parse({
       partitionKey: 'p',
       rowKey: 'r',
       url: 'https://example.com',
       urlKey: 'url-key-1',
-      rawBoxPriceMinor: 8999,
+      boxSalesPrice: 8999,
       boxUnit: 'box'
     })
 
-    expect(parsed.rawBoxPriceMinor).toBe(8999)
+    expect(parsed.boxSalesPrice).toBe(8999)
     expect(parsed.boxUnit).toBe('box')
   })
 
@@ -374,21 +412,39 @@ describe('m2crm box price / pack info hint plumbing', () => {
     expect(parseCrawlPagePackInfoHint(parsed.packInfoHintJson!)).toEqual(packInfoHint)
   })
 
-  it('accepts rawBoxPriceMinor/boxUnit on the crawl product detail table row', () => {
+  it('accepts boxSalesPrice/boxUnit on the crawl product detail table row', () => {
     const parsed = crawlProductDetailTableSchema.parse({
       partitionKey: 'p',
       rowKey: 'r',
-      rawBoxPriceMinor: 8999,
+      boxSalesPrice: 8999,
       boxUnit: 'box'
     })
 
-    expect(parsed.rawBoxPriceMinor).toBe(8999)
+    expect(parsed.boxSalesPrice).toBe(8999)
     expect(parsed.boxUnit).toBe('box')
   })
 })
 
+describe('m2crm product price plumbing', () => {
+  it('requires explicit non-negative M2CRM price fields at the manual HTTP boundary', () => {
+    const parsed = manualCrawlEnqueueSchema.parse({
+      tableName: 'm2crmproducts',
+      rowKey: '123',
+      url: 'https://example.com/range',
+      crawlType: 'Range',
+      styleCode: 'LANO/BASALTART',
+      trade: 'Carpet',
+      price: 5841,
+      boxSalesPrice: 700920
+    })
+
+    expect(parsed.price).toBe(5841)
+    expect(parsed.boxSalesPrice).toBe(700920)
+  })
+})
+
 // regression coverage for the m2crm per-SKU width-hint wiring (Phase 02a): rawWidthHint is
-// authoritative business data (same trust tier as rawPriceMinor, confirmed live against m2crm's
+// authoritative business data (same trust tier as price, confirmed live against m2crm's
 // native `width` product field), not a bias hint like packInfoHint. Each schema boundary it
 // crosses must round-trip it independently, same rationale as the box price/pack info block above.
 describe('m2crm width hint plumbing', () => {
@@ -419,6 +475,8 @@ describe('m2crm width hint plumbing', () => {
       crawlType: 'Range',
       styleCode: 'VICTORIA/BURFORDTWIST/50OZ',
       trade: 'Carpet',
+      price: 2500,
+      boxSalesPrice: 0,
       rawWidthHint
     })
 
@@ -477,7 +535,9 @@ describe('SpecifiedUrls crawl requests', () => {
       crawlType: 'SpecifiedUrls',
       specifiedUrls: ['https://example.com/product/one'],
       styleCode: 'SISAL',
-      trade: 'Carpet'
+      trade: 'Carpet',
+      price: 2500,
+      boxSalesPrice: 0
     })
 
     expect(parsed.specifiedUrls).toEqual(['https://example.com/product/one'])
@@ -514,6 +574,8 @@ describe('productOnlinePdfUrl plumbing (curated upstream PDF evidence)', () => {
       crawlType: 'Range',
       styleCode: 'VICTORIA/BURFORDTWIST/40OZ',
       trade: 'Carpet',
+      price: 2500,
+      boxSalesPrice: 0,
       productOnlinePdfUrl: 'https://cdn.example.com/spec.pdf'
     })
 

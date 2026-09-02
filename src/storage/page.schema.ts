@@ -39,15 +39,16 @@ export const crawlPageTableSchema = z.object({
   visibleTextLength: z.number().int().nonnegative().optional(),
   ttlExpiresAt: z.string().trim().min(1).optional(),
   etag: z.string().trim().min(1).optional(),
-  rawPriceMinor: z.number().optional(),
+  price: z.number().optional(),
   vatRate: z.number().optional(),
-  // merchant-set box price, same trust tier as rawPriceMinor - not a vendor-page claim to verify.
-  rawBoxPriceMinor: z.number().optional(),
+  // merchant-set box price, same trust tier as price - not a vendor-page claim to verify.
+  boxSalesPrice: z.number().optional(),
   boxUnit: z.string().trim().min(1).optional(),
   packInfoHintJson: z.string().trim().min(1).optional(),
   vendorSku: z.string().trim().min(1).optional(),
   sourceRowKey: z.string().trim().min(1).optional(),
-  pileWeightHint: z.string().trim().min(1).optional()
+  pileWeightHint: z.string().trim().min(1).optional(),
+  brandNameHint: z.string().trim().min(1).optional()
 })
 
 export type CrawlPageVariantUrls = z.infer<typeof crawlPageVariantUrlsSchema>

@@ -118,7 +118,7 @@ function resolveField(
   }
 
   const currentMatchesPreviousSource = previousState
-    ? hashValue(currentValue) === previousState.valueHash
+    ? hashValue(currentValue) === previousState.valueHash || matchesSerializedValue(currentValue, previousState.valueJson)
     : !currentHasValue || hashValue(currentValue) === hashValue(incomingValue)
 
   if (currentMatchesPreviousSource) return {value: incomingValue, sourceValue: incomingValue}
@@ -266,6 +266,23 @@ function hashValue(value: unknown): string {
 }
 function serializeValue(value: unknown): string {
   return JSON.stringify(value === undefined ? null : value)
+}
+
+function matchesSerializedValue(value: unknown, serializedValue: string): boolean {
+  try {
+    return canonicalizeValue(value) === canonicalizeValue(JSON.parse(serializedValue))
+  } catch {
+    return false
+  }
+}
+
+function canonicalizeValue(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonicalizeValue).join(',')}]`
+  if (value && typeof value === 'object') {
+    const objectValue = value as Record<string, unknown>
+    return `{${Object.keys(objectValue).sort().map((key) => `${JSON.stringify(key)}:${canonicalizeValue(objectValue[key])}`).join(',')}}`
+  }
+  return JSON.stringify(value)
 }
 function stableKey(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-|-$/g, '').slice(0, 96)
