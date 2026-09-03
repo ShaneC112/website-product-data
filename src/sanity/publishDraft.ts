@@ -1,4 +1,4 @@
-import {randomUUID} from 'node:crypto'
+import {createHash, randomUUID} from 'node:crypto'
 import type {AssetUpload, SanityImage, SanityIngestionPlan, SanityProductDraft} from './ingestion.js'
 import {buildInitialSourceFields, mergeProductUpdate} from './mergeProductUpdate.js'
 import {evaluateBridgeEligibility} from './bridgeContract.schema.js'
@@ -9,7 +9,7 @@ export type PublishDraftResult =
 
 export type SanityPublisherClient = {
   fetch<T>(query: string, params?: Record<string, unknown>, options?: {perspective?: string}): Promise<T>
-  create(document: {_type: string; [key: string]: unknown}): Promise<{_id: string}>
+  createIfNotExists(document: {_id: string; _type: string; [key: string]: unknown}): Promise<{_id: string}>
   createOrReplace(document: {_id: string; _type: string; [key: string]: unknown}): Promise<unknown>
   assets: {
     upload(type: 'image', body: Blob, options?: {filename?: string}): Promise<{_id: string}>
@@ -17,7 +17,7 @@ export type SanityPublisherClient = {
 }
 
 export type PublishAssetEvent = {
-  action: 'asset_fetch_started' | 'asset_fetch_completed' | 'asset_fetch_failed' | 'asset_upload_completed'
+  action: 'asset_fetch_started' | 'asset_fetch_completed' | 'asset_fetch_failed' | 'asset_upload_completed' | 'media_image_created'
   sourceUrl: string
   role: AssetUpload['role']
   target: AssetUpload['target']
@@ -82,12 +82,19 @@ export async function publishProductDraft(
       const asset = await client.assets.upload('image', image, {filename: filenameFromUrl(upload.sourceUrl)})
       onAssetEvent?.({action: 'asset_upload_completed', sourceUrl: upload.sourceUrl, role: upload.role, target: upload.target, durationMs: Date.now() - startedAt})
       assetIds.push(asset._id)
-      applyImage(document, upload, {
-        _type: 'productImage',
-        asset: {_type: 'reference', _ref: asset._id},
+      const mediaImage = await client.createIfNotExists({
+        _id: vendorMediaImageId(upload.sourceUrl, upload.role),
+        _type: 'mediaImage',
+        image: {_type: 'image', asset: {_type: 'reference', _ref: asset._id}},
         alt: upload.alt,
         role: upload.role,
+        source: 'vendor',
         sourceUrl: upload.sourceUrl,
+      })
+      onAssetEvent?.({action: 'media_image_created', sourceUrl: upload.sourceUrl, role: upload.role, target: upload.target, durationMs: Date.now() - startedAt})
+      applyImage(document, upload, {
+        _type: 'reference',
+        _ref: mediaImage._id,
       })
     } catch (error) {
       onAssetEvent?.({action: 'asset_fetch_failed', sourceUrl: upload.sourceUrl, role: upload.role, target: upload.target, durationMs: Date.now() - startedAt, error: error instanceof Error ? error.message : String(error)})
@@ -186,4 +193,9 @@ function filenameFromUrl(url: string): string | undefined {
   } catch {
     return undefined
   }
+}
+
+function vendorMediaImageId(sourceUrl: string, role: AssetUpload['role']): string {
+  const identity = createHash('sha256').update(`vendor:${role}:${sourceUrl}`).digest('hex')
+  return `media-vendor-${identity}`
 }

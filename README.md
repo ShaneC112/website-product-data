@@ -1,5 +1,22 @@
 # website-product-data
 
+## Sanity media projections
+
+`@shane-corrigan/website-product-data/sanity` exports `SANITY_MEDIA_IMAGE_FIELDS` and
+`mediaImageProjection()`. Use them in frontend GROQ queries to dereference a direct
+`mediaImage` reference while returning the previous image-compatible `{_type, asset, alt, crop,
+hotspot}` shape plus canonical media metadata.
+
+```ts
+import {mediaImageProjection} from '@shane-corrigan/website-product-data/sanity'
+
+const roomQuery = `*[_type == "room" && slug.current == $slug][0]{
+  name,
+  ${mediaImageProjection('image', 'image')},
+  ${mediaImageProjection('coalesce(openGraphImage, image)', 'openGraphImage')}
+}`
+```
+
 ## Intent
 
 `website-product-data` is the shared data-contract library for the website product

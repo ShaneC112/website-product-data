@@ -85,7 +85,7 @@ type SanityProductFeature = {
 
 export type AssetUpload = {
   sourceUrl: string
-  role: 'product' | 'swatch' | 'roomshot' | 'technical'
+  role: 'product' | 'swatch' | 'roomshot'
   alt: string
   target:
     | {scope: 'variant'; variantKey: string; field: 'primaryImage' | 'images' | 'swatchImage'}
@@ -160,13 +160,8 @@ export type SanityProductDraft = {
 }
 
 export type SanityImage = {
-  _type: 'productImage'
-  asset: {_type: 'reference'; _ref: string}
-  alt: string
-  role: AssetUpload['role']
-  sourceUrl: string
-  room?: SanitySuitableRoom | 'not-specified'
-  generationPrompt?: string
+  _type: 'reference'
+  _ref: string
 }
 
 export type SanityIngestionPlan = {
@@ -498,11 +493,13 @@ function buildAssetUploads(variants: ExtractedVendorVariant[], productName: stri
       const classifiedRole = classified.get(sourceUrl)
       const role = sourceUrl === primarySwatchUrl || (classifiedRole === 'swatch' && !secondarySwatches.has(sourceUrl))
         ? 'swatch'
-        : classifiedRole === 'roomshot' || classifiedRole === 'technical'
-          ? classifiedRole
+        : classifiedRole === 'roomshot'
+          ? 'roomshot'
           : 'product'
       const target: AssetUpload['target'] = role === 'swatch'
         ? {scope: 'variant', variantKey, field: 'swatchImage'}
+        : classifiedRole === 'technical'
+          ? {scope: 'product', field: 'gallery'}
         : role === 'product' && !hasPrimaryImage
           ? {scope: 'variant', variantKey, field: 'primaryImage'}
           : role === 'product' ? {scope: 'variant', variantKey, field: 'images'} : {scope: 'product', field: 'gallery'}
@@ -512,7 +509,7 @@ function buildAssetUploads(variants: ExtractedVendorVariant[], productName: stri
         sourceUrl, role,
         alt: role === 'roomshot'
           ? `${productName} in a room setting`
-          : role === 'technical'
+          : classifiedRole === 'technical'
             ? `${productName} technical detail`
             : `${productName}, ${colourName}`,
         target,

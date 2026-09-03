@@ -43,7 +43,7 @@ function buildBlob(vendorProductPage: Record<string, unknown>): ComposedProductD
 function fakeClient(overrides: Partial<SanityPublisherClient> = {}): SanityPublisherClient {
   return {
     fetch: vi.fn(async () => ({ drafts: [], published: [], aliasTargetIds: [] })),
-    create: vi.fn(async () => ({ _id: 'created-id' })),
+    createIfNotExists: vi.fn(async (document) => ({ _id: document._id })),
     createOrReplace: vi.fn(async () => ({})),
     assets: { upload: vi.fn(async () => ({ _id: 'image-asset-1' })) },
     ...overrides,
@@ -70,7 +70,7 @@ describe('publishProductDraft - held outcome', () => {
     if (result.outcome === 'held') {
       expect(result.reasons).toEqual(expect.arrayContaining(['missing_swatch_image', 'missing_required_width']))
     }
-    expect(client.create).not.toHaveBeenCalled()
+    expect(client.createIfNotExists).not.toHaveBeenCalled()
     expect(client.createOrReplace).not.toHaveBeenCalled()
   })
 
@@ -92,7 +92,7 @@ describe('publishProductDraft - held outcome', () => {
 
     expect(result.outcome).toBe('held')
     expect(client.createOrReplace).not.toHaveBeenCalled()
-    expect(client.create).not.toHaveBeenCalled()
+    expect(client.createIfNotExists).not.toHaveBeenCalled()
   })
 
   it('holds with content_locked when the existing product has been locked by an editor, even if the plan is otherwise eligible', async () => {
@@ -137,7 +137,22 @@ describe('publishProductDraft - draft outcome', () => {
       (event) => events.push(event.action),
     )
 
-    expect(events).toEqual(['asset_fetch_started', 'asset_fetch_completed', 'asset_upload_completed'])
+    expect(events).toEqual(['asset_fetch_started', 'asset_fetch_completed', 'asset_upload_completed', 'media_image_created'])
+  })
+
+  it('uses a stable media document identity for the same vendor source', async () => {
+    const blob = buildBlob({
+      widths: [{widthLabel: '4 m'}],
+      variants: [{variantId: 'blue', colourName: 'Blue', swatchImageUrl: 'https://example.com/swatch-blue.jpg'}],
+    })
+    const client = fakeClient()
+
+    await publishProductDraft(client, buildSanityIngestionPlan(baseRow(), blob, {vendorId: 'victoria-carpets'}), fetchImageOk)
+    await publishProductDraft(client, buildSanityIngestionPlan(baseRow(), blob, {vendorId: 'victoria-carpets'}), fetchImageOk)
+
+    const create = client.createIfNotExists as ReturnType<typeof vi.fn>
+    expect(create).toHaveBeenCalledTimes(2)
+    expect(create.mock.calls[0][0]._id).toBe(create.mock.calls[1][0]._id)
   })
 
   it('creates a draft when only optional registry recommendations are missing', async () => {

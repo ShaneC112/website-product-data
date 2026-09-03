@@ -406,7 +406,7 @@ describe('classified vendor gallery images', () => {
     expect(plan.assets).toEqual(expect.arrayContaining([
       expect.objectContaining({sourceUrl: 'https://example.com/blue-swatch.jpg', role: 'swatch', target: {scope: 'variant', variantKey: 'blue', field: 'swatchImage'}}),
       expect.objectContaining({sourceUrl: 'https://example.com/blue-room.jpg', role: 'roomshot', target: {scope: 'product', field: 'gallery'}}),
-      expect.objectContaining({sourceUrl: 'https://example.com/blue-backing.jpg', role: 'technical', target: {scope: 'product', field: 'gallery'}}),
+      expect.objectContaining({sourceUrl: 'https://example.com/blue-backing.jpg', role: 'product', target: {scope: 'product', field: 'gallery'}}),
     ]))
   })
 
