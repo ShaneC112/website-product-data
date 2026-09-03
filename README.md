@@ -138,6 +138,19 @@ Canonical key helpers now shipped in this package:
 
 Queue contracts now include canonical identity pass-through fields on render jobs (`styleCodeRaw`, `styleCodeStorageKey`, `m2crmUuid`, `sourceGroupKey`) and the shared `renderCompleteSchema` for `crawl-render-complete`.
 
+### Stage ledger and recovery contracts (recoverable-queues plan, in progress)
+
+Azure, Nuxt, and Studio share one pipeline-stage vocabulary instead of inventing local strings:
+
+- `crawlPipelineStageSchema` (`source_render`, `source_extract`, `variant_render`, `variant_extract`, `image_classify`, `compose`, `publish`), `crawlStageStateSchema`, and `crawlStageTargetSchema` (`queues/contracts.ts`) describe one logical unit of pipeline work.
+- `storage/stage-ledger.schema.ts` defines the two durable Azure Table row shapes backing it: `crawlStageLedgerTableSchema` (`webcrawlstageledger`, one row per stage/target/run/generation) and `crawlStageDispatchTableSchema` (`webcrawlstagedispatch`, the transactional-outbox row persisted before a queue send).
+- `storage/keys.ts` adds `buildStageLedgerRowKey`/`buildStageDispatchRowKey` for their row-key convention.
+- `requests/contracts.ts` adds `crawlRecoveryCheckpointSchema` (operator-facing checkpoints: `render_source`, `extract_source`, `recover_missing_variants`, `extract_variants`, `classify_images`, `compose`, `publish`) and `crawlRecoveryRequestSchema` (deliberately has no `force` field - recovery always targets a precise checkpoint).
+
+As of this writing, Azure uses these contracts to durably track stage progress and fence stale
+messages after a recovery generation starts; the recovery HTTP API, watchdog, and Nuxt/Studio
+surfaces that consume `crawlRecoveryRequestSchema` are not implemented yet.
+
 The durable extraction-batch ledger also stores the originating optional `runId`. Consumers use it to distinguish a retry within one run from a later run reusing the same group and URL, so stale succeeded rows can be reset without duplicating work inside a run.
 
 `crawlRequestMessageSchema`, `manualCrawlEnqueueSchema`, and `renderRequestSchema` also carry an optional

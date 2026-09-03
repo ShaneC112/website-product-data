@@ -106,6 +106,10 @@
       "types": "./dist/storage/extract-batch.schema.d.ts",
       "default": "./dist/storage/extract-batch.schema.js"
     },
+    "./storage/stage-ledger.schema": {
+      "types": "./dist/storage/stage-ledger.schema.d.ts",
+      "default": "./dist/storage/stage-ledger.schema.js"
+    },
     "./storage/sanity-image-generation.schema": {
       "types": "./dist/storage/sanity-image-generation.schema.d.ts",
       "default": "./dist/storage/sanity-image-generation.schema.js"

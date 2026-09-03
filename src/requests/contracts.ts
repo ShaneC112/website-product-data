@@ -83,6 +83,27 @@ export const groupReprocessSchema = z.object({
 
 export type GroupReprocessInput = z.infer<typeof groupReprocessSchema>
 
+// operator-facing recovery checkpoints, mapped 1:1 onto CrawlPipelineStage in the recovery
+// executor. `force` is deliberately absent - recovery always targets a precise checkpoint.
+export const crawlRecoveryCheckpointSchema = z.enum([
+  'render_source', 'extract_source', 'recover_missing_variants',
+  'extract_variants', 'classify_images', 'compose', 'publish'
+])
+
+export type CrawlRecoveryCheckpoint = z.infer<typeof crawlRecoveryCheckpointSchema>
+
+export const crawlRecoveryRequestSchema = z.object({
+  sourceGroupKey: z.string().trim().min(1),
+  checkpoint: crawlRecoveryCheckpointSchema,
+  parentRunId: z.string().trim().min(1).optional(),
+  requestedVariantUrlKeys: z.array(z.string().trim().min(1)).max(500).optional(),
+  actor: z.enum(['nuxt', 'sanity', 'system']).default('nuxt'),
+  testMode: z.boolean().optional()
+})
+
+export type CrawlRecoveryRequest = z.infer<typeof crawlRecoveryRequestSchema>
+
+
 export const sanityRegistrySyncSchema = z.object({
   apply: z.boolean().default(false),
 })

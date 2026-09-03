@@ -11,6 +11,8 @@ export const STORAGE_TABLES = {
   crawlMatchingLedger: 'webcrawlmatchledger',
   crawlVariantSwatch: 'webcrawlvariantswatches',
   crawlExtractBatch: 'webcrawlextractbatch',
+  crawlStageLedger: 'webcrawlstageledger',
+  crawlStageDispatch: 'webcrawlstagedispatch',
   sanityImageGeneration: 'sanityimagegeneration'
 } as const
 

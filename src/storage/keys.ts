@@ -53,6 +53,14 @@ export function buildSourceGroupStorageKey(sourceGroupKey: string): string {
   return encodeStorageKey(sourceGroupKey)
 }
 
+export function buildStageLedgerRowKey(runId: string, stage: string, targetKey: string): string {
+  return `${runId}:${stage}:${encodeStorageKey(targetKey)}`
+}
+
+export function buildStageDispatchRowKey(runId: string, stage: string, targetKey: string): string {
+  return `_dispatch:${runId}:${stage}:${encodeStorageKey(targetKey)}`
+}
+
 export function buildCanonicalSourceRowKey(m2crmUuid: string): string {
   return m2crmUuid.trim()
 }

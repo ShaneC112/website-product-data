@@ -351,6 +351,30 @@ export const sanityActionQueueMessageSchema = z.object({
   requestId: z.string().trim().min(1)
 })
 
+// canonical stage vocabulary for the durable recovery ledger - Azure, Nuxt, and Studio must
+// consume this instead of inventing local stage/state strings.
+export const crawlPipelineStageSchema = z.enum([
+  'source_render',
+  'source_extract',
+  'variant_render',
+  'variant_extract',
+  'image_classify',
+  'compose',
+  'publish'
+])
+
+export const crawlStageStateSchema = z.enum([
+  'planned', 'pending_outbound', 'queued', 'running', 'completed',
+  'failed', 'timed_out', 'blocked', 'superseded', 'cancelled'
+])
+
+export const crawlStageTargetSchema = z.object({
+  kind: z.enum(['group', 'source_page', 'variant_page']),
+  key: z.string().trim().min(1),
+  urlKey: z.string().trim().min(1).optional(),
+  variantId: z.string().trim().min(1).optional()
+})
+
 export const batchOperationSchema = z.enum([
   'product_extraction',
   'image_classification',
@@ -412,6 +436,9 @@ export const extractionBatchResultSchema = z.object({
 })
 
 export type QueueValidationError = z.infer<typeof queueValidationErrorSchema>
+export type CrawlPipelineStage = z.infer<typeof crawlPipelineStageSchema>
+export type CrawlStageState = z.infer<typeof crawlStageStateSchema>
+export type CrawlStageTarget = z.infer<typeof crawlStageTargetSchema>
 export type CrawlRequestMessage = z.infer<typeof crawlRequestMessageSchema>
 export type RenderRequest = z.infer<typeof renderRequestSchema>
 export type RenderJob = z.infer<typeof renderJobSchema>
@@ -435,6 +462,9 @@ export type BatchItemResult = z.infer<typeof batchItemResultSchema>
 export type ExtractionBatchResult = z.infer<typeof extractionBatchResultSchema>
 
 export const CrawlRequestMessage = crawlRequestMessageSchema
+export const CrawlPipelineStage = crawlPipelineStageSchema
+export const CrawlStageState = crawlStageStateSchema
+export const CrawlStageTarget = crawlStageTargetSchema
 export const RenderRequest = renderRequestSchema
 export const RenderJob = renderJobSchema
 export const RenderResponse = renderResponseSchema

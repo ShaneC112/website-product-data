@@ -1,5 +1,6 @@
 export * from './constants.js'
 export * from './extract-batch.schema.js'
+export * from './stage-ledger.schema.js'
 export * from './sanity-image-generation.schema.js'
 export * from './group-pdf.schema.js'
 export * from './group-state.schema.js'
