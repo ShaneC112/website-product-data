@@ -37,9 +37,25 @@ export const manualCrawlEnqueueSchema = z.object({
 
 export type ManualCrawlEnqueueInput = z.infer<typeof manualCrawlEnqueueSchema>
 
+// operator-facing recovery checkpoints, mapped 1:1 onto CrawlPipelineStage in the recovery
+// executor. `force` is deliberately absent - recovery always targets a precise checkpoint.
+export const crawlRecoveryCheckpointSchema = z.enum([
+  'render_source', 'extract_source', 'recover_missing_variants',
+  'extract_variants', 'classify_images', 'compose', 'publish'
+])
+
+export type CrawlRecoveryCheckpoint = z.infer<typeof crawlRecoveryCheckpointSchema>
+
 const sanityActionPayloadSchema = z.object({
   sanityProductId: z.string().trim().min(1),
   force: z.literal(true),
+})
+
+// recovery never carries `force` - it always targets one precise pipeline checkpoint, resolved
+// server-side by Azure from the product's sourceGroupKey (the browser only chooses a checkpoint).
+const sanityRecoveryActionPayloadSchema = z.object({
+  sanityProductId: z.string().trim().min(1),
+  checkpoint: crawlRecoveryCheckpointSchema,
 })
 
 export const sanityActionRequestSchema = z.discriminatedUnion('action', [
@@ -52,6 +68,11 @@ export const sanityActionRequestSchema = z.discriminatedUnion('action', [
     requestId: z.string().trim().min(1),
     action: z.literal('rebuild'),
     payload: sanityActionPayloadSchema,
+  }),
+  z.object({
+    requestId: z.string().trim().min(1),
+    action: z.literal('recover'),
+    payload: sanityRecoveryActionPayloadSchema,
   }),
 ])
 
@@ -82,15 +103,6 @@ export const groupReprocessSchema = z.object({
 })
 
 export type GroupReprocessInput = z.infer<typeof groupReprocessSchema>
-
-// operator-facing recovery checkpoints, mapped 1:1 onto CrawlPipelineStage in the recovery
-// executor. `force` is deliberately absent - recovery always targets a precise checkpoint.
-export const crawlRecoveryCheckpointSchema = z.enum([
-  'render_source', 'extract_source', 'recover_missing_variants',
-  'extract_variants', 'classify_images', 'compose', 'publish'
-])
-
-export type CrawlRecoveryCheckpoint = z.infer<typeof crawlRecoveryCheckpointSchema>
 
 export const crawlRecoveryRequestSchema = z.object({
   sourceGroupKey: z.string().trim().min(1),

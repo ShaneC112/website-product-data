@@ -24,6 +24,36 @@ describe('Sanity action requests', () => {
     expect(sanityActionRequestSchema.safeParse({requestId, action: 'rebuild', payload: {sanityProductId: 'product-123', force: false}}).success).toBe(false)
     expect(sanityActionRequestSchema.safeParse({requestId, action: 'crawl', payload: {force: true}}).success).toBe(false)
   })
+
+  it('accepts a recover action with a checkpoint and no force field', () => {
+    const parsed = sanityActionRequestSchema.parse({
+      requestId,
+      action: 'recover',
+      payload: {sanityProductId: 'product-123', checkpoint: 'recover_missing_variants'}
+    })
+    expect(parsed).toEqual({
+      requestId,
+      action: 'recover',
+      payload: {sanityProductId: 'product-123', checkpoint: 'recover_missing_variants'}
+    })
+  })
+
+  it('rejects a recover action with an unknown checkpoint', () => {
+    expect(sanityActionRequestSchema.safeParse({
+      requestId,
+      action: 'recover',
+      payload: {sanityProductId: 'product-123', checkpoint: 'restart'}
+    }).success).toBe(false)
+  })
+
+  it('rejects a recover action carrying force', () => {
+    const result = sanityActionRequestSchema.safeParse({
+      requestId,
+      action: 'recover',
+      payload: {sanityProductId: 'product-123', checkpoint: 'publish', force: true}
+    })
+    expect(result.success && !('force' in result.data.payload)).toBe(true)
+  })
 })
 
 describe('Sanity action queue messages', () => {
