@@ -185,6 +185,28 @@ describe('publishProductDraft - draft outcome', () => {
     expect(client.createOrReplace).toHaveBeenCalledTimes(1)
   })
 
+  it('uses one deterministic draft identity for concurrent first publishes', async () => {
+    const blob = buildBlob({
+      widths: [{widthLabel: '4 m'}],
+      variants: [{variantId: 'blue', colourName: 'Blue', swatchHex: '#1122ff', swatchImageUrl: 'https://example.com/swatch-blue.jpg'}],
+    })
+    const plan = buildSanityIngestionPlan(baseRow(), blob, {vendorId: 'victoria-carpets'})
+    const client = fakeClient()
+
+    const results = await Promise.all([
+      publishProductDraft(client, plan, fetchImageOk),
+      publishProductDraft(client, plan, fetchImageOk),
+    ])
+
+    expect(results).toEqual([
+      expect.objectContaining({outcome: 'draft'}),
+      expect.objectContaining({outcome: 'draft'}),
+    ])
+    const createOrReplace = client.createOrReplace as ReturnType<typeof vi.fn>
+    expect(createOrReplace.mock.calls[0][0]._id).toBe(createOrReplace.mock.calls[1][0]._id)
+    expect(createOrReplace.mock.calls[0][0]._id).toMatch(/^drafts\.product-[a-f0-9]{64}$/)
+  })
+
   it('updates an existing draft by vendor and external identity when the source lacks a style code', async () => {
     const row = baseRow({sourceGroupKey: 'LANO/BASALTART', styleCode: undefined})
     const blob = buildBlob({

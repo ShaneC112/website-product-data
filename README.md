@@ -76,6 +76,7 @@ Exports:
 Decisions:
 - The private shared package is the single source of truth for shared storage contracts and shared write request payload contracts.
 - The `sanity` subpath owns pure crawl-to-Sanity mapping, the bridge gate (`evaluateBridgeEligibility`), the independent Studio publish gate (`evaluateStudioPublishReadiness`), and conflict-preserving merge logic through a minimal structural client interface. It has no runtime `@sanity/client` dependency. There is no `productImportCandidate`/triage-document workflow: a product that fails the bridge gate never reaches Sanity at all (the `held` outcome makes no Sanity call), it only stays a `draft`/`published` document once it does.
+- First-time draft publication derives a deterministic product document ID from the ingestion identity key. Concurrent queue deliveries therefore converge on one `drafts.product-<sha256>` document rather than creating duplicate drafts.
 - The `sanity` subpath's `sanityBridgeProductSchema` (bridge-contract schema) is the guaranteed subset of Sanity product fields Azure writes - Studio may add more fields freely, but changing/removing one of these fields is a breaking change. See `sanity-studio`'s `test/bridgeContract.test.ts`, which guards against that drift.
 - Nuxt write routes import request schemas from this package instead of duplicating them locally.
 - Azure write functions should import the same shared request schemas wherever the payload contract matches.

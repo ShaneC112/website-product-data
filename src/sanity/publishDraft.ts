@@ -1,4 +1,4 @@
-import {createHash, randomUUID} from 'node:crypto'
+import {createHash} from 'node:crypto'
 import type {AssetUpload, SanityImage, SanityIngestionPlan, SanityProductDraft} from './ingestion.js'
 import {buildInitialSourceFields, mergeProductUpdate} from './mergeProductUpdate.js'
 import {evaluateBridgeEligibility} from './bridgeContract.schema.js'
@@ -68,7 +68,7 @@ export async function publishProductDraft(
     return {outcome: 'held', reasons: [...new Set(reasons)]}
   }
 
-  const draftId = toDraftId(existing?._id ?? randomUUID())
+  const draftId = toDraftId(existing?._id ?? productDocumentId(plan))
   const document = structuredClone(plan.document)
   const assetIds: string[] = []
   for (const upload of plan.assets) {
@@ -198,4 +198,10 @@ function filenameFromUrl(url: string): string | undefined {
 function vendorMediaImageId(sourceUrl: string, role: AssetUpload['role']): string {
   const identity = createHash('sha256').update(`vendor:${role}:${sourceUrl}`).digest('hex')
   return `media-vendor-${identity}`
+}
+
+function productDocumentId(plan: SanityIngestionPlan): string {
+  const identity = plan.identityKey ?? `${plan.vendorId}:${plan.externalId}`
+  const hash = createHash('sha256').update(`product:${identity}`).digest('hex')
+  return `product-${hash}`
 }
