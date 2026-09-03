@@ -30,6 +30,7 @@ export const STORAGE_QUEUES = {
   crawlTransformJobs: 'crawl-transform-jobs',
   crawlExtractBatchJobs: 'crawl-extract-batch-jobs',
   publishJobs: 'publish-jobs',
+  sanityActions: 'sanity-actions',
   sanityImagePrepare: 'sanity-image-prepare',
   sanityImageGenerate: 'sanity-image-generate'
 } as const

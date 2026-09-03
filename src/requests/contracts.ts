@@ -37,6 +37,26 @@ export const manualCrawlEnqueueSchema = z.object({
 
 export type ManualCrawlEnqueueInput = z.infer<typeof manualCrawlEnqueueSchema>
 
+const sanityActionPayloadSchema = z.object({
+  sanityProductId: z.string().trim().min(1),
+  force: z.literal(true),
+})
+
+export const sanityActionRequestSchema = z.discriminatedUnion('action', [
+  z.object({
+    requestId: z.string().trim().min(1),
+    action: z.literal('crawl'),
+    payload: sanityActionPayloadSchema,
+  }),
+  z.object({
+    requestId: z.string().trim().min(1),
+    action: z.literal('rebuild'),
+    payload: sanityActionPayloadSchema,
+  }),
+])
+
+export type SanityActionRequest = z.infer<typeof sanityActionRequestSchema>
+
 export const matchingLedgerApprovalSchema = z.object({
   rowKey: z.string().min(1),
   sourceGroupKey: z.string().min(1),

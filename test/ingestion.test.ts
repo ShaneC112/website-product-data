@@ -42,12 +42,37 @@ function buildBlob(vendorProductPage: Record<string, unknown>): ComposedProductD
 // apply one row-level price to every colour, even when the match ledger had already resolved
 // distinct prices per colour via variantOverrides.
 describe('per-colour price resolution', () => {
+  it('falls back to the source group key when upstream style codes are blank', () => {
+    const row = baseRow({sourceGroupKey: 'VICTORIA/BURFORDTWIST/50OZ', styleCode: ''})
+    const blob = buildBlob({variants: []})
+    blob.source.styleCode = ''
+    blob.extracted.styleCode = ''
+
+    const plan = buildSanityIngestionPlan(row, blob, {vendorId: 'victoria-carpets'})
+
+    expect(plan.document.importMeta).toMatchObject({
+      styleCode: 'VICTORIA/BURFORDTWIST/50OZ',
+      styleCodeNormalized: 'VICTORIA-BURFORDTWIST-50OZ',
+    })
+  })
+
   it('maps an AI-confirmed registry brandName to the direct Sanity brand field', () => {
     const blob = buildBlob({variants: []})
     blob.extracted.fields = [{field: 'brandName', value: 'Lano', confidence: 0.99}]
     const plan = buildSanityIngestionPlan(baseRow(), blob, {vendorId: 'lano'})
 
     expect(plan.document.brand).toBe('Lano')
+  })
+
+  it('uses the vendor variant label instead of a generic colour classification as the display name', () => {
+    const plan = buildSanityIngestionPlan(baseRow(), buildBlob({
+      variants: [{variantId: 'barns', label: 'barns', colourName: 'beige'}],
+    }), {vendorId: 'victoria-carpets'})
+
+    expect(plan.document.variants[0]).toMatchObject({
+      variantId: 'barns',
+      colourName: 'barns',
+    })
   })
 
   it('marks a product as price on request only when neither the product nor any colour has a price', () => {

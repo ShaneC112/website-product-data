@@ -1,11 +1,37 @@
 import { describe, expect, it } from 'vitest'
-import { crawlRequestMessageSchema, renderCompleteSchema, renderRequestSchema, renderResponseSchema } from '../src/queues/contracts.js'
+import { crawlRequestMessageSchema, renderCompleteSchema, renderRequestSchema, renderResponseSchema, sanityActionQueueMessageSchema } from '../src/queues/contracts.js'
 import { IMAGE_GENERATION_PRODUCT_REGISTRY, IMAGE_GENERATION_PROFILE_ESTIMATES, estimateImageGenerationCostEur, getRegistryEntriesForTrade, mapTradeToSanityProductType, SANITY_CATEGORY_KEYS, SANITY_PRODUCT_TYPES, SANITY_SUITABLE_ROOMS } from '../src/registry/index.js'
 import { mapSanityProductTypeToCategoryKey } from '../src/registry/index.js'
 import { crawlPageTableSchema, parseCrawlPagePackInfoHint, stringifyCrawlPagePackInfoHint } from '../src/storage/page.schema.js'
 import { crawlProductDetailTableSchema, parseRawWidthHint, stringifyRawWidthHint } from '../src/storage/product-detail.schema.js'
 import { crawlRunSummaryTableSchema } from '../src/storage/run-summary.schema.js'
-import { manualCrawlEnqueueSchema } from '../src/requests/contracts.js'
+import { manualCrawlEnqueueSchema, sanityActionRequestSchema } from '../src/requests/contracts.js'
+
+describe('Sanity action requests', () => {
+  const payload = {sanityProductId: 'product-123', force: true}
+  const requestId = 'sanity-action-123'
+
+  it('accepts minimal forced crawl and rebuild actions', () => {
+    expect(sanityActionRequestSchema.parse({requestId, action: 'crawl', payload})).toEqual({requestId, action: 'crawl', payload})
+    expect(sanityActionRequestSchema.parse({requestId, action: 'rebuild', payload})).toEqual({requestId, action: 'rebuild', payload})
+  })
+
+  it('rejects an unknown action discriminator', () => {
+    expect(sanityActionRequestSchema.safeParse({requestId, action: 'publish', payload}).success).toBe(false)
+  })
+
+  it('rejects an action payload without an explicit force confirmation', () => {
+    expect(sanityActionRequestSchema.safeParse({requestId, action: 'rebuild', payload: {sanityProductId: 'product-123', force: false}}).success).toBe(false)
+    expect(sanityActionRequestSchema.safeParse({requestId, action: 'crawl', payload: {force: true}}).success).toBe(false)
+  })
+})
+
+describe('Sanity action queue messages', () => {
+  it('accepts only a versioned document and request reference', () => {
+    expect(sanityActionQueueMessageSchema.parse({schemaVersion: 1, sanityDocumentId: 'product-123', requestId: 'action-123'})).toEqual({schemaVersion: 1, sanityDocumentId: 'product-123', requestId: 'action-123'})
+    expect(sanityActionQueueMessageSchema.safeParse({schemaVersion: 1, requestId: 'action-123'}).success).toBe(false)
+  })
+})
 
 describe('Sanity ingestion run summary', () => {
   it('accepts a non-published outcome and document IDs', () => {

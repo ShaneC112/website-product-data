@@ -219,7 +219,7 @@ export function buildSanityIngestionPlan(
   const categoryKey = mapSanityProductTypeToCategoryKey(productType)
   const suitableRooms = readSuitableRooms(fieldMap.get('suitableRooms')?.value)
   const vendorId = normalizeIdentityPart(options.vendorId)
-  const styleCode = row.styleCode ?? blob.source.styleCode ?? blob.extracted.styleCode
+  const styleCode = firstNonBlank(row.styleCode, blob.source.styleCode, blob.extracted.styleCode, row.sourceGroupKey)
   const styleCodeNormalized = styleCode ? normalizeStyleCode(styleCode) : undefined
   const identityKey = styleCodeNormalized ? `${vendorId}:${styleCodeNormalized}` : undefined
   const price = row.price == null ? undefined : buildPrice(row.price, options.pricingUnit ?? 'm2')
@@ -302,6 +302,10 @@ export function normalizeStyleCode(value: string): string {
   return value.trim().toUpperCase().replace(/[^A-Z0-9]+/g, '-')
 }
 
+function firstNonBlank(...values: Array<string | undefined>): string | undefined {
+  return values.find((value) => value?.trim())?.trim()
+}
+
 function buildPrice(retailExVatMinor: number, unit: SanityPrice['unit']): SanityPrice {
   return {_type: 'productPrice', currency: 'EUR', unit, retailExVat: retailExVatMinor / 100, vatRate: 0.23, retailIncVat: calculateRetailIncVat(retailExVatMinor)}
 }
@@ -338,7 +342,7 @@ function buildVariant(
   }
   return {
     _key: stableKey(variantId), _type: 'productVariant', variantId, vendorSku,
-    colourName: variant.colourName ?? variant.label ?? variantId,
+    colourName: variant.label ?? variant.colourName ?? variantId,
     hex: variant.swatchHex,
     colourFamily: deriveSecondaryColourNameFromHex(variant.swatchHex) ?? undefined,
     surfaceAppearance: withSurfaceAppearancePaletteKeys(variant.surfaceAppearance),
@@ -484,7 +488,7 @@ function buildAssetUploads(variants: ExtractedVendorVariant[], productName: stri
   const uploads = new Map<string, AssetUpload>()
   variants.forEach((variant, variantIndex) => {
     const variantKey = stableKey(variant.variantId ?? variant.label ?? `variant-${variantIndex + 1}`)
-    const colourName = variant.colourName ?? variant.label ?? `variant ${variantIndex + 1}`
+    const colourName = variant.label ?? variant.colourName ?? `variant ${variantIndex + 1}`
     const classified = new Map((variant.classifiedImages ?? []).map((image) => [image.url, image.role]))
     const primarySwatchUrl = variant.swatchImageUrl ?? variant.swatchImageUrls?.[0]
     const secondarySwatches = new Set((variant.swatchImageUrls ?? []).filter((url) => url !== primarySwatchUrl))

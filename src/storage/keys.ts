@@ -24,6 +24,10 @@ export function normaliseVariantToken(value: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
+export function normalizeStyleCode(value: string): string {
+  return value.trim().toUpperCase().replace(/[^A-Z0-9]+/g, '-')
+}
+
 export function normaliseWidth(value: string): string {
   const text = value.toLowerCase().replace(/\s+/g, '')
   const match = text.match(/^(\d+(?:\.\d+)?)(mm|cm|m)?$/)

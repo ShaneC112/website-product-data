@@ -345,6 +345,12 @@ export const sanityImageQueueMessageSchema = z.object({
   jobId: z.string().trim().min(1)
 })
 
+export const sanityActionQueueMessageSchema = z.object({
+  schemaVersion: z.literal(1),
+  sanityDocumentId: z.string().trim().min(1),
+  requestId: z.string().trim().min(1)
+})
+
 export const batchOperationSchema = z.enum([
   'product_extraction',
   'image_classification',
@@ -420,6 +426,7 @@ export type SanityImagePrepareCommand = z.infer<typeof sanityImagePrepareCommand
 export type SanityImageGenerateCommand = z.infer<typeof sanityImageGenerateCommandSchema>
 export type SanityImageCommand = z.infer<typeof sanityImageCommandSchema>
 export type SanityImageQueueMessage = z.infer<typeof sanityImageQueueMessageSchema>
+export type SanityActionQueueMessage = z.infer<typeof sanityActionQueueMessageSchema>
 export type BatchOperation = z.infer<typeof batchOperationSchema>
 export type BatchItemStatus = z.infer<typeof batchItemStatusSchema>
 export type ExtractionBatchJobItem = z.infer<typeof extractionBatchJobItemSchema>
@@ -441,6 +448,7 @@ export const SanityImagePrepareCommand = sanityImagePrepareCommandSchema
 export const SanityImageGenerateCommand = sanityImageGenerateCommandSchema
 export const SanityImageCommand = sanityImageCommandSchema
 export const SanityImageQueueMessage = sanityImageQueueMessageSchema
+export const SanityActionQueueMessage = sanityActionQueueMessageSchema
 export const BatchOperation = batchOperationSchema
 export const BatchItemStatus = batchItemStatusSchema
 export const ExtractionBatchJob = extractionBatchJobSchema
