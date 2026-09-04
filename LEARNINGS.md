@@ -1,5 +1,16 @@
 # Learnings
 
+## Shared read responses need runtime contracts too
+
+Sharing only a recovery request schema left the Azure response and Nuxt consumer coupled through
+duplicate TypeScript types, which could not detect an older or malformed response at runtime.
+
+**Fix:** added a shared recovery-plan schema built from the canonical pipeline stage/state enums and
+used it at both the Azure producer and Nuxt proxy boundaries.
+
+**Best practice:** when multiple services exchange operational read models, share and execute a
+runtime schema at both boundaries; TypeScript aliases alone do not protect rolling deployments.
+
 ## A generation-fencing check does not require the message to carry its own generation number
 
 The recoverable-queues plan's illustrative pseudocode for `isCurrentStageGeneration` compares an

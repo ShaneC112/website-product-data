@@ -11,6 +11,7 @@ import {
 import { STORAGE_TABLES } from '../src/storage/constants.js'
 import {
   crawlRecoveryCheckpointSchema,
+  crawlRecoveryPlanSchema,
   crawlRecoveryRequestSchema
 } from '../src/requests/contracts.js'
 
@@ -201,5 +202,34 @@ describe('crawlRecoveryRequestSchema', () => {
       parentRunId: 'run-1'
     })
     expect(parsed.parentRunId).toBe('run-1')
+  })
+})
+
+describe('crawlRecoveryPlanSchema', () => {
+  it('accepts a plan with ledger-backed stage items and legal choices', () => {
+    const parsed = crawlRecoveryPlanSchema.parse({
+      sourceGroupKey: 'VENDOR/RANGE',
+      activeRunId: 'run-1',
+      activeGeneration: 1,
+      stageItems: [baseLedgerRow],
+      choices: [{
+        checkpoint: 'extract_variants',
+        enabled: true,
+        preserved: ['source extraction'],
+        invalidates: ['variant extraction onward'],
+        targetUrlKeys: ['url-key-1']
+      }]
+    })
+
+    expect(parsed.stageItems).toHaveLength(1)
+    expect(parsed.choices[0]?.checkpoint).toBe('extract_variants')
+  })
+
+  it('rejects a plan that omits stageItems', () => {
+    expect(crawlRecoveryPlanSchema.safeParse({
+      sourceGroupKey: 'VENDOR/RANGE',
+      activeGeneration: 1,
+      choices: []
+    }).success).toBe(false)
   })
 })

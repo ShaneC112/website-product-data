@@ -1,5 +1,11 @@
 # website-product-data
 
+## Recovery contracts
+
+`@shane-corrigan/website-product-data/requests/contracts` exports runtime schemas for recovery
+requests, legal choices, and ledger-backed recovery-plan responses. Azure producers and operator
+UIs should parse these schemas instead of maintaining local stage/state response definitions.
+
 ## Sanity media projections
 
 `@shane-corrigan/website-product-data/sanity` exports `SANITY_MEDIA_IMAGE_FIELDS` and

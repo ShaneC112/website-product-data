@@ -1,5 +1,9 @@
 import { z } from 'zod'
-import { packInfoHintSchema } from '../queues/contracts.js'
+import {
+  crawlPipelineStageSchema,
+  crawlStageStateSchema,
+  packInfoHintSchema
+} from '../queues/contracts.js'
 import { extractedScalarMeasurementSchema } from '../storage/page-detail.schema.js'
 
 export const manualCrawlEnqueueSchema = z.object({
@@ -114,6 +118,37 @@ export const crawlRecoveryRequestSchema = z.object({
 })
 
 export type CrawlRecoveryRequest = z.infer<typeof crawlRecoveryRequestSchema>
+
+export const crawlRecoveryChoiceSchema = z.object({
+  checkpoint: crawlRecoveryCheckpointSchema,
+  enabled: z.boolean(),
+  reason: z.string().optional(),
+  preserved: z.array(z.string()),
+  invalidates: z.array(z.string()),
+  targetUrlKeys: z.array(z.string())
+})
+
+export const crawlRecoveryStageItemSchema = z.object({
+  runId: z.string().trim().min(1),
+  generation: z.number().int().positive(),
+  stage: crawlPipelineStageSchema,
+  targetJson: z.string().min(1),
+  state: crawlStageStateSchema,
+  lastUpdatedAt: z.string().datetime(),
+  expectedBy: z.string().datetime().optional(),
+  failureMessage: z.string().optional()
+}).passthrough()
+
+export const crawlRecoveryPlanSchema = z.object({
+  sourceGroupKey: z.string().trim().min(1),
+  activeRunId: z.string().trim().min(1).optional(),
+  activeGeneration: z.number().int().positive(),
+  stageItems: z.array(crawlRecoveryStageItemSchema),
+  choices: z.array(crawlRecoveryChoiceSchema)
+})
+
+export type CrawlRecoveryChoice = z.infer<typeof crawlRecoveryChoiceSchema>
+export type CrawlRecoveryPlan = z.infer<typeof crawlRecoveryPlanSchema>
 
 
 export const sanityRegistrySyncSchema = z.object({
