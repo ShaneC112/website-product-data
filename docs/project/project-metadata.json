@@ -1,0 +1,10 @@
+{
+  "name": "Website Product Enrichment",
+  "version": "0.1.0",
+  "status": "active",
+  "updatedAt": "2026-09-04",
+  "releasePolicy": {
+    "packageVersions": "Change only when that package's release surface changes.",
+    "projectMetadataVersion": "Change for cross-repository documentation, workflow, or customization releases."
+  }
+}

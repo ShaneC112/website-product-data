@@ -1,0 +1,34 @@
+{
+  "repositories": [
+    {
+      "path": "website-product-data",
+      "owner": "Shared contracts, storage schemas, registry data, and canonical project documentation",
+      "packageManager": "npm",
+      "stableCommands": ["build", "test", "verify"]
+    },
+    {
+      "path": "website-product-enrichment-azure",
+      "owner": "Durable pipeline orchestration, extraction, recovery, and publishing",
+      "packageManager": "npm",
+      "stableCommands": ["build", "test", "verify"]
+    },
+    {
+      "path": "website-product-enrichment-render",
+      "owner": "Stateless Playwright browser capture",
+      "packageManager": "npm",
+      "stableCommands": ["build", "test", "verify"]
+    },
+    {
+      "path": "website-product-enrichment-ui",
+      "owner": "Nuxt crawl-operations interface and server-side Azure access",
+      "packageManager": "pnpm",
+      "stableCommands": ["typecheck", "lint", "test", "test:e2e", "test:e2e:list", "build", "verify"]
+    },
+    {
+      "path": "website-product-enrichment-sanity-studio",
+      "owner": "Sanity schemas, Studio UX, and Blueprint functions",
+      "packageManager": "pnpm",
+      "stableCommands": ["typecheck", "test", "build", "verify"]
+    }
+  ]
+}

@@ -7,7 +7,24 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "verify": "npm run build && npm test && npm run docs:check && npm run scripts:index:check && npm run workspace:sync:check && npm run project:inventory",
+    "docs:check": "node scripts/check-documentation.mjs",
+    "project:inventory": "node scripts/project-inventory.mjs",
+    "learnings:data:migrate": "node scripts/migrate-data-learnings.mjs data --write",
+    "learnings:data:check": "node scripts/migrate-data-learnings.mjs data --check",
+    "learnings:render:migrate": "node scripts/migrate-data-learnings.mjs render --write",
+    "learnings:render:check": "node scripts/migrate-data-learnings.mjs render --check",
+    "learnings:azure:migrate": "node scripts/migrate-data-learnings.mjs azure --write",
+    "learnings:azure:check": "node scripts/migrate-data-learnings.mjs azure --check",
+    "learnings:ui:migrate": "node scripts/migrate-data-learnings.mjs ui --write",
+    "learnings:ui:check": "node scripts/migrate-data-learnings.mjs ui --check",
+    "learnings:studio:migrate": "node scripts/migrate-data-learnings.mjs studio --write",
+    "learnings:studio:check": "node scripts/migrate-data-learnings.mjs studio --check",
+    "learnings:roots:check": "node scripts/check-learning-root-references.mjs",
+    "scripts:index:check": "node scripts/check-script-index.mjs",
+    "workspace:sync": "node scripts/sync-workspace-customizations.mjs --write",
+    "workspace:sync:check": "node scripts/sync-workspace-customizations.mjs --check"
   },
   "dependencies": {
     "zod": "^3.23.8"

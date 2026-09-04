@@ -1,5 +1,13 @@
 # website-product-data
 
+## Navigation
+
+- [Repository instructions](AGENTS.md) and [changelog](CHANGELOG.md)
+- [Repository script index](scripts/README.md)
+- [Data documentation index](docs/README.md)
+- [Canonical cross-repository documentation](docs/project/README.md)
+- [Current learnings](docs/project/learnings/data/README.md)
+
 ## Recovery contracts
 
 `@shane-corrigan/website-product-data/requests/contracts` exports runtime schemas for recovery
