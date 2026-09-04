@@ -2,9 +2,15 @@ import { z } from 'zod'
 import {
   crawlPipelineStageSchema,
   crawlStageStateSchema,
+  type CrawlRequestOrigin,
   packInfoHintSchema
 } from '../queues/contracts.js'
 import { extractedScalarMeasurementSchema } from '../storage/page-detail.schema.js'
+import {
+  styleCodeImportPayloadSchema,
+  styleCodeImportRequestDocumentSchema,
+  type StyleCodeImportRequestDocument
+} from './style-code-import.js'
 
 export const manualCrawlEnqueueSchema = z.object({
   tableName: z.enum(['m2crmproducts']),
@@ -78,9 +84,17 @@ export const sanityActionRequestSchema = z.discriminatedUnion('action', [
     action: z.literal('recover'),
     payload: sanityRecoveryActionPayloadSchema,
   }),
+  z.object({
+    requestId: z.string().trim().min(1),
+    action: z.literal('stylecode_import'),
+    payload: styleCodeImportPayloadSchema,
+  }),
 ])
 
 export type SanityActionRequest = z.infer<typeof sanityActionRequestSchema>
+export type StyleCodeImportRequestDocumentContract = StyleCodeImportRequestDocument
+export { styleCodeImportRequestDocumentSchema }
+export type { CrawlRequestOrigin }
 
 export const matchingLedgerApprovalSchema = z.object({
   rowKey: z.string().min(1),

@@ -7,6 +7,12 @@ import { parseRawWidthHint, stringifyRawWidthHint } from '../src/storage/product
 import { composeOutputTableSchema } from '../src/storage/compose-output.schema.js'
 import { crawlRunSummaryTableSchema } from '../src/storage/run-summary.schema.js'
 import { manualCrawlEnqueueSchema, sanityActionRequestSchema } from '../src/requests/contracts.js'
+import {
+  styleCodeImportRequestDocumentSchema,
+  styleCodeImportResultSchema,
+  styleCodeImportRequestStatusSchema,
+  styleCodeImportResultOutcomeSchema
+} from '../src/requests/style-code-import.js'
 
 describe('Sanity action requests', () => {
   const payload = {sanityProductId: 'product-123', force: true}
@@ -55,6 +61,20 @@ describe('Sanity action requests', () => {
     })
     expect(result.success && !('force' in result.data.payload)).toBe(true)
   })
+
+  it('accepts a style-code import action with a trimmed non-empty style code', () => {
+    const parsed = sanityActionRequestSchema.parse({
+      requestId,
+      action: 'stylecode_import',
+      payload: {styleCode: '  ST123  '}
+    })
+
+    expect(parsed).toEqual({
+      requestId,
+      action: 'stylecode_import',
+      payload: {styleCode: 'ST123'}
+    })
+  })
 })
 
 describe('Sanity action queue messages', () => {
@@ -84,6 +104,99 @@ describe('Sanity ingestion run summary', () => {
       sanityHeldCount: 1,
       sanityHeldReasonsJson: '["missing_swatch_image"]'
     })
+  })
+
+  it('accepts style-code import origin metadata and joined-run correlation', () => {
+    const parsed = crawlRunSummaryTableSchema.parse({
+      partitionKey: 'run-1',
+      rowKey: 'run-1',
+      runId: 'run-1',
+      sourceRowKey: 'row-1',
+      originType: 'sanity_action',
+      originRequestDocumentId: 'request-doc-1',
+      originRequestId: 'request-1',
+      originRequestType: 'stylecode_import',
+      joinedRunId: 'run-joined-1'
+    })
+
+    expect(parsed).toMatchObject({
+      sourceRowKey: 'row-1',
+      originType: 'sanity_action',
+      originRequestDocumentId: 'request-doc-1',
+      originRequestId: 'request-1',
+      originRequestType: 'stylecode_import',
+      joinedRunId: 'run-joined-1'
+    })
+  })
+})
+
+describe('Style-code import contracts', () => {
+  it('accepts the shared request document shape', () => {
+    const parsed = styleCodeImportRequestDocumentSchema.parse({
+      _id: 'request-doc-1',
+      _type: 'styleCodeImportRequest',
+      requestId: 'request-1',
+      source: 'studio',
+      requestType: 'stylecode_import',
+      styleCode: 'ST123',
+      status: 'pending',
+      progressMessages: ['Request created'],
+      successResults: [],
+      failureResults: [],
+      requestedAt: '2026-01-01T00:00:00.000Z'
+    })
+
+    expect(parsed.status).toBe('pending')
+  })
+
+  it('accepts only the canonical request statuses and result outcomes', () => {
+    expect(styleCodeImportRequestStatusSchema.safeParse('completed').success).toBe(true)
+    expect(styleCodeImportRequestStatusSchema.safeParse('partial').success).toBe(false)
+    expect(styleCodeImportResultOutcomeSchema.safeParse('excluded').success).toBe(true)
+    expect(styleCodeImportResultOutcomeSchema.safeParse('queued').success).toBe(false)
+  })
+
+  it('rejects invalid result rows', () => {
+    expect(styleCodeImportResultSchema.safeParse({
+      m2crmRowKey: '',
+      outcome: 'failed',
+      message: 'bad',
+      completedAt: '2026-01-01T00:00:00.000Z'
+    }).success).toBe(false)
+
+    expect(styleCodeImportResultSchema.safeParse({
+      m2crmRowKey: 'row-1',
+      outcome: 'failed',
+      message: 'bad',
+      completedAt: 'not-a-date'
+    }).success).toBe(false)
+  })
+})
+
+describe('Crawl request origin plumbing', () => {
+  it('round-trips the shared origin object on crawl requests', () => {
+    const parsed = crawlRequestMessageSchema.parse({
+      source: 'manual',
+      tableName: 'm2crmproducts',
+      rowKey: 'row-1',
+      url: 'https://example.com/product',
+      crawlType: 'Single',
+      styleCode: 'ST123',
+      trade: 'Carpet',
+      reason: 'manual',
+      changedFields: [],
+      validationErrors: [],
+      force: true,
+      origin: {
+        type: 'sanity_action',
+        requestDocumentId: 'request-doc-1',
+        requestId: 'request-1',
+        requestType: 'stylecode_import'
+      },
+      requestedAt: '2026-01-01T00:00:00.000Z'
+    })
+
+    expect(parsed.origin?.requestId).toBe('request-1')
   })
 })
 
@@ -137,10 +250,12 @@ describe('visible-text schema plumbing', () => {
       rowKey: 'r',
       url: 'https://example.com',
       urlKey: 'url-key-1',
-      blobVisibleTextPath: 'x/visible-text.txt'
+      blobVisibleTextPath: 'x/visible-text.txt',
+      activeRunId: 'run-1'
     })
 
     expect(parsed.blobVisibleTextPath).toBe('x/visible-text.txt')
+    expect(parsed.activeRunId).toBe('run-1')
   })
 })
 

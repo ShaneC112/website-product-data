@@ -25,6 +25,13 @@ export const queueValidationErrorSchema = z.object({
   message: z.string().trim().min(1)
 })
 
+export const crawlRequestOriginSchema = z.object({
+  type: z.literal('sanity_action'),
+  requestDocumentId: z.string().trim().min(1),
+  requestId: z.string().trim().min(1),
+  requestType: z.literal('stylecode_import')
+})
+
 export const crawlRequestMessageSchema = z.object({
   runId: z.string().trim().min(1).optional(),
   source: z.enum(['sync', 'manual', 'sweeper']),
@@ -62,6 +69,7 @@ export const crawlRequestMessageSchema = z.object({
   packInfoHint: packInfoHintSchema.optional(),
   validationErrors: z.array(queueValidationErrorSchema).default([]),
   force: z.boolean().default(false),
+  origin: crawlRequestOriginSchema.optional(),
   requestedAt: z.string().trim().min(1)
 }).superRefine((message, ctx) => {
   // styleCode/trade are only required for otherwise-valid requests; messages that carry
@@ -439,6 +447,7 @@ export type QueueValidationError = z.infer<typeof queueValidationErrorSchema>
 export type CrawlPipelineStage = z.infer<typeof crawlPipelineStageSchema>
 export type CrawlStageState = z.infer<typeof crawlStageStateSchema>
 export type CrawlStageTarget = z.infer<typeof crawlStageTargetSchema>
+export type CrawlRequestOrigin = z.infer<typeof crawlRequestOriginSchema>
 export type CrawlRequestMessage = z.infer<typeof crawlRequestMessageSchema>
 export type RenderRequest = z.infer<typeof renderRequestSchema>
 export type RenderJob = z.infer<typeof renderJobSchema>

@@ -64,6 +64,10 @@
       "types": "./dist/requests/contracts.d.ts",
       "default": "./dist/requests/contracts.js"
     },
+    "./requests/style-code-import": {
+      "types": "./dist/requests/style-code-import.d.ts",
+      "default": "./dist/requests/style-code-import.js"
+    },
     "./queues": {
       "types": "./dist/queues/index.d.ts",
       "default": "./dist/queues/index.js"

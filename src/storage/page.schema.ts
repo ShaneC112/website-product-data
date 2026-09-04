@@ -30,6 +30,7 @@ export const crawlPageTableSchema = z.object({
   linkedProductCount: z.number().int().nonnegative().optional(),
   contentHash: z.string().trim().min(1).optional(),
   status: z.string().trim().min(1).optional(),
+  activeRunId: z.string().trim().min(1).optional(),
   completedVariantTransformRunId: z.string().trim().min(1).optional(),
   blobHtmlPath: z.string().trim().min(1).optional(),
   blobScreenshotPath: z.string().trim().min(1).optional(),

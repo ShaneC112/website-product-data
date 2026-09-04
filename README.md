@@ -101,6 +101,26 @@ Current request-contract adoption:
 - `publishPreflight` is shared between Nuxt and Azure.
 - `matchingLedgerApproval` is shared between Nuxt and Azure.
 - `manualCrawlEnqueue` is shared between Nuxt and Azure using the Azure-owned payload shape.
+- `styleCodeImportRequestDocument` and `stylecode_import` action payloads are shared between Studio and Azure for top-level import-by-style-code requests.
+
+## Style-code import contracts
+
+The import-by-style-code workflow uses the existing `sanity-actions` transport, but it does not
+reuse the product-local `sanityActionRequests[]` object. Studio creates a top-level
+`styleCodeImportRequest` document, validates it with the shared
+`styleCodeImportRequestDocumentSchema`, and queues only `{schemaVersion, sanityDocumentId,
+requestId}` to Azure. Azure then reads the authoritative request document from Sanity, resolves the
+live M2CRM style-code group, and writes bounded `progressMessages`, `successResults`, and
+`failureResults` back to that same document.
+
+Shared consumers should import this workflow through package exports, not sibling source paths:
+
+- `@shane-corrigan/website-product-data/requests/contracts`
+- `@shane-corrigan/website-product-data/requests/style-code-import`
+
+Because Studio and Azure consume this repo through `file:` dependencies, changing these exports or
+their emitted files requires rebuilding this package and refreshing the consumer install before
+typecheck/test runs.
 
 ## Sanity registry synchronization
 

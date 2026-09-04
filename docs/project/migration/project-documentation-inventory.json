@@ -72,6 +72,11 @@
           },
           {
             "level": 2,
+            "text": "Style-code import contracts",
+            "anchor": "style-code-import-contracts"
+          },
+          {
+            "level": 2,
             "text": "Sanity registry synchronization",
             "anchor": "sanity-registry-synchronization"
           },
@@ -265,50 +270,21 @@
         ]
       },
       "dirtyPathsAtInventory": [
-        "docs/project/agents/acceptance-scenarios.md",
-        "docs/project/agents/agent-evaluation-cases.json",
-        "docs/project/agents/agent-evaluation.md",
-        "docs/project/agents/evaluation-results/",
-        "docs/project/agents/knowledge-coverage.md",
-        "docs/project/architecture/README.md",
-        "docs/project/architecture/evidence-and-extraction.md",
-        "docs/project/architecture/extension-boundaries.md",
-        "docs/project/architecture/identity-and-contracts.md",
-        "docs/project/architecture/pipeline-and-durability.md",
-        "docs/project/architecture/sanity-and-operator-workflows.md",
-        "docs/project/decisions/001-data-first-shared-contracts-and-identity.md",
-        "docs/project/decisions/002-azure-durability-and-render-capture.md",
-        "docs/project/decisions/003-separate-bridge-and-editorial-publication-gates.md",
-        "docs/project/decisions/README.md",
-        "docs/project/future/README.md",
-        "docs/project/learnings/azure/azure-a-batch-response-with-zero-usable-results-needs-a-log-line-not-a-silent-missing.md",
-        "docs/project/learnings/azure/azure-extracted-fields-is-a-product-surface-not-just-internal-plumbing.md",
-        "docs/project/learnings/azure/azure-multiple-webcrawlrunsummary-rows-per-group-are-normal-not-a-bug.md",
-        "docs/project/learnings/data/data-a-field-registry-examplevalue-is-prompt-content-not-documentation-and-models-will-copy-it.md",
-        "docs/project/learnings/data/data-width-registry-field-structural-fix-over-defensive-capping.md",
-        "docs/project/learnings/render/render-a-live-ui-bug-can-be-two-independent-bugs-wearing-the-same-symptom.md",
-        "docs/project/learnings/ui/ui-a-single-item-deep-link-page-can-still-show-a-non-empty-but-stale-dom-state.md",
-        "docs/project/learnings/ui/ui-an-operator-re-queue-action-must-actually-force-reprocessing.md",
-        "docs/project/learnings/ui/ui-file-dependents-must-be-rebuilt-and-restarted.md",
-        "docs/project/learnings/ui/ui-multiple-run-summary-rows-per-group-pick-the-most-advanced-one-not-the-latest.md",
-        "docs/project/migration/documentation-link-manifest.md",
-        "docs/project/migration/project-documentation-inventory.json",
-        "docs/project/operations/README.md",
-        "docs/project/project-map.json",
-        "docs/project/scripts/README.md",
-        "docs/project/scripts/script-index.json",
+        "README.md",
+        "docs/project/learnings/azure/README.md",
+        "docs/project/learnings/azure/azure-style-code-import-requests-need-structured-per-row-results-not-just-terminal-status-strings.md",
+        "docs/project/learnings/data/README.md",
+        "docs/project/learnings/data/data-file-dependency-consumers-can-see-new-exports-before-their-installed-dist-payload-actually-contains-them.md",
+        "docs/project/learnings/studio/README.md",
+        "docs/project/learnings/studio/studio-32-top-level-operator-requests-still-belong-on-the-existing-sanity-actions-transport-not-a-new-browser-to-azure-path.md",
         "package.json",
-        "scripts/README.md",
-        "scripts/check-agent-governance.mjs",
-        "scripts/check-documentation.mjs",
-        "scripts/check-learning-root-references.mjs",
-        "scripts/check-script-index.mjs",
-        "scripts/evaluate-agent-response.mjs",
-        "scripts/project-documentation-inventory.mjs",
-        "scripts/project-inventory.mjs",
-        "workspace-customizations/.github/agents/project-knowledge.agent.md",
-        "workspace-customizations/.github/agents/project-qa-commit.agent.md",
-        "workspace-customizations/agents/README.md"
+        "src/queues/contracts.ts",
+        "src/requests/contracts.ts",
+        "src/requests/index.ts",
+        "src/requests/style-code-import.ts",
+        "src/storage/page.schema.ts",
+        "src/storage/run-summary.schema.ts",
+        "test/schema-additions.test.ts"
       ],
       "disposition": {
         "category": "consolidated",
@@ -400,6 +376,11 @@
             "level": 3,
             "text": "Sanity product actions",
             "anchor": "sanity-product-actions"
+          },
+          {
+            "level": 3,
+            "text": "Import by style code",
+            "anchor": "import-by-style-code"
           },
           {
             "level": 3,
@@ -643,12 +624,17 @@
         "customizationPaths": []
       },
       "dirtyPathsAtInventory": [
-        "scripts/README.md",
+        "README.md",
         "src/01-source-render/ingress/crawlRequestDispatcher.test.ts",
-        "src/05-image-classify/progress/persistVariantOutcome.ts",
-        "src/core/README.md",
-        "src/core/batch/coordinator.ts",
-        "src/operator-actions/reprocessGroup.ts"
+        "src/01-source-render/ingress/crawlRequestDispatcher.ts",
+        "src/operator-actions/manualCrawlEnqueue.ts",
+        "src/operator-actions/sanity/",
+        "src/operator-actions/sanityActions.ts",
+        "src/recovery/reconciliationSweeper.test.ts",
+        "src/recovery/reconciliationSweeper.ts",
+        "src/stores/crawlPageStore.ts",
+        "src/stores/crawlRunSummaryStore.test.ts",
+        "src/stores/crawlRunSummaryStore.ts"
       ],
       "disposition": {
         "category": "consolidated",
@@ -804,12 +790,7 @@
         "rootAgents": "present",
         "customizationPaths": []
       },
-      "dirtyPathsAtInventory": [
-        "scripts/README.md",
-        "src/README.md",
-        "src/vendors/README.md",
-        "src/vendors/bestwoolcarpets/README.md"
-      ],
+      "dirtyPathsAtInventory": [],
       "disposition": {
         "category": "consolidated",
         "detail": "Root learning catalog redirects to the canonical indexed project documentation."
@@ -1057,6 +1038,11 @@
           },
           {
             "level": 2,
+            "text": "Import by Style Code",
+            "anchor": "import-by-style-code"
+          },
+          {
+            "level": 2,
             "text": "Provisioning checklist",
             "anchor": "provisioning-checklist"
           }
@@ -1087,7 +1073,18 @@
         "customizationPaths": []
       },
       "dirtyPathsAtInventory": [
-        "scripts/README.md"
+        "README.md",
+        "components/ImportByStyleCodePane.tsx",
+        "functions/sanity-actions/index.ts",
+        "sanity.blueprint.ts",
+        "schemaTypes/documents/styleCodeImportRequest.ts",
+        "schemaTypes/index.ts",
+        "schemaTypes/objects/styleCodeImportResult.ts",
+        "src/structure.ts",
+        "test/importByStyleCodePane.test.ts",
+        "test/sanityActionsHandler.test.ts",
+        "test/structure.test.ts",
+        "test/styleCodeImportRequest.schema.test.ts"
       ],
       "disposition": {
         "category": "consolidated",
