@@ -14,39 +14,6 @@ export {
   type RawWidthHint
 } from './page-detail.schema.js'
 
-export const crawlProductDetailTableSchema = z.object({
-  partitionKey: z.string().trim().min(1),
-  rowKey: z.string().trim().min(1),
-  urlKey: z.string().trim().min(1).optional(),
-  sourceGroupKey: z.string().trim().min(1).optional(),
-  sourceGroupStorageKey: z.string().trim().min(1).optional(),
-  styleCodeRaw: z.string().trim().min(1).optional(),
-  styleCodeStorageKey: z.string().trim().min(1).optional(),
-  sourceTableName: z.string().trim().min(1).optional(),
-  sourceRowKey: z.string().trim().min(1).optional(),
-  m2crmUuid: z.string().trim().min(1).optional(),
-  vendorSku: z.string().trim().min(1).optional(),
-  price: z.number().optional(),
-  vatRate: z.number().optional(),
-  // merchant-set box price, same trust tier as price - not a vendor-page claim to verify.
-  boxSalesPrice: z.number().optional(),
-  boxUnit: z.string().trim().min(1).optional(),
-  packInfoHintJson: z.string().trim().min(1).optional(),
-  // this row's own matched m2crm SKU's roll width(s), same trust tier as price - see
-  // rawWidthHintSchema in page-detail.schema.ts. JSON-stringified, consistent with the other hint columns.
-  rawWidthHintJson: z.string().trim().min(1).optional(),
-  styleCode: z.string().trim().min(1).optional(),
-  trade: z.string().trim().min(1).optional(),
-  status: crawlProductDetailStatusSchema.optional(),
-  detailJson: z.string().trim().min(1).optional(),
-  detailBlobPath: z.string().trim().min(1).optional(),
-  composedBlobPath: z.string().trim().min(1).optional(),
-  publishedAt: z.string().trim().min(1).optional(),
-  updatedAt: z.string().trim().min(1).optional(),
-  createdAt: z.string().trim().min(1).optional(),
-  promptVersion: z.string().trim().min(1).optional()
-})
-
 export const composedProductSummarySchema = z.object({
   url: z.string().trim().min(1),
   pageRole: crawlPageRoleSchema,
@@ -124,21 +91,8 @@ export const composedProductDetailBlobSchema = z.object({
   })
 })
 
-export type CrawlProductDetailTable = z.infer<typeof crawlProductDetailTableSchema>
 export type ProductDetailSummary = z.infer<typeof productDetailSummarySchema>
 export type ComposedProductDetailBlob = z.infer<typeof composedProductDetailBlobSchema>
-export type CrawlProductDetailParsed = {
-  row: CrawlProductDetailTable
-  summary: ProductDetailSummary | null
-}
-export type CrawlProductDetailWithBlob = CrawlProductDetailParsed & {
-  blob: ComposedProductDetailBlob | null
-}
-
-export function parseCrawlProductDetailTable(value: unknown): CrawlProductDetailTable {
-  return crawlProductDetailTableSchema.parse(value)
-}
-
 export function parseProductDetailSummary(value: string): ProductDetailSummary {
   return productDetailSummarySchema.parse(JSON.parse(value))
 }
@@ -153,21 +107,4 @@ export function stringifyProductDetailSummary(value: unknown): string {
 
 export function stringifyComposedProductDetailBlob(value: unknown): string {
   return JSON.stringify(composedProductDetailBlobSchema.parse(value))
-}
-
-export function parseCrawlProductDetail(row: CrawlProductDetailTable): CrawlProductDetailParsed {
-  return {
-    row,
-    summary: row.detailJson ? parseProductDetailSummary(row.detailJson) : null
-  }
-}
-
-export function composeCrawlProductDetail(
-  row: CrawlProductDetailTable,
-  blob: ComposedProductDetailBlob | null
-): CrawlProductDetailWithBlob {
-  return {
-    ...parseCrawlProductDetail(row),
-    blob
-  }
 }

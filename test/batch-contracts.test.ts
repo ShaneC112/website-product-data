@@ -114,12 +114,15 @@ describe('crawlExtractBatchTableSchema', () => {
 })
 
 describe('batch storage constants', () => {
-  it('adds the new ledger table and batch queue, and keeps the migrated queue names', () => {
+  it('adds the new ledger table and batch queues, and keeps the migrated queue names', () => {
     expect(STORAGE_TABLES.crawlExtractBatch).toBe('webcrawlextractbatch')
-    expect(STORAGE_QUEUES.crawlExtractBatchJobs).toBe('crawl-extract-batch-jobs')
-    expect(STORAGE_QUEUES.crawlRenderComplete).toBe('crawl-render-complete')
-    expect(STORAGE_QUEUES.crawlExtractJobs).toBe('crawl-extract-jobs')
-    expect(STORAGE_QUEUES.crawlVariantJobs).toBe('crawl-variant-jobs')
+    expect(STORAGE_QUEUES.crawlVariantExtractBatchJobs).toBe('crawl-variant-extract-batch-jobs')
+    expect(STORAGE_QUEUES.crawlImageClassifyBatchJobs).toBe('crawl-image-classify-batch-jobs')
+    expect(STORAGE_QUEUES.crawlSourceRenderComplete).toBe('crawl-source-render-complete')
+    expect(STORAGE_QUEUES.crawlVariantRenderComplete).toBe('crawl-variant-render-complete')
+    expect(STORAGE_QUEUES.crawlSourceExtractJobs).toBe('crawl-source-extract-jobs')
+    expect(STORAGE_QUEUES.crawlVariantExtractJobs).toBe('crawl-variant-extract-jobs')
+    expect(STORAGE_QUEUES.crawlVariantRenderDispatch).toBe('crawl-variant-render-dispatch')
   })
 })
 

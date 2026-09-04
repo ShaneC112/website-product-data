@@ -3,22 +3,6 @@ import { extractedVendorVariantSchema } from './page-detail.schema.js'
 import { classifiedImageSchema } from './image-classification.schema.js'
 import { crawlVariantSwatchSourceSchema, crawlVariantSwatchStatusSchema } from './variant-swatch.schema.js'
 
-export const crawlVariantDetailTableSchema = z.object({
-  partitionKey: z.string().trim().min(1),
-  rowKey: z.string().trim().min(1),
-  sourceGroupKey: z.string().trim().min(1),
-  sourceGroupStorageKey: z.string().trim().min(1).optional(),
-  styleCodeRaw: z.string().trim().min(1).optional(),
-  styleCodeStorageKey: z.string().trim().min(1).optional(),
-  parentUrlKey: z.string().trim().min(1),
-  variantId: z.string().trim().min(1).optional(),
-  variantUrl: z.string().trim().min(1).optional(),
-  label: z.string().trim().min(1).optional(),
-  detailJson: z.string().trim().min(1),
-  detailBlobPath: z.string().trim().min(1).optional(),
-  ttlExpiresAt: z.string().trim().min(1).optional()
-})
-
 export const variantDetailSummarySchema = z.object({
   summaryType: z.literal('variant-detail-summary'),
   canonicalVariantKey: z.string().trim().min(1).optional(),
@@ -36,20 +20,8 @@ export const variantDetailSummarySchema = z.object({
   hasDecorativePattern: z.boolean().optional()
 })
 
-export type CrawlVariantDetailTable = z.infer<typeof crawlVariantDetailTableSchema>
 export type VariantDetailSummary = z.infer<typeof variantDetailSummarySchema>
 export type VariantDetailBlob = z.infer<typeof extractedVendorVariantSchema>
-export type CrawlVariantDetailParsed = {
-  row: CrawlVariantDetailTable
-  summary: VariantDetailSummary
-}
-export type CrawlVariantDetailWithBlob = CrawlVariantDetailParsed & {
-  blob: VariantDetailBlob | null
-}
-
-export function parseCrawlVariantDetailTable(value: unknown): CrawlVariantDetailTable {
-  return crawlVariantDetailTableSchema.parse(value)
-}
 
 export function parseVariantDetailSummary(value: string): VariantDetailSummary {
   return variantDetailSummarySchema.parse(JSON.parse(value))
@@ -65,21 +37,4 @@ export function stringifyVariantDetailSummary(value: unknown): string {
 
 export function stringifyVariantDetailBlob(value: unknown): string {
   return JSON.stringify(extractedVendorVariantSchema.parse(value))
-}
-
-export function parseCrawlVariantDetail(row: CrawlVariantDetailTable): CrawlVariantDetailParsed {
-  return {
-    row,
-    summary: parseVariantDetailSummary(row.detailJson)
-  }
-}
-
-export function composeCrawlVariantDetail(
-  row: CrawlVariantDetailTable,
-  blob: VariantDetailBlob | null
-): CrawlVariantDetailWithBlob {
-  return {
-    ...parseCrawlVariantDetail(row),
-    blob
-  }
 }

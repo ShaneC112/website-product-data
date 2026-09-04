@@ -3,7 +3,8 @@ import { crawlRequestMessageSchema, renderCompleteSchema, renderRequestSchema, r
 import { IMAGE_GENERATION_PRODUCT_REGISTRY, IMAGE_GENERATION_PROFILE_ESTIMATES, estimateImageGenerationCostEur, getRegistryEntriesForTrade, mapTradeToSanityProductType, SANITY_CATEGORY_KEYS, SANITY_PRODUCT_TYPES, SANITY_SUITABLE_ROOMS } from '../src/registry/index.js'
 import { mapSanityProductTypeToCategoryKey } from '../src/registry/index.js'
 import { crawlPageTableSchema, parseCrawlPagePackInfoHint, stringifyCrawlPagePackInfoHint } from '../src/storage/page.schema.js'
-import { crawlProductDetailTableSchema, parseRawWidthHint, stringifyRawWidthHint } from '../src/storage/product-detail.schema.js'
+import { parseRawWidthHint, stringifyRawWidthHint } from '../src/storage/product-detail.schema.js'
+import { composeOutputTableSchema } from '../src/storage/compose-output.schema.js'
 import { crawlRunSummaryTableSchema } from '../src/storage/run-summary.schema.js'
 import { manualCrawlEnqueueSchema, sanityActionRequestSchema } from '../src/requests/contracts.js'
 
@@ -469,7 +470,7 @@ describe('m2crm box price / pack info hint plumbing', () => {
   })
 
   it('accepts boxSalesPrice/boxUnit on the crawl product detail table row', () => {
-    const parsed = crawlProductDetailTableSchema.parse({
+    const parsed = composeOutputTableSchema.parse({
       partitionKey: 'p',
       rowKey: 'r',
       boxSalesPrice: 8999,
@@ -541,7 +542,7 @@ describe('m2crm width hint plumbing', () => {
 
   it('round-trips rawWidthHint on the crawl product detail table row as a JSON-stringified column', () => {
     const rawWidthHintJson = stringifyRawWidthHint(rawWidthHint)
-    const parsed = crawlProductDetailTableSchema.parse({
+    const parsed = composeOutputTableSchema.parse({
       partitionKey: 'p',
       rowKey: 'r',
       rawWidthHintJson

@@ -54,21 +54,25 @@
       "types": "./dist/storage/index.d.ts",
       "default": "./dist/storage/index.js"
     },
-    "./storage/group-pdf.schema": {
-      "types": "./dist/storage/group-pdf.schema.d.ts",
-      "default": "./dist/storage/group-pdf.schema.js"
+    "./storage/extract-group-pdf.schema": {
+      "types": "./dist/storage/extract-group-pdf.schema.d.ts",
+      "default": "./dist/storage/extract-group-pdf.schema.js"
     },
     "./storage/group-state.schema": {
       "types": "./dist/storage/group-state.schema.d.ts",
       "default": "./dist/storage/group-state.schema.js"
     },
+    "./storage/compose-group-state.schema": {
+      "types": "./dist/storage/compose-group-state.schema.d.ts",
+      "default": "./dist/storage/compose-group-state.schema.js"
+    },
     "./storage/image-classification.schema": {
       "types": "./dist/storage/image-classification.schema.d.ts",
       "default": "./dist/storage/image-classification.schema.js"
     },
-    "./storage/matching-ledger.schema": {
-      "types": "./dist/storage/matching-ledger.schema.d.ts",
-      "default": "./dist/storage/matching-ledger.schema.js"
+    "./storage/publish-match-ledger.schema": {
+      "types": "./dist/storage/publish-match-ledger.schema.d.ts",
+      "default": "./dist/storage/publish-match-ledger.schema.js"
     },
     "./storage/page.schema": {
       "types": "./dist/storage/page.schema.d.ts",
@@ -78,9 +82,21 @@
       "types": "./dist/storage/page-detail.schema.d.ts",
       "default": "./dist/storage/page-detail.schema.js"
     },
+    "./storage/source-extract-detail.schema": {
+      "types": "./dist/storage/source-extract-detail.schema.d.ts",
+      "default": "./dist/storage/source-extract-detail.schema.js"
+    },
+    "./storage/variant-extract-detail.schema": {
+      "types": "./dist/storage/variant-extract-detail.schema.d.ts",
+      "default": "./dist/storage/variant-extract-detail.schema.js"
+    },
     "./storage/product-detail.schema": {
       "types": "./dist/storage/product-detail.schema.d.ts",
       "default": "./dist/storage/product-detail.schema.js"
+    },
+    "./storage/compose-output.schema": {
+      "types": "./dist/storage/compose-output.schema.d.ts",
+      "default": "./dist/storage/compose-output.schema.js"
     },
     "./storage/run-summary.schema": {
       "types": "./dist/storage/run-summary.schema.d.ts",
@@ -90,9 +106,9 @@
       "types": "./dist/storage/url-link.schema.d.ts",
       "default": "./dist/storage/url-link.schema.js"
     },
-    "./storage/validation.schema": {
-      "types": "./dist/storage/validation.schema.d.ts",
-      "default": "./dist/storage/validation.schema.js"
+    "./storage/source-render-validation.schema": {
+      "types": "./dist/storage/source-render-validation.schema.d.ts",
+      "default": "./dist/storage/source-render-validation.schema.js"
     },
     "./storage/variant-swatch.schema": {
       "types": "./dist/storage/variant-swatch.schema.d.ts",
@@ -101,6 +117,14 @@
     "./storage/variant-detail.schema": {
       "types": "./dist/storage/variant-detail.schema.d.ts",
       "default": "./dist/storage/variant-detail.schema.js"
+    },
+    "./storage/image-classify-outcome.schema": {
+      "types": "./dist/storage/image-classify-outcome.schema.d.ts",
+      "default": "./dist/storage/image-classify-outcome.schema.js"
+    },
+    "./storage/image-classify-swatch.schema": {
+      "types": "./dist/storage/image-classify-swatch.schema.d.ts",
+      "default": "./dist/storage/image-classify-swatch.schema.js"
     },
     "./storage/extract-batch.schema": {
       "types": "./dist/storage/extract-batch.schema.d.ts",

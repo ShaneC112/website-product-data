@@ -11,7 +11,7 @@ import {
 } from '../registry/index.js'
 import type {
   ComposedProductDetailBlob,
-  CrawlProductDetailTable,
+  ComposeOutputTable,
   ExtractedReviewModel,
   ExtractedVendorVariant,
 } from '../storage/index.js'
@@ -201,7 +201,7 @@ export function calculateRetailIncVat(retailExVatMinor: number): number {
 }
 
 export function buildSanityIngestionPlan(
-  row: CrawlProductDetailTable,
+  row: ComposeOutputTable,
   blob: ComposedProductDetailBlob,
   options: BuildIngestionOptions,
 ): SanityIngestionPlan {

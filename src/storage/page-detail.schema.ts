@@ -125,19 +125,6 @@ export const extractedReviewModelSchema = z.object({
   additionalFeatures: z.array(extractedReviewAdditionalAttributeSchema)
 })
 
-export const crawlPageDetailTableSchema = z.object({
-  partitionKey: z.string().trim().min(1),
-  rowKey: z.string().trim().min(1),
-  urlKey: z.string().trim().min(1),
-  sourceGroupKey: z.string().trim().min(1),
-  pageRole: crawlPageRoleSchema,
-  status: crawlProductDetailStatusSchema,
-  detailJson: z.string().trim().min(1),
-  extractedDetailBlobPath: z.string().trim().min(1).optional(),
-  vendorProductPageBlobPath: z.string().trim().min(1).optional(),
-  ttlExpiresAt: z.string().trim().min(1).optional()
-})
-
 export const pageDetailSummarySchema = z.object({
   summaryType: z.literal('page-detail-summary'),
   trade: z.string().trim().min(1).optional(),
@@ -190,7 +177,6 @@ export const extractedDetailBlobSchema = z.object({
   vendorProductPageBlobPath: z.string().trim().min(1).optional()
 })
 
-export type CrawlPageDetailTable = z.infer<typeof crawlPageDetailTableSchema>
 export type CrawlPageRoleValue = z.infer<typeof crawlPageRoleSchema>
 export type CrawlProductDetailStatusValue = z.infer<typeof crawlProductDetailStatusSchema>
 export type PageDetailSummary = z.infer<typeof pageDetailSummarySchema>
@@ -199,16 +185,6 @@ export type ExtractedVendorVariant = z.infer<typeof extractedVendorVariantSchema
 export type ExtractedReviewKnownAttribute = z.infer<typeof extractedReviewKnownAttributeSchema>
 export type ExtractedReviewAdditionalAttribute = z.infer<typeof extractedReviewAdditionalAttributeSchema>
 export type ExtractedReviewModel = z.infer<typeof extractedReviewModelSchema>
-export type CrawlPageDetailParsed =
-  | {
-      row: CrawlPageDetailTable
-      detail: PageDetailSummary | RangeDetailSummary
-      detailKind: 'page-detail-summary' | 'range-detail-summary'
-    }
-
-export function parseCrawlPageDetailTable(value: unknown): CrawlPageDetailTable {
-  return crawlPageDetailTableSchema.parse(value)
-}
 
 export function parsePageDetailSummary(value: string): PageDetailSummary {
   return pageDetailSummarySchema.parse(JSON.parse(value))
@@ -232,22 +208,4 @@ export function stringifyExtractedDetailBlob(value: unknown): string {
 
 export function stringifyVendorProductPageBlob(value: unknown): string {
   return JSON.stringify(extractedVendorProductPageSchema.parse(value))
-}
-
-export function parseCrawlPageDetail(row: CrawlPageDetailTable): CrawlPageDetailParsed {
-  const parsed = JSON.parse(row.detailJson) as { summaryType?: unknown }
-
-  if (parsed?.summaryType === 'range-detail-summary') {
-    return {
-      row,
-      detail: rangeDetailSummarySchema.parse(parsed),
-      detailKind: 'range-detail-summary'
-    }
-  }
-
-  return {
-    row,
-    detail: pageDetailSummarySchema.parse(parsed),
-    detailKind: 'page-detail-summary'
-  }
 }
