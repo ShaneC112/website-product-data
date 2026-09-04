@@ -17,6 +17,8 @@ const requiredFiles = [
   'docs/sanity/README.md',
   'docs/project/README.md',
   'docs/project/architecture/README.md',
+  'docs/project/agents/knowledge-coverage.md',
+  'docs/project/agents/acceptance-scenarios.md',
   'docs/project/operations/README.md',
   'docs/project/decisions/README.md',
   'docs/project/scripts/README.md',
@@ -24,6 +26,7 @@ const requiredFiles = [
   'docs/project/future/README.md',
   'docs/project/future/vendor-trade-stage-flows.md',
   'docs/project/migration/documentation-link-manifest.md',
+  'docs/project/migration/project-documentation-inventory.json',
   'docs/project/project-map.json',
   'docs/project/project-metadata.json',
   'docs/project/CHANGELOG.md'
@@ -38,6 +41,8 @@ const navigationFiles = [
   '../website-product-enrichment-azure/scripts/campaign-and-reporting.md',
   '../website-product-enrichment-azure/scripts/reset-and-clear-operations.md',
   '../website-product-enrichment-azure/src/README.md',
+  '../website-product-enrichment-render/scripts/README.md',
+  '../website-product-enrichment-render/src/README.md',
   '../website-product-enrichment-render/src/vendors/README.md',
   '../website-product-enrichment-ui/app/README.md',
   '../website-product-enrichment-ui/server/README.md',
@@ -45,6 +50,7 @@ const navigationFiles = [
   '../website-product-enrichment-sanity-studio/components/README.md',
   '../website-product-enrichment-sanity-studio/functions/README.md',
   '../website-product-enrichment-sanity-studio/schemaTypes/README.md',
+  '../website-product-enrichment-sanity-studio/scripts/README.md',
   '../website-product-enrichment-sanity-studio/test/README.md'
 ]
 
@@ -57,7 +63,7 @@ for (const file of requiredFiles) {
   }
 }
 
-for (const file of ['docs/project/project-map.json', 'docs/project/project-metadata.json']) {
+for (const file of ['docs/project/project-map.json', 'docs/project/project-metadata.json', 'docs/project/scripts/script-index.json']) {
   const path = resolve(repositoryRoot, file)
   JSON.parse(await readFile(path, 'utf8'))
 }
@@ -66,6 +72,7 @@ for (const repositoryName of ['data', 'render', 'azure', 'ui', 'studio']) {
   await execFileAsync(process.execPath, [resolve(scriptDirectory, 'migrate-data-learnings.mjs'), repositoryName, '--check'])
 }
 await execFileAsync(process.execPath, [resolve(scriptDirectory, 'check-learning-root-references.mjs')])
+await execFileAsync(process.execPath, [resolve(scriptDirectory, 'project-documentation-inventory.mjs'), '--check'])
 
 const markdownFiles = [
   ...(await listMarkdownFiles(resolve(repositoryRoot, 'docs'))),

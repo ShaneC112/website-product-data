@@ -8,7 +8,7 @@
 
 ## Multiple run-summary rows per group: pick the most-advanced one, not the latest
 
-See the parallel entry in `website-product-enrichment-azure/LEARNINGS.md` for the
+See [Multiple `webcrawlrunsummary` rows per group are normal, not a bug](../azure/azure-multiple-webcrawlrunsummary-rows-per-group-are-normal-not-a-bug.md) for the
 root cause. On the UI side, `server/api/crawl/group-states.get.ts`'s
 `listLatestRunSummaries` picked the run summary with the latest `requestedAt` across
 all of a group's `webcrawlrunsummary` rows - which surfaced a duplicate-width

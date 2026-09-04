@@ -8,7 +8,7 @@
 
 ## `file:` dependents must be rebuilt *and restarted*
 
-Same note as `website-product-data`'s LEARNINGS.md: after any change to that shared
+Same note as [Data's `file:` dependent learning](../data/data-file-dependents-must-be-rebuilt-and-restarted.md): after any change to that shared
 package, `npm install ../website-product-data --no-save` (or `pnpm install`) refreshes
 the on-disk copy here, but a running dev server can still hold a stale in-memory
 module. Restart the process, don't just rebuild.

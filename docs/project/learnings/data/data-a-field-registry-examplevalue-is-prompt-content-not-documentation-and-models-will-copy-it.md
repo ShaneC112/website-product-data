@@ -23,7 +23,7 @@ page>"}]`) so a model that copies it verbatim now fails a value-type check
 downstream (the consuming repo's structural validation expects a real number and
 unit string) instead of producing a silently-wrong number. The consuming repo also
 added an explicit "never output an example's literal value" instruction to its base
-system prompt - see that repo's `LEARNINGS.md` for the full writeup.
+system prompt - see [An AI model will copy a prompt's example value verbatim when it's uncertain](../azure/azure-an-ai-model-will-copy-a-prompt-s-example-value-verbatim-when-it-s-uncertain.md) for the full writeup.
 
 **Best practice:** any `exampleValue` added to `fieldRegistry` for a numeric,
 measurement, or otherwise structured field should look obviously like a

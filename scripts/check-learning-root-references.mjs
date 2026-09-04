@@ -22,15 +22,8 @@ const redirectTargets = new Map([
   ['website-product-enrichment-ui', '../website-product-data/docs/project/learnings/ui/README.md'],
   ['website-product-enrichment-sanity-studio', '../website-product-data/docs/project/learnings/studio/README.md']
 ])
-const temporaryAllowlist = new Set([
-  'website-product-data/docs/project/migration/documentation-link-manifest.md',
-  'website-product-enrichment-azure/src/core/README.md',
-  'website-product-enrichment-azure/src/core/batch/coordinator.ts',
-  'website-product-enrichment-azure/src/01-source-render/ingress/crawlRequestDispatcher.test.ts',
-  'website-product-enrichment-azure/src/operator-actions/reprocessGroup.ts',
-  'website-product-enrichment-azure/src/05-image-classify/progress/persistVariantOutcome.ts',
-  'website-product-enrichment-render/src/vendors/README.md',
-  'website-product-enrichment-render/src/vendors/bestwoolcarpets/README.md'
+const allowedRootLearningReaders = new Set([
+  resolve(scriptDirectory, 'project-documentation-inventory.mjs')
 ])
 const textExtensions = new Set(['.md', '.ts', '.tsx', '.js', '.mjs', '.vue'])
 const excludedDirectories = new Set(['.git', 'node_modules', 'dist', '.output', 'playwright-report', 'test-results'])
@@ -49,9 +42,7 @@ for (const repositoryName of repositories) {
     if (isExcluded(path, workspacePath)) continue
     const content = await readFile(path, 'utf8')
     if (!/LEARNINGS\.md/.test(content)) continue
-    if (!temporaryAllowlist.has(workspacePath)) {
-      violations.push(workspacePath)
-    }
+    violations.push(workspacePath)
   }
 }
 
@@ -59,7 +50,7 @@ if (violations.length > 0) {
   throw new Error(`Unallowlisted active root LEARNINGS.md references:\n${violations.map((path) => `- ${path}`).join('\n')}`)
 }
 
-console.info(`Active root-learning references are controlled: ${temporaryAllowlist.size} temporary allowlist entries.`)
+console.info('No active root-learning references found.')
 
 async function listTextFiles(directory) {
   const entries = await readdir(directory, {withFileTypes: true})
@@ -73,10 +64,16 @@ async function listTextFiles(directory) {
 
 function isExcluded(path, workspacePath) {
   return rootCatalogs.has(path)
+    || allowedRootLearningReaders.has(path)
     || path === fileURLToPath(import.meta.url)
     || workspacePath.includes('/plan/')
     || workspacePath.endsWith('/CHANGELOG.md')
-    || workspacePath.startsWith('website-product-data/docs/project/learnings/')
+    || isCanonicalLearningIndex(workspacePath)
+}
+
+function isCanonicalLearningIndex(workspacePath) {
+  return workspacePath.startsWith('website-product-data/docs/project/learnings/')
+    && workspacePath.endsWith('/README.md')
 }
 
 function extension(name) {

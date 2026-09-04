@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "repositories": [
+    {
+      "name": "Data",
+      "path": ".",
+      "catalogBacklink": "../docs/project/scripts/README.md",
+      "files": {
+        "check-agent-governance.mjs": "documented",
+        "check-documentation.mjs": "documented",
+        "evaluate-agent-response.mjs": "documented",
+        "check-learning-root-references.mjs": "documented",
+        "check-script-index.mjs": "documented",
+        "migrate-data-learnings.mjs": "documented",
+        "project-documentation-inventory.mjs": "documented",
+        "project-inventory.mjs": "documented",
+        "sync-workspace-customizations.mjs": "documented"
+      }
+    },
+    {
+      "name": "Azure",
+      "path": "../website-product-enrichment-azure",
+      "catalogBacklink": "../../website-product-data/docs/project/scripts/README.md",
+      "files": {
+        "build-synthetic-payload.test.ts": "test",
+        "build-synthetic-payload.ts": "helper-only",
+        "campaign-report.test.ts": "test",
+        "campaign-report.ts": "documented",
+        "clear-crawl-queues.ts": "documented",
+        "clear-sanity-image-queues.ts": "documented",
+        "diagnose-image-prompt-policy.mjs": "documented",
+        "estimate-swatch-colour.mjs": "documented",
+        "inspect-campaign-result.test.ts": "test",
+        "inspect-campaign-result.ts": "documented",
+        "live-image-probe.mjs": "documented",
+        "live-pdf-probe.mjs": "documented",
+        "m2crmAuth.ts": "helper-only",
+        "m2crmProductFields.ts": "helper-only",
+        "query-m2crm-custom-fields.ts": "documented",
+        "query-m2crm-products.ts": "documented",
+        "reset-pipeline-state.ts": "documented",
+        "reset-preflight.test.ts": "test",
+        "reset-preflight.ts": "helper-only",
+        "reset-trace-logs.ts": "documented",
+        "snapshot-m2crm-crawl-products.ts": "documented",
+        "test-image-endpoints.mjs": "documented"
+      }
+    },
+    {
+      "name": "Render",
+      "path": "../website-product-enrichment-render",
+      "catalogBacklink": "../../website-product-data/docs/project/scripts/README.md",
+      "files": {
+        "fixture-sanitizer.test.ts": "test",
+        "fixture-sanitizer.ts": "documented",
+        "render-candidate-probe.test.ts": "test",
+        "render-candidate-probe.ts": "documented",
+        "vendor-campaign-manifest.test.ts": "test",
+        "vendor-campaign-manifest.ts": "documented"
+      }
+    },
+    {
+      "name": "Studio",
+      "path": "../website-product-enrichment-sanity-studio",
+      "catalogBacklink": "../../website-product-data/docs/project/scripts/README.md",
+      "files": {
+        "inventory-live-sanity-content.ts": "documented",
+        "migrate-live-sanity-content.ts": "documented",
+        "migrate-media-images.ts": "documented",
+        "migrate-variant-overrides.ts": "documented",
+        "publish-product.ts": "documented",
+        "retrigger-room-image-request.ts": "documented",
+        "retry-room-image-generation.ts": "documented",
+        "seed-room-image-designs.ts": "documented"
+      }
+    }
+  ]
+}

@@ -9,8 +9,7 @@
 ## An operator "re-queue" action must actually force reprocessing
 
 `ai-review.vue`'s manual `requeueGroup` action sent `force: false` to
-`/api/crawl/enqueue`. Even after fixing `crawlUrl` (see the azure repo's
-LEARNINGS.md) so the Re-queue button was no longer permanently disabled, a
+`/api/crawl/enqueue`. Even after fixing `crawlUrl` (see the [Azure learning index](../azure/README.md)) so the Re-queue button was no longer permanently disabled, a
 non-forced request for a URL the dispatcher had already seen gets silently linked
 as a duplicate rather than actually re-rendered/re-extracted - so an operator
 deliberately clicking "Re-queue" to fix stale/wrong data got no error and no new

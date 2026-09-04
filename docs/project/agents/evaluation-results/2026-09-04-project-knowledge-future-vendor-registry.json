@@ -1,0 +1,13 @@
+{
+  "agent": "Project Knowledge",
+  "scenarioId": "future-vendor-registry-boundary",
+  "decision": "Do not implement. A vendor-and-trade stage registry for LVT is a future design and is not approved for implementation.",
+  "evidence": [
+    "Canonical note: docs/project/future/vendor-trade-stage-flows.md is titled \"Future Vendor and Trade Stage Flows\" and states \"Status: future design, not approved for implementation.\"",
+    "The note explicitly excludes runtime schemas, registries, handlers, and behavior changes.",
+    "The stated reconsideration trigger requires concrete evidence that an LVT, Laminate, or vendor exception cannot be handled cleanly by an existing vendor module, shared contract, or bounded configuration setting.",
+    "Even after reconsideration, queue identity, ledger persistence, dispatch, retries, recovery, telemetry, shared contracts, validation, and publication gates must remain common."
+  ],
+  "approvalOrBlocker": "Blocked pending documented, concrete LVT exception evidence and an explicit decision approving the smallest owner-specific change.",
+  "nextAction": "Record the LVT exception with evidence, evaluate existing vendor modules, shared contracts, and bounded configuration first, then route any approved scope through docs/project/future/vendor-trade-stage-flows.md."
+}

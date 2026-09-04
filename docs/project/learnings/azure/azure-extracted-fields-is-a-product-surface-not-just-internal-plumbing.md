@@ -17,6 +17,5 @@ is surfaced directly to operators via the AI review UI's "Field confidence" card
 the literal "final AI pass" JSON output — silently flattening it to strings there
 would hide the real extracted shape from someone debugging a bad extraction.
 Special-cased via `serializeMeasurementListValue`. Any future `measurement-list`
-registry field should follow the same pattern (see the same note in
-`website-product-data/LEARNINGS.md`).
+registry field should follow the same pattern (see [the `width` registry-field structural fix](../data/data-width-registry-field-structural-fix-over-defensive-capping.md)).
 

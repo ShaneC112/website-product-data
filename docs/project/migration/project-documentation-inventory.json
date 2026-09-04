@@ -1,0 +1,1098 @@
+{
+  "version": 1,
+  "scope": "Website Product Enrichment documentation migration",
+  "dispositionCategories": [
+    "retained",
+    "moved",
+    "consolidated",
+    "intentionally-historical",
+    "obsolete"
+  ],
+  "repositories": [
+    {
+      "path": "website-product-data",
+      "package": {
+        "name": "@shane-corrigan/website-product-data",
+        "version": "0.1.0",
+        "manager": "npm",
+        "aliases": [
+          "agents:check",
+          "agents:evaluate",
+          "agents:evaluate:check",
+          "build",
+          "docs:check",
+          "learnings:azure:check",
+          "learnings:azure:migrate",
+          "learnings:data:check",
+          "learnings:data:migrate",
+          "learnings:render:check",
+          "learnings:render:migrate",
+          "learnings:roots:check",
+          "learnings:studio:check",
+          "learnings:studio:migrate",
+          "learnings:ui:check",
+          "learnings:ui:migrate",
+          "project:documentation:inventory",
+          "project:documentation:inventory:check",
+          "project:inventory",
+          "scripts:index:check",
+          "test",
+          "verify",
+          "workspace:sync",
+          "workspace:sync:check"
+        ]
+      },
+      "gitRoot": "/workspaces/project-container/website-product-data",
+      "rootReadme": {
+        "headings": [
+          {
+            "level": 1,
+            "text": "website-product-data",
+            "anchor": "website-product-data"
+          },
+          {
+            "level": 2,
+            "text": "Navigation",
+            "anchor": "navigation"
+          },
+          {
+            "level": 2,
+            "text": "Recovery contracts",
+            "anchor": "recovery-contracts"
+          },
+          {
+            "level": 2,
+            "text": "Sanity media projections",
+            "anchor": "sanity-media-projections"
+          },
+          {
+            "level": 2,
+            "text": "Intent",
+            "anchor": "intent"
+          },
+          {
+            "level": 2,
+            "text": "Sanity registry synchronization",
+            "anchor": "sanity-registry-synchronization"
+          },
+          {
+            "level": 2,
+            "text": "Product type and category intent",
+            "anchor": "product-type-and-category-intent"
+          },
+          {
+            "level": 2,
+            "text": "Storage and messaging reference",
+            "anchor": "storage-and-messaging-reference"
+          },
+          {
+            "level": 3,
+            "text": "Stage ledger and recovery contracts (recoverable-queues plan, in progress)",
+            "anchor": "stage-ledger-and-recovery-contracts-recoverable-queues-plan-in-progress"
+          },
+          {
+            "level": 3,
+            "text": "Tables",
+            "anchor": "tables"
+          },
+          {
+            "level": 4,
+            "text": "`webcrawlpages`",
+            "anchor": "webcrawlpages"
+          },
+          {
+            "level": 4,
+            "text": "`webcrawlpagedetail`",
+            "anchor": "webcrawlpagedetail"
+          },
+          {
+            "level": 4,
+            "text": "`webcrawlvariantdetail`",
+            "anchor": "webcrawlvariantdetail"
+          },
+          {
+            "level": 4,
+            "text": "`webcrawlgroupstate`",
+            "anchor": "webcrawlgroupstate"
+          },
+          {
+            "level": 4,
+            "text": "`webcrawlproductdetail`",
+            "anchor": "webcrawlproductdetail"
+          },
+          {
+            "level": 4,
+            "text": "`webcrawlurllinks`",
+            "anchor": "webcrawlurllinks"
+          },
+          {
+            "level": 4,
+            "text": "`webcrawlvalidations`",
+            "anchor": "webcrawlvalidations"
+          },
+          {
+            "level": 4,
+            "text": "`webcrawlrunsummary`",
+            "anchor": "webcrawlrunsummary"
+          },
+          {
+            "level": 4,
+            "text": "`webcrawlmatchledger`",
+            "anchor": "webcrawlmatchledger"
+          },
+          {
+            "level": 4,
+            "text": "`webcrawlextractbatch`",
+            "anchor": "webcrawlextractbatch"
+          },
+          {
+            "level": 3,
+            "text": "Queues",
+            "anchor": "queues"
+          },
+          {
+            "level": 4,
+            "text": "`crawl-requests`",
+            "anchor": "crawl-requests"
+          },
+          {
+            "level": 4,
+            "text": "`crawl-render-jobs`",
+            "anchor": "crawl-render-jobs"
+          },
+          {
+            "level": 4,
+            "text": "`crawl-extract-jobs`",
+            "anchor": "crawl-extract-jobs"
+          },
+          {
+            "level": 4,
+            "text": "`crawl-variant-jobs`",
+            "anchor": "crawl-variant-jobs"
+          },
+          {
+            "level": 4,
+            "text": "`crawl-transform-jobs`",
+            "anchor": "crawl-transform-jobs"
+          },
+          {
+            "level": 4,
+            "text": "`crawl-image-jobs`",
+            "anchor": "crawl-image-jobs"
+          },
+          {
+            "level": 4,
+            "text": "`crawl-extract-batch-jobs`",
+            "anchor": "crawl-extract-batch-jobs"
+          },
+          {
+            "level": 4,
+            "text": "`publish-jobs`",
+            "anchor": "publish-jobs"
+          },
+          {
+            "level": 3,
+            "text": "Blob container",
+            "anchor": "blob-container"
+          },
+          {
+            "level": 4,
+            "text": "`crawl-artefacts`",
+            "anchor": "crawl-artefacts"
+          },
+          {
+            "level": 2,
+            "text": "Field glossary appendix",
+            "anchor": "field-glossary-appendix"
+          },
+          {
+            "level": 3,
+            "text": "Common identity fields",
+            "anchor": "common-identity-fields"
+          },
+          {
+            "level": 3,
+            "text": "`CrawlPageRow` field glossary",
+            "anchor": "crawlpagerow-field-glossary"
+          },
+          {
+            "level": 3,
+            "text": "`CrawlProductDetailRow` field glossary",
+            "anchor": "crawlproductdetailrow-field-glossary"
+          },
+          {
+            "level": 3,
+            "text": "`CrawlValidationRow` field glossary",
+            "anchor": "crawlvalidationrow-field-glossary"
+          },
+          {
+            "level": 3,
+            "text": "`CrawlRunSummaryRow` field glossary",
+            "anchor": "crawlrunsummaryrow-field-glossary"
+          },
+          {
+            "level": 3,
+            "text": "`CrawlMatchingLedgerRow` field glossary",
+            "anchor": "crawlmatchingledgerrow-field-glossary"
+          }
+        ]
+      },
+      "rootLearnings": {
+        "state": "redirect-only",
+        "canonicalTargets": [
+          "docs/project/learnings/data/README.md"
+        ]
+      },
+      "scripts": {
+        "status": "present",
+        "rootIndex": "present",
+        "files": [
+          "check-agent-governance.mjs",
+          "check-documentation.mjs",
+          "check-learning-root-references.mjs",
+          "check-script-index.mjs",
+          "evaluate-agent-response.mjs",
+          "migrate-data-learnings.mjs",
+          "project-documentation-inventory.mjs",
+          "project-inventory.mjs",
+          "sync-workspace-customizations.mjs"
+        ]
+      },
+      "agentCustomization": {
+        "rootAgents": "present",
+        "customizationPaths": [
+          "workspace-customizations"
+        ]
+      },
+      "dirtyPathsAtInventory": [
+        "docs/project/agents/acceptance-scenarios.md",
+        "docs/project/agents/agent-evaluation-cases.json",
+        "docs/project/agents/agent-evaluation.md",
+        "docs/project/agents/evaluation-results/",
+        "docs/project/agents/knowledge-coverage.md",
+        "docs/project/architecture/README.md",
+        "docs/project/architecture/evidence-and-extraction.md",
+        "docs/project/architecture/extension-boundaries.md",
+        "docs/project/architecture/identity-and-contracts.md",
+        "docs/project/architecture/pipeline-and-durability.md",
+        "docs/project/architecture/sanity-and-operator-workflows.md",
+        "docs/project/decisions/001-data-first-shared-contracts-and-identity.md",
+        "docs/project/decisions/002-azure-durability-and-render-capture.md",
+        "docs/project/decisions/003-separate-bridge-and-editorial-publication-gates.md",
+        "docs/project/decisions/README.md",
+        "docs/project/future/README.md",
+        "docs/project/learnings/azure/azure-a-batch-response-with-zero-usable-results-needs-a-log-line-not-a-silent-missing.md",
+        "docs/project/learnings/azure/azure-extracted-fields-is-a-product-surface-not-just-internal-plumbing.md",
+        "docs/project/learnings/azure/azure-multiple-webcrawlrunsummary-rows-per-group-are-normal-not-a-bug.md",
+        "docs/project/learnings/data/data-a-field-registry-examplevalue-is-prompt-content-not-documentation-and-models-will-copy-it.md",
+        "docs/project/learnings/data/data-width-registry-field-structural-fix-over-defensive-capping.md",
+        "docs/project/learnings/render/render-a-live-ui-bug-can-be-two-independent-bugs-wearing-the-same-symptom.md",
+        "docs/project/learnings/ui/ui-a-single-item-deep-link-page-can-still-show-a-non-empty-but-stale-dom-state.md",
+        "docs/project/learnings/ui/ui-an-operator-re-queue-action-must-actually-force-reprocessing.md",
+        "docs/project/learnings/ui/ui-file-dependents-must-be-rebuilt-and-restarted.md",
+        "docs/project/learnings/ui/ui-multiple-run-summary-rows-per-group-pick-the-most-advanced-one-not-the-latest.md",
+        "docs/project/migration/documentation-link-manifest.md",
+        "docs/project/migration/project-documentation-inventory.json",
+        "docs/project/operations/README.md",
+        "docs/project/project-map.json",
+        "docs/project/scripts/README.md",
+        "docs/project/scripts/script-index.json",
+        "package.json",
+        "scripts/README.md",
+        "scripts/check-agent-governance.mjs",
+        "scripts/check-documentation.mjs",
+        "scripts/check-learning-root-references.mjs",
+        "scripts/check-script-index.mjs",
+        "scripts/evaluate-agent-response.mjs",
+        "scripts/project-documentation-inventory.mjs",
+        "scripts/project-inventory.mjs",
+        "workspace-customizations/.github/agents/project-knowledge.agent.md",
+        "workspace-customizations/.github/agents/project-qa-commit.agent.md",
+        "workspace-customizations/agents/README.md"
+      ],
+      "disposition": {
+        "category": "consolidated",
+        "detail": "Root learning catalog redirects to the canonical indexed project documentation."
+      }
+    },
+    {
+      "path": "website-product-enrichment-azure",
+      "package": {
+        "name": "website-product-enrichment-azure",
+        "version": "1.0.0",
+        "manager": "npm",
+        "aliases": [
+          "build",
+          "clean",
+          "clear:crawl-queues",
+          "clear:sanity-image-queues",
+          "diagnose:image-prompt-policy",
+          "m2crm:custom-fields",
+          "m2crm:products",
+          "m2crm:snapshot",
+          "prestart",
+          "query:m2crm-custom-fields",
+          "query:m2crm-products",
+          "reset:pipeline",
+          "reset:trace-logs",
+          "start",
+          "start:fresh",
+          "test",
+          "test:image-endpoints",
+          "verify",
+          "watch"
+        ]
+      },
+      "gitRoot": "/workspaces/project-container/website-product-enrichment-azure",
+      "rootReadme": {
+        "headings": [
+          {
+            "level": 1,
+            "text": "website-product-enrichment-azure",
+            "anchor": "website-product-enrichment-azure"
+          },
+          {
+            "level": 2,
+            "text": "Navigation",
+            "anchor": "navigation"
+          },
+          {
+            "level": 2,
+            "text": "Intent",
+            "anchor": "intent"
+          },
+          {
+            "level": 2,
+            "text": "Responsibility boundary",
+            "anchor": "responsibility-boundary"
+          },
+          {
+            "level": 2,
+            "text": "Framework decision",
+            "anchor": "framework-decision"
+          },
+          {
+            "level": 2,
+            "text": "Cross-repo contract change checklist",
+            "anchor": "cross-repo-contract-change-checklist"
+          },
+          {
+            "level": 2,
+            "text": "Local setup",
+            "anchor": "local-setup"
+          },
+          {
+            "level": 3,
+            "text": "Local debugging",
+            "anchor": "local-debugging"
+          },
+          {
+            "level": 2,
+            "text": "Crawl-to-Sanity ingestion",
+            "anchor": "crawl-to-sanity-ingestion"
+          },
+          {
+            "level": 3,
+            "text": "Registry definition synchronization",
+            "anchor": "registry-definition-synchronization"
+          },
+          {
+            "level": 3,
+            "text": "Sanity product actions",
+            "anchor": "sanity-product-actions"
+          },
+          {
+            "level": 3,
+            "text": "m2crm price/pack wiring and per-colour resolution",
+            "anchor": "m2crm-pricepack-wiring-and-per-colour-resolution"
+          },
+          {
+            "level": 2,
+            "text": "Sanity room image queues",
+            "anchor": "sanity-room-image-queues"
+          },
+          {
+            "level": 2,
+            "text": "Freshness model",
+            "anchor": "freshness-model"
+          },
+          {
+            "level": 2,
+            "text": "Source product identity",
+            "anchor": "source-product-identity"
+          },
+          {
+            "level": 2,
+            "text": "Crawl validation ledger",
+            "anchor": "crawl-validation-ledger"
+          },
+          {
+            "level": 2,
+            "text": "Range extract and swatch seeding",
+            "anchor": "range-extract-and-swatch-seeding"
+          },
+          {
+            "level": 2,
+            "text": "Swatch colour derivation",
+            "anchor": "swatch-colour-derivation"
+          },
+          {
+            "level": 2,
+            "text": "Render queues and completion handoff",
+            "anchor": "render-queues-and-completion-handoff"
+          },
+          {
+            "level": 2,
+            "text": "Stage ledger (recoverable-queues plan, in progress)",
+            "anchor": "stage-ledger-recoverable-queues-plan-in-progress"
+          },
+          {
+            "level": 3,
+            "text": "Recovery API",
+            "anchor": "recovery-api"
+          },
+          {
+            "level": 3,
+            "text": "Observe-only rollout gating",
+            "anchor": "observe-only-rollout-gating"
+          },
+          {
+            "level": 2,
+            "text": "Durable extraction batches",
+            "anchor": "durable-extraction-batches"
+          },
+          {
+            "level": 3,
+            "text": "Pitfall: `renderDispatchWorker` may be creating the page row for the first time",
+            "anchor": "pitfall-renderdispatchworker-may-be-creating-the-page-row-for-the-first-time"
+          },
+          {
+            "level": 3,
+            "text": "Pitfall: duplicate widths of one style must not re-render the same URL",
+            "anchor": "pitfall-duplicate-widths-of-one-style-must-not-re-render-the-same-url"
+          },
+          {
+            "level": 3,
+            "text": "Pitfall: `claimOrCreateCrawlPage` must claim atomically, not \"read then write\"",
+            "anchor": "pitfall-claimorcreatecrawlpage-must-claim-atomically-not-read-then-write"
+          },
+          {
+            "level": 3,
+            "text": "Pitfall: a \"range\" page's own product-detail row needs a transform after variant evidence settles",
+            "anchor": "pitfall-a-range-pages-own-product-detail-row-needs-a-transform-after-variant-evidence-settles"
+          },
+          {
+            "level": 3,
+            "text": "Pitfall: variant detail rows must stamp the *range* page's urlKey as `parentUrlKey`",
+            "anchor": "pitfall-variant-detail-rows-must-stamp-the-range-pages-urlkey-as-parenturlkey"
+          },
+          {
+            "level": 3,
+            "text": "Pitfall: `crawlImageClassifyWorker` must use the same canonical variant key as transform",
+            "anchor": "pitfall-crawlimageclassifyworker-must-use-the-same-canonical-variant-key-as-transform"
+          },
+          {
+            "level": 2,
+            "text": "Local E2E reset workflow",
+            "anchor": "local-e2e-reset-workflow"
+          },
+          {
+            "level": 2,
+            "text": "Pipeline field trace (local/test only)",
+            "anchor": "pipeline-field-trace-localtest-only"
+          },
+          {
+            "level": 3,
+            "text": "Pitfall: compact table summaries must cap unbounded vendor content",
+            "anchor": "pitfall-compact-table-summaries-must-cap-unbounded-vendor-content"
+          },
+          {
+            "level": 3,
+            "text": "Pitfall: free-text width splitting can fan one bad value into hundreds of garbage entries",
+            "anchor": "pitfall-free-text-width-splitting-can-fan-one-bad-value-into-hundreds-of-garbage-entries"
+          },
+          {
+            "level": 3,
+            "text": "Pitfall: unbounded regex captures inside `<script>`/`<style>` blocks, and AI JSON wrapped in markdown fences",
+            "anchor": "pitfall-unbounded-regex-captures-inside--blocks-and-ai-json-wrapped-in-markdown-fences"
+          },
+          {
+            "level": 3,
+            "text": "Pitfall: the AI call only ran when required fields were missing, and could copy a prompt example verbatim",
+            "anchor": "pitfall-the-ai-call-only-ran-when-required-fields-were-missing-and-could-copy-a-prompt-example-verbatim"
+          },
+          {
+            "level": 2,
+            "text": "Recovery operations",
+            "anchor": "recovery-operations"
+          },
+          {
+            "level": 2,
+            "text": "Current storage shape",
+            "anchor": "current-storage-shape"
+          },
+          {
+            "level": 2,
+            "text": "Run summary telemetry",
+            "anchor": "run-summary-telemetry"
+          },
+          {
+            "level": 2,
+            "text": "Azure OpenAI compatibility",
+            "anchor": "azure-openai-compatibility"
+          },
+          {
+            "level": 2,
+            "text": "m2crm custom fields used by this pipeline",
+            "anchor": "m2crm-custom-fields-used-by-this-pipeline"
+          },
+          {
+            "level": 3,
+            "text": "Specified URLs",
+            "anchor": "specified-urls"
+          },
+          {
+            "level": 2,
+            "text": "Multi-weight products (e.g. Victoria Carpets)",
+            "anchor": "multi-weight-products-eg-victoria-carpets"
+          },
+          {
+            "level": 2,
+            "text": "Batch AI extraction",
+            "anchor": "batch-ai-extraction"
+          },
+          {
+            "level": 2,
+            "text": "Curated PDF extraction",
+            "anchor": "curated-pdf-extraction"
+          },
+          {
+            "level": 2,
+            "text": "HTTP endpoints",
+            "anchor": "http-endpoints"
+          },
+          {
+            "level": 2,
+            "text": "Verification",
+            "anchor": "verification"
+          },
+          {
+            "level": 2,
+            "text": "Field registry and extraction model",
+            "anchor": "field-registry-and-extraction-model"
+          },
+          {
+            "level": 3,
+            "text": "Product field registry",
+            "anchor": "product-field-registry"
+          },
+          {
+            "level": 3,
+            "text": "Variant field registry",
+            "anchor": "variant-field-registry"
+          },
+          {
+            "level": 3,
+            "text": "Adding or changing a registry field",
+            "anchor": "adding-or-changing-a-registry-field"
+          },
+          {
+            "level": 2,
+            "text": "Deployment",
+            "anchor": "deployment"
+          }
+        ]
+      },
+      "rootLearnings": {
+        "state": "redirect-only",
+        "canonicalTargets": [
+          "../website-product-data/docs/project/learnings/azure/README.md"
+        ]
+      },
+      "scripts": {
+        "status": "present",
+        "rootIndex": "present",
+        "files": [
+          "__tests__/m2crmProductFields.test.ts",
+          "build-synthetic-payload.test.ts",
+          "build-synthetic-payload.ts",
+          "campaign-report.test.ts",
+          "campaign-report.ts",
+          "clear-crawl-queues.ts",
+          "clear-sanity-image-queues.ts",
+          "diagnose-image-prompt-policy.mjs",
+          "estimate-swatch-colour.mjs",
+          "inspect-campaign-result.test.ts",
+          "inspect-campaign-result.ts",
+          "live-image-probe.mjs",
+          "live-pdf-probe.mjs",
+          "m2crmAuth.ts",
+          "m2crmProductFields.ts",
+          "query-m2crm-custom-fields.ts",
+          "query-m2crm-products.ts",
+          "reset-pipeline-state.ts",
+          "reset-preflight.test.ts",
+          "reset-preflight.ts",
+          "reset-trace-logs.ts",
+          "snapshot-m2crm-crawl-products.ts",
+          "test-image-endpoints.mjs"
+        ]
+      },
+      "agentCustomization": {
+        "rootAgents": "present",
+        "customizationPaths": []
+      },
+      "dirtyPathsAtInventory": [
+        "scripts/README.md",
+        "src/01-source-render/ingress/crawlRequestDispatcher.test.ts",
+        "src/05-image-classify/progress/persistVariantOutcome.ts",
+        "src/core/README.md",
+        "src/core/batch/coordinator.ts",
+        "src/operator-actions/reprocessGroup.ts"
+      ],
+      "disposition": {
+        "category": "consolidated",
+        "detail": "Root learning catalog redirects to the canonical indexed project documentation."
+      }
+    },
+    {
+      "path": "website-product-enrichment-render",
+      "package": {
+        "name": "website-product-enrichment-render",
+        "version": "1.0.0",
+        "manager": "npm",
+        "aliases": [
+          "build",
+          "clean",
+          "dev",
+          "reset:trace-logs",
+          "start",
+          "start:fresh",
+          "test",
+          "verify"
+        ]
+      },
+      "gitRoot": "/workspaces/project-container/website-product-enrichment-render",
+      "rootReadme": {
+        "headings": [
+          {
+            "level": 1,
+            "text": "website-product-enrichment-render",
+            "anchor": "website-product-enrichment-render"
+          },
+          {
+            "level": 2,
+            "text": "Navigation",
+            "anchor": "navigation"
+          },
+          {
+            "level": 2,
+            "text": "Intent",
+            "anchor": "intent"
+          },
+          {
+            "level": 2,
+            "text": "Repo boundary with Azure",
+            "anchor": "repo-boundary-with-azure"
+          },
+          {
+            "level": 2,
+            "text": "Framework decision",
+            "anchor": "framework-decision"
+          },
+          {
+            "level": 2,
+            "text": "Runtime model",
+            "anchor": "runtime-model"
+          },
+          {
+            "level": 2,
+            "text": "Deferred Multi-Replica Egress Tidy-Up",
+            "anchor": "deferred-multi-replica-egress-tidy-up"
+          },
+          {
+            "level": 2,
+            "text": "Pitfall: `RenderComplete` must echo back everything Azure needs, not just status",
+            "anchor": "pitfall-rendercomplete-must-echo-back-everything-azure-needs-not-just-status"
+          },
+          {
+            "level": 2,
+            "text": "Verification",
+            "anchor": "verification"
+          },
+          {
+            "level": 2,
+            "text": "Local debugging",
+            "anchor": "local-debugging"
+          },
+          {
+            "level": 2,
+            "text": "Cross-repo contract change checklist",
+            "anchor": "cross-repo-contract-change-checklist"
+          },
+          {
+            "level": 2,
+            "text": "Current vendor architecture",
+            "anchor": "current-vendor-architecture"
+          },
+          {
+            "level": 2,
+            "text": "Core outputs",
+            "anchor": "core-outputs"
+          },
+          {
+            "level": 2,
+            "text": "Optional disk tracing",
+            "anchor": "optional-disk-tracing"
+          },
+          {
+            "level": 2,
+            "text": "Best Wool reference pattern",
+            "anchor": "best-wool-reference-pattern"
+          },
+          {
+            "level": 2,
+            "text": "How to add a new vendor",
+            "anchor": "how-to-add-a-new-vendor"
+          },
+          {
+            "level": 2,
+            "text": "Request cache",
+            "anchor": "request-cache"
+          },
+          {
+            "level": 2,
+            "text": "Endpoints",
+            "anchor": "endpoints"
+          },
+          {
+            "level": 2,
+            "text": "Environment",
+            "anchor": "environment"
+          },
+          {
+            "level": 2,
+            "text": "Scripts",
+            "anchor": "scripts"
+          },
+          {
+            "level": 2,
+            "text": "Test coverage",
+            "anchor": "test-coverage"
+          }
+        ]
+      },
+      "rootLearnings": {
+        "state": "redirect-only",
+        "canonicalTargets": [
+          "../website-product-data/docs/project/learnings/render/README.md"
+        ]
+      },
+      "scripts": {
+        "status": "present",
+        "rootIndex": "present",
+        "files": [
+          "fixture-sanitizer.test.ts",
+          "fixture-sanitizer.ts",
+          "render-candidate-probe.test.ts",
+          "render-candidate-probe.ts",
+          "vendor-campaign-manifest.test.ts",
+          "vendor-campaign-manifest.ts"
+        ]
+      },
+      "agentCustomization": {
+        "rootAgents": "present",
+        "customizationPaths": []
+      },
+      "dirtyPathsAtInventory": [
+        "scripts/README.md",
+        "src/README.md",
+        "src/vendors/README.md",
+        "src/vendors/bestwoolcarpets/README.md"
+      ],
+      "disposition": {
+        "category": "consolidated",
+        "detail": "Root learning catalog redirects to the canonical indexed project documentation."
+      }
+    },
+    {
+      "path": "website-product-enrichment-ui",
+      "package": {
+        "name": "website-product-enrichment-ui",
+        "version": "0.1.0",
+        "manager": "pnpm",
+        "aliases": [
+          "build",
+          "dev",
+          "generate",
+          "lint",
+          "postinstall",
+          "preview",
+          "test",
+          "test:e2e",
+          "test:e2e:list",
+          "test:watch",
+          "typecheck",
+          "verify"
+        ]
+      },
+      "gitRoot": "/workspaces/project-container/website-product-enrichment-ui",
+      "rootReadme": {
+        "headings": [
+          {
+            "level": 1,
+            "text": "website-product-enrichment-ui",
+            "anchor": "website-product-enrichment-ui"
+          },
+          {
+            "level": 2,
+            "text": "Navigation",
+            "anchor": "navigation"
+          },
+          {
+            "level": 2,
+            "text": "Intent",
+            "anchor": "intent"
+          },
+          {
+            "level": 2,
+            "text": "Shared contract source of truth",
+            "anchor": "shared-contract-source-of-truth"
+          },
+          {
+            "level": 2,
+            "text": "Registry synchronization",
+            "anchor": "registry-synchronization"
+          },
+          {
+            "level": 2,
+            "text": "Setup",
+            "anchor": "setup"
+          },
+          {
+            "level": 2,
+            "text": "Testing",
+            "anchor": "testing"
+          },
+          {
+            "level": 3,
+            "text": "TODO: Show active runs before group composition",
+            "anchor": "todo-show-active-runs-before-group-composition"
+          },
+          {
+            "level": 3,
+            "text": "Shared import troubleshooting",
+            "anchor": "shared-import-troubleshooting"
+          },
+          {
+            "level": 3,
+            "text": "Icon troubleshooting",
+            "anchor": "icon-troubleshooting"
+          },
+          {
+            "level": 3,
+            "text": "Hydration troubleshooting for timestamps",
+            "anchor": "hydration-troubleshooting-for-timestamps"
+          },
+          {
+            "level": 3,
+            "text": "Local Azure write development",
+            "anchor": "local-azure-write-development"
+          },
+          {
+            "level": 3,
+            "text": "Test-mode writes",
+            "anchor": "test-mode-writes"
+          },
+          {
+            "level": 2,
+            "text": "Screens",
+            "anchor": "screens"
+          },
+          {
+            "level": 2,
+            "text": "Structure",
+            "anchor": "structure"
+          },
+          {
+            "level": 2,
+            "text": "Deployment",
+            "anchor": "deployment"
+          },
+          {
+            "level": 2,
+            "text": "For AI agents",
+            "anchor": "for-ai-agents"
+          }
+        ]
+      },
+      "rootLearnings": {
+        "state": "redirect-only",
+        "canonicalTargets": [
+          "../website-product-data/docs/project/learnings/ui/README.md"
+        ]
+      },
+      "scripts": {
+        "status": "absent",
+        "files": []
+      },
+      "agentCustomization": {
+        "rootAgents": "present",
+        "customizationPaths": []
+      },
+      "dirtyPathsAtInventory": [],
+      "disposition": {
+        "category": "consolidated",
+        "detail": "Root learning catalog redirects to the canonical indexed project documentation."
+      }
+    },
+    {
+      "path": "website-product-enrichment-sanity-studio",
+      "package": {
+        "name": "website-product-enrichment-sanity-studio",
+        "version": "0.1.0",
+        "manager": "pnpm",
+        "aliases": [
+          "build",
+          "deploy",
+          "dev",
+          "media-images:inventory",
+          "media-images:migrate",
+          "media-images:verify",
+          "migration:apply",
+          "migration:inventory",
+          "migration:prepare",
+          "migration:variant-overrides",
+          "publish:product",
+          "schema:extract",
+          "seed:room-image-designs",
+          "test",
+          "typecheck",
+          "typegen",
+          "verify"
+        ]
+      },
+      "gitRoot": "/workspaces/project-container/website-product-enrichment-sanity-studio",
+      "rootReadme": {
+        "headings": [
+          {
+            "level": 1,
+            "text": "Website Product Enrichment Sanity Studio",
+            "anchor": "website-product-enrichment-sanity-studio"
+          },
+          {
+            "level": 2,
+            "text": "Navigation",
+            "anchor": "navigation"
+          },
+          {
+            "level": 2,
+            "text": "Content model",
+            "anchor": "content-model"
+          },
+          {
+            "level": 3,
+            "text": "Registry-backed features and specifications",
+            "anchor": "registry-backed-features-and-specifications"
+          },
+          {
+            "level": 2,
+            "text": "Publication workflow",
+            "anchor": "publication-workflow"
+          },
+          {
+            "level": 2,
+            "text": "Conflict resolution",
+            "anchor": "conflict-resolution"
+          },
+          {
+            "level": 2,
+            "text": "Local setup",
+            "anchor": "local-setup"
+          },
+          {
+            "level": 3,
+            "text": "Variant override migration",
+            "anchor": "variant-override-migration"
+          },
+          {
+            "level": 3,
+            "text": "Media image migration and verification",
+            "anchor": "media-image-migration-and-verification"
+          },
+          {
+            "level": 3,
+            "text": "Legacy site content migration",
+            "anchor": "legacy-site-content-migration"
+          },
+          {
+            "level": 2,
+            "text": "Publish an Azure product",
+            "anchor": "publish-an-azure-product"
+          },
+          {
+            "level": 2,
+            "text": "AI room images",
+            "anchor": "ai-room-images"
+          },
+          {
+            "level": 3,
+            "text": "Products created directly in Sanity",
+            "anchor": "products-created-directly-in-sanity"
+          },
+          {
+            "level": 3,
+            "text": "Cost estimates",
+            "anchor": "cost-estimates"
+          },
+          {
+            "level": 3,
+            "text": "Diagnostics",
+            "anchor": "diagnostics"
+          },
+          {
+            "level": 2,
+            "text": "Product requeue actions",
+            "anchor": "product-requeue-actions"
+          },
+          {
+            "level": 2,
+            "text": "Provisioning checklist",
+            "anchor": "provisioning-checklist"
+          }
+        ]
+      },
+      "rootLearnings": {
+        "state": "redirect-only",
+        "canonicalTargets": [
+          "../website-product-data/docs/project/learnings/studio/README.md"
+        ]
+      },
+      "scripts": {
+        "status": "present",
+        "rootIndex": "present",
+        "files": [
+          "inventory-live-sanity-content.ts",
+          "migrate-live-sanity-content.ts",
+          "migrate-media-images.ts",
+          "migrate-variant-overrides.ts",
+          "publish-product.ts",
+          "retrigger-room-image-request.ts",
+          "retry-room-image-generation.ts",
+          "seed-room-image-designs.ts"
+        ]
+      },
+      "agentCustomization": {
+        "rootAgents": "present",
+        "customizationPaths": []
+      },
+      "dirtyPathsAtInventory": [
+        "scripts/README.md"
+      ],
+      "disposition": {
+        "category": "consolidated",
+        "detail": "Root learning catalog redirects to the canonical indexed project documentation."
+      }
+    }
+  ]
+}

@@ -8,7 +8,7 @@
 
 ## A single-item deep-link page can still show a non-empty (but stale) DOM state
 
-See `website-product-enrichment-render/LEARNINGS.md` for the root cause of the
+See [Best Wool per-variant swatches: a popup overlay does not remove the page behind it](../render/render-best-wool-per-variant-swatches-a-popup-overlay-does-not-remove-the-page-behind-it.md) for the root cause of the
 Best Wool swatch-per-variant bug - this repo's part was just the downstream
 symptom (broken images) once the backend started returning genuinely-correct,
 per-variant `selectedSwatchUrl` values but they still failed to render for an

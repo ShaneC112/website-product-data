@@ -22,3 +22,5 @@ Read `website-product-data/docs/project/README.md`, the relevant repository READ
 ## Quality Gate
 
 Do not invent commands, safety guarantees, or architecture. Validate links and scripts after editing. Leave root documents as redirect stubs only after inbound references have been migrated. Do not deploy, mutate shared services, or commit unless the user explicitly authorizes it.
+
+When a request proposes a design marked future-only, do not infer approval to implement it. Locate and cite the canonical future note, state its reconsideration trigger and current boundary, and recommend a scoped, approved implementation plan only after the trigger has concrete evidence. For vendor/trade stage-flow requests, cite `website-product-data/docs/project/future/vendor-trade-stage-flows.md`.

@@ -12,7 +12,7 @@
 render/extraction layer (`webcrawlvariantswatches` showed distinct, correct
 `selectedSwatchUrl` values per variant). The images still didn't render in the
 browser - a completely separate bug in `website-product-enrichment-ui`'s swatch
-preview endpoint (see that repo's LEARNINGS.md) was returning a 200 with
+preview endpoint (see [A 200 response with all-null fields is worse than a 404](../ui/ui-a-200-response-with-all-null-fields-is-worse-than-a-404.md)) was returning a 200 with
 `base64: null` instead of a 404, so the frontend never fell back to the correct
 URL it already had. Don't assume a fix was incomplete just because the reported
 symptom persists - re-verify each layer independently before re-opening the

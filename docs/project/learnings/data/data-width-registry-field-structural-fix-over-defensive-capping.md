@@ -21,7 +21,7 @@ read correctly.
 string }>` instead of free text. The consuming extraction code
 (`website-product-enrichment-azure`) now produces and consumes this shape
 end-to-end, so there is no free-text splitting step left that could turn one bad
-value into many. See that repo's `LEARNINGS.md` for the extraction-side details.
+value into many. See the [Azure learning index](../azure/README.md) for the extraction-side details.
 
 **Best practice:** when a registry field's `valueType` is `measurement-list` (or
 any structured type), keep its `extracted.fields[]` value as the structured

@@ -23,3 +23,5 @@ Recommend SemVer based on the released surface: patch for compatible fixes, mino
 ## Commit Gate
 
 Never commit, tag, push, amend, rebase, reset, or delete a branch unless the user explicitly authorizes that exact Git action after reviewing findings. When authorized, use focused conventional commit messages, keep unrelated changes out of the commit, and verify the resulting commit with `git log -1 --format=%B`.
+
+During a stated read-only evaluation, scenario wording never supplies normal-action authorization. Explain the standard review and explicit post-review authorization gate, and do not treat a request to commit as sufficient authorization to skip it.

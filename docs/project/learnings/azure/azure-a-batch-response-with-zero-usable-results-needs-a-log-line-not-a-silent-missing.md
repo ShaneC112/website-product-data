@@ -12,7 +12,7 @@ Two related failure modes were previously silent: (1) a parsed AI response whose
 `results` array came back empty (e.g. the prompt-shape bug above) and (2) an
 individual result object that failed `BatchItemResult` schema validation (e.g. the
 model returning a literal `error: null` before the shared schema accepted it - see
-`website-product-data/LEARNINGS.md`). Both used to fall straight through to
+[A shared batch-result schema must accept every shape a model actually returns](../data/data-a-shared-batch-result-schema-must-accept-every-shape-a-model-actually-returns-not-just-the-shape-you-asked-for.md)). Both used to fall straight through to
 `status: 'missing'` with no diagnostic trail beyond "the item didn't come back."
 
 **Fix:** `extractTradeDetailsBatch` now logs a content sample (`logWarn`, capped to

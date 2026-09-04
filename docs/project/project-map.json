@@ -1,34 +1,46 @@
 {
+  "dependencyOrder": [
+    "website-product-data",
+    "website-product-enrichment-azure",
+    "website-product-enrichment-render",
+    "website-product-enrichment-ui",
+    "website-product-enrichment-sanity-studio"
+  ],
   "repositories": [
     {
       "path": "website-product-data",
       "owner": "Shared contracts, storage schemas, registry data, and canonical project documentation",
       "packageManager": "npm",
-      "stableCommands": ["build", "test", "verify"]
+      "stableCommands": ["build", "test", "verify"],
+      "indexes": ["README.md", "AGENTS.md", "docs/README.md", "scripts/README.md", "docs/project/learnings/data/README.md"]
     },
     {
       "path": "website-product-enrichment-azure",
       "owner": "Durable pipeline orchestration, extraction, recovery, and publishing",
       "packageManager": "npm",
-      "stableCommands": ["build", "test", "verify"]
+      "stableCommands": ["build", "test", "verify"],
+      "indexes": ["README.md", "AGENTS.md", "src/README.md", "scripts/README.md", "../website-product-data/docs/project/learnings/azure/README.md"]
     },
     {
       "path": "website-product-enrichment-render",
       "owner": "Stateless Playwright browser capture",
       "packageManager": "npm",
-      "stableCommands": ["build", "test", "verify"]
+      "stableCommands": ["build", "test", "verify"],
+      "indexes": ["README.md", "AGENTS.md", "src/README.md", "src/vendors/README.md", "scripts/README.md", "../website-product-data/docs/project/learnings/render/README.md"]
     },
     {
       "path": "website-product-enrichment-ui",
       "owner": "Nuxt crawl-operations interface and server-side Azure access",
       "packageManager": "pnpm",
-      "stableCommands": ["typecheck", "lint", "test", "test:e2e", "test:e2e:list", "build", "verify"]
+      "stableCommands": ["typecheck", "lint", "test", "test:e2e", "test:e2e:list", "build", "verify"],
+      "indexes": ["README.md", "AGENTS.md", "app/README.md", "server/README.md", "tests/README.md", "../website-product-data/docs/project/learnings/ui/README.md"]
     },
     {
       "path": "website-product-enrichment-sanity-studio",
       "owner": "Sanity schemas, Studio UX, and Blueprint functions",
       "packageManager": "pnpm",
-      "stableCommands": ["typecheck", "test", "build", "verify"]
+      "stableCommands": ["typecheck", "test", "build", "verify"],
+      "indexes": ["README.md", "AGENTS.md", "components/README.md", "functions/README.md", "schemaTypes/README.md", "scripts/README.md", "test/README.md", "../website-product-data/docs/project/learnings/studio/README.md"]
     }
   ]
 }

@@ -14,6 +14,14 @@ const projectMapPath = resolve(dataRepository, 'docs/project/project-map.json')
 const projectMap = JSON.parse(await readFile(projectMapPath, 'utf8'))
 const inventory = []
 
+if (!Array.isArray(projectMap.dependencyOrder) || projectMap.dependencyOrder[0] !== 'website-product-data') {
+  throw new Error('Project map must declare Data-first dependency order.')
+}
+
+if (new Set(projectMap.dependencyOrder).size !== projectMap.repositories.length) {
+  throw new Error('Project map dependency order must include every repository exactly once.')
+}
+
 for (const repository of projectMap.repositories) {
   const repositoryPath = resolve(workspaceRoot, repository.path)
   const packageJsonPath = resolve(repositoryPath, 'package.json')
@@ -31,6 +39,13 @@ for (const repository of projectMap.repositories) {
     }
   }
 
+  if (!Array.isArray(repository.indexes) || repository.indexes.length === 0) {
+    throw new Error(`${repository.path} is missing canonical documentation indexes.`)
+  }
+  for (const index of repository.indexes) {
+    await access(resolve(repositoryPath, index))
+  }
+
   const {stdout: gitRoot} = await execFileAsync('git', ['-C', repositoryPath, 'rev-parse', '--show-toplevel'])
   inventory.push({
     path: repository.path,
@@ -38,8 +53,9 @@ for (const repository of projectMap.repositories) {
     packageManager,
     version: packageJson.version ?? null,
     stableCommands: repository.stableCommands,
+    indexes: repository.indexes,
     gitRoot: gitRoot.trim()
   })
 }
 
-console.info(JSON.stringify({project: 'Website Product Enrichment', repositories: inventory}, null, 2))
+console.info(JSON.stringify({project: 'Website Product Enrichment', dependencyOrder: projectMap.dependencyOrder, repositories: inventory}, null, 2))
