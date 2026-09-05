@@ -270,8 +270,10 @@
         ]
       },
       "dirtyPathsAtInventory": [
-        "docs/project/learnings/render/README.md",
-        "docs/project/learnings/render/render-range-wide-specifications-can-live-only-inside-a-client-side-modal.md"
+        "docs/project/architecture/sanity-and-operator-workflows.md",
+        "docs/project/learnings/azure/README.md",
+        "docs/project/learnings/azure/azure-sanity-triggered-action-code-should-be-organized-one-folder-per-action-family-under-operator-actions-sanity.md",
+        "docs/project/migration/project-documentation-inventory.json"
       ],
       "disposition": {
         "category": "consolidated",
@@ -610,7 +612,15 @@
         "rootAgents": "present",
         "customizationPaths": []
       },
-      "dirtyPathsAtInventory": [],
+      "dirtyPathsAtInventory": [
+        "README.md",
+        "src/operator-actions/README.md",
+        "src/operator-actions/sanity/helpers/",
+        "src/operator-actions/sanity/recover-pipeline/",
+        "src/operator-actions/sanity/update-product/",
+        "src/operator-actions/sanityActions.test.ts",
+        "src/operator-actions/sanityActions.ts"
+      ],
       "disposition": {
         "category": "consolidated",
         "detail": "Root learning catalog redirects to the canonical indexed project documentation."
@@ -765,14 +775,7 @@
         "rootAgents": "present",
         "customizationPaths": []
       },
-      "dirtyPathsAtInventory": [
-        "README.md",
-        "src/renderPage.ts",
-        "src/vendors/westex/render.test.ts",
-        "src/vendors/westex/render.ts",
-        "src/vendors/westex/vendorState.ts",
-        "src/vendors/westex/workflow.probe.test.ts"
-      ],
+      "dirtyPathsAtInventory": [],
       "disposition": {
         "category": "consolidated",
         "detail": "Root learning catalog redirects to the canonical indexed project documentation."
