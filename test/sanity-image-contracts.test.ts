@@ -74,6 +74,41 @@ describe('sanityImagePrepareCommandSchema', () => {
 
     expect(parsed.design.statementTone).toBe('none')
   })
+  it('accepts a bounded single-line userHint', () => {
+    const parsed = sanityImagePrepareCommandSchema.parse({
+      ...basePrepareCommand,
+      userHint: 'Use a varied, balanced interior palette with warm neutrals around the flooring.'
+    })
+
+    expect(parsed.userHint).toBe('Use a varied, balanced interior palette with warm neutrals around the flooring.')
+  })
+
+  it('rejects blank userHint values after trim', () => {
+    const result = sanityImagePrepareCommandSchema.safeParse({
+      ...basePrepareCommand,
+      userHint: '   '
+    })
+
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects multiline userHint values', () => {
+    const result = sanityImagePrepareCommandSchema.safeParse({
+      ...basePrepareCommand,
+      userHint: 'Keep the flooring dominant.\nAdd green walls.'
+    })
+
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects userHint values longer than 300 characters', () => {
+    const result = sanityImagePrepareCommandSchema.safeParse({
+      ...basePrepareCommand,
+      userHint: 'a'.repeat(301)
+    })
+
+    expect(result.success).toBe(false)
+  })
 })
 
 describe('sanityImageCommandSchema', () => {

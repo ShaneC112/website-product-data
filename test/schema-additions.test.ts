@@ -6,6 +6,7 @@ import { crawlPageTableSchema, parseCrawlPagePackInfoHint, stringifyCrawlPagePac
 import { parseRawWidthHint, stringifyRawWidthHint } from '../src/storage/product-detail.schema.js'
 import { composeOutputTableSchema } from '../src/storage/compose-output.schema.js'
 import { crawlRunSummaryTableSchema } from '../src/storage/run-summary.schema.js'
+import { sanityImageGenerationTableSchema } from '../src/storage/sanity-image-generation.schema.js'
 import { manualCrawlEnqueueSchema, sanityActionRequestSchema } from '../src/requests/contracts.js'
 import {
   styleCodeImportRequestDocumentSchema,
@@ -265,6 +266,56 @@ describe('visible-text schema plumbing', () => {
 
     expect(parsed.blobPaths.visibleText).toBe('x/visible-text.txt')
   })
+describe('sanity image generation retention schema', () => {
+  it('accepts terminal retention timestamps on terminal rows', () => {
+    const parsed = sanityImageGenerationTableSchema.parse({
+      partitionKey: 'request-1',
+      rowKey: 'prepare',
+      commandId: 'request-1:prepare',
+      requestId: 'request-1',
+      phase: 'prepare',
+      sanityProjectId: 'project',
+      sanityDataset: 'production',
+      sanityDocumentId: 'product-1',
+      requestKey: 'request-key',
+      status: 'completed',
+      pipeline: 'direct',
+      generationProfile: 'flux-roomshot-v1',
+      attempt: 1,
+      requestedAt: '2026-09-01T00:00:00.000Z',
+      updatedAt: '2026-09-01T00:01:00.000Z',
+      completedAt: '2026-09-01T00:01:00.000Z',
+      terminalAt: '2026-09-01T00:01:00.000Z',
+      retentionExpiresAt: '2026-10-01T00:01:00.000Z'
+    })
+
+    expect(parsed.terminalAt).toBe('2026-09-01T00:01:00.000Z')
+    expect(parsed.retentionExpiresAt).toBe('2026-10-01T00:01:00.000Z')
+  })
+
+  it('rejects invalid terminal retention timestamps', () => {
+    const result = sanityImageGenerationTableSchema.safeParse({
+      partitionKey: 'request-1',
+      rowKey: 'prepare',
+      commandId: 'request-1:prepare',
+      requestId: 'request-1',
+      phase: 'prepare',
+      sanityProjectId: 'project',
+      sanityDataset: 'production',
+      sanityDocumentId: 'product-1',
+      requestKey: 'request-key',
+      status: 'failed',
+      pipeline: 'direct',
+      generationProfile: 'flux-roomshot-v1',
+      attempt: 1,
+      requestedAt: '2026-09-01T00:00:00.000Z',
+      updatedAt: '2026-09-01T00:01:00.000Z',
+      terminalAt: 'not-a-date'
+    })
+
+    expect(result.success).toBe(false)
+  })
+})
 
   it('accepts an optional blobVisibleTextPath on the crawl page table row', () => {
     const parsed = crawlPageTableSchema.parse({

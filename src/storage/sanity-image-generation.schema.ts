@@ -33,6 +33,8 @@ export const sanityImageGenerationTableSchema = z.object({
   requestedAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   completedAt: z.string().datetime().optional(),
+  terminalAt: z.string().datetime().optional(),
+  retentionExpiresAt: z.string().datetime().optional(),
   error: z.string().max(2000).optional()
 })
 

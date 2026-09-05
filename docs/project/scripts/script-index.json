@@ -64,7 +64,9 @@
       "path": "../website-product-enrichment-sanity-studio",
       "catalogBacklink": "../../website-product-data/docs/project/scripts/README.md",
       "files": {
+        "imageGenerationHistoryMigration.ts": "helper-only",
         "inventory-live-sanity-content.ts": "documented",
+        "migrate-image-generation-history.ts": "documented",
         "migrate-live-sanity-content.ts": "documented",
         "migrate-media-images.ts": "documented",
         "migrate-variant-overrides.ts": "documented",

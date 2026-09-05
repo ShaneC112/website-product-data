@@ -257,6 +257,11 @@ const sanityImageCommandBaseSchema = z.object({
   totalRuns: z.number().int().positive(),
   requestedAt: z.string().datetime()
 })
+const sanityImageUserHintSchema = z.string()
+  .trim()
+  .min(1)
+  .max(300)
+  .refine((value) => !/[\r\n]/.test(value), 'userHint must be a single line')
 
 const sanityImageGenerateRunSchema = z.object({
   runId: z.string().trim().min(1),
@@ -289,6 +294,7 @@ const sanityImageGenerateRunSchema = z.object({
 export const sanityImagePrepareCommandSchema = sanityImageCommandBaseSchema.extend({
   phase: z.literal('prepare'),
   autoCreate: z.boolean().default(true),
+  userHint: sanityImageUserHintSchema.optional(),
   product: z.object({
     name: z.string().trim().min(1),
     productType: z.enum(SANITY_PRODUCT_TYPES),

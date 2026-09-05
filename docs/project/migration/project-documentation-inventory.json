@@ -270,9 +270,11 @@
         ]
       },
       "dirtyPathsAtInventory": [
-        "docs/project/architecture/sanity-and-operator-workflows.md",
-        "docs/project/learnings/azure/README.md",
-        "docs/project/learnings/azure/azure-not-every-sanity-triggered-action-goes-through-the-sanity-actions-transport-check-before-assuming-a-missing-dispatcher-entry-is-a-gap.md"
+        "docs/project/learnings/azure/azure-strict-structured-output-schemas-must-match-the-runtime-parser-shape-including-nullability.md",
+        "src/queues/contracts.ts",
+        "src/storage/sanity-image-generation.schema.ts",
+        "test/sanity-image-contracts.test.ts",
+        "test/schema-additions.test.ts"
       ],
       "disposition": {
         "category": "consolidated",
@@ -612,8 +614,23 @@
         "customizationPaths": []
       },
       "dirtyPathsAtInventory": [
-        "src/operator-actions/README.md",
-        "src/operator-actions/sanity/image-generation/"
+        "src/01-source-render/progress/sourceRenderValidationStore.test.ts",
+        "src/02-source-extract/progress/sourceExtractDetailStore.test.ts",
+        "src/04-variant-extract/progress/variantExtractDetailStore.test.ts",
+        "src/05-image-classify/progress/imageClassifySwatchStore.test.ts",
+        "src/06-compose/progress/composeGroupStateStore.test.ts",
+        "src/06-compose/progress/composeOutputStore.test.ts",
+        "src/sanity-images/01-prepare/process/promptPreparation.test.ts",
+        "src/sanity-images/01-prepare/process/promptPreparation.ts",
+        "src/sanity-images/01-prepare/process/userHint.test.ts",
+        "src/sanity-images/01-prepare/process/userHint.ts",
+        "src/sanity-images/02-generate/worker/generate.test.ts",
+        "src/sanity-images/02-generate/worker/generate.ts",
+        "src/sanity-images/core/imageClient.test.ts",
+        "src/sanity-images/core/imageClient.ts",
+        "src/sanity-images/core/ledger.test.ts",
+        "src/sanity-images/core/ledger.ts",
+        "src/sanity-images/retention/"
       ],
       "disposition": {
         "category": "consolidated",
@@ -918,6 +935,8 @@
           "build",
           "deploy",
           "dev",
+          "image-history:inventory",
+          "image-history:verify",
           "media-images:inventory",
           "media-images:migrate",
           "media-images:verify",
@@ -1039,7 +1058,9 @@
         "status": "present",
         "rootIndex": "present",
         "files": [
+          "imageGenerationHistoryMigration.ts",
           "inventory-live-sanity-content.ts",
+          "migrate-image-generation-history.ts",
           "migrate-live-sanity-content.ts",
           "migrate-media-images.ts",
           "migrate-variant-overrides.ts",
@@ -1053,7 +1074,26 @@
         "rootAgents": "present",
         "customizationPaths": []
       },
-      "dirtyPathsAtInventory": [],
+      "dirtyPathsAtInventory": [
+        "components/CreateRoomImageRequestAction.tsx",
+        "components/DeleteAiMediaImageAction.tsx",
+        "components/DismissRoomImageRequestAction.tsx",
+        "functions/request-room-images/index.ts",
+        "package.json",
+        "sanity.config.ts",
+        "schemaTypes/documents/mediaImage.ts",
+        "schemaTypes/documents/roomImageQueueJob.ts",
+        "schemaTypes/objects/imageGenerationRequest.ts",
+        "scripts/README.md",
+        "scripts/imageGenerationHistoryMigration.ts",
+        "scripts/migrate-image-generation-history.ts",
+        "src/documentActions.ts",
+        "test/deleteAiMediaImageAction.test.ts",
+        "test/dismissRoomImageRequestAction.test.ts",
+        "test/imageGenerationHistoryMigration.test.ts",
+        "test/mediaImageReference.schema.test.ts",
+        "test/sanityConfig.test.ts"
+      ],
       "disposition": {
         "category": "consolidated",
         "detail": "Root learning catalog redirects to the canonical indexed project documentation."
