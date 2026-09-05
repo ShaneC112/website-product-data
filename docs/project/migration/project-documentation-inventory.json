@@ -270,12 +270,8 @@
         ]
       },
       "dirtyPathsAtInventory": [
-        "docs/project/architecture/evidence-and-extraction.md",
-        "docs/project/architecture/extension-boundaries.md",
-        "docs/project/architecture/identity-and-contracts.md",
-        "docs/project/architecture/pipeline-and-durability.md",
-        "docs/project/architecture/sanity-and-operator-workflows.md",
-        "docs/project/learnings/azure/azure-m2crm-products-support-direct-stylename-queries-but-not-direct-stylecode-queries.md"
+        "docs/project/learnings/render/README.md",
+        "docs/project/learnings/render/render-range-wide-specifications-can-live-only-inside-a-client-side-modal.md"
       ],
       "disposition": {
         "category": "consolidated",
@@ -770,9 +766,8 @@
         "customizationPaths": []
       },
       "dirtyPathsAtInventory": [
+        "README.md",
         "src/renderPage.ts",
-        "src/vendors/README.md",
-        "src/vendors/westex/README.md",
         "src/vendors/westex/render.test.ts",
         "src/vendors/westex/render.ts",
         "src/vendors/westex/vendorState.ts",
