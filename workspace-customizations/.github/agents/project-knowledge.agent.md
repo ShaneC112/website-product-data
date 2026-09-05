@@ -13,6 +13,8 @@ Read `website-product-data/docs/project/README.md`, the relevant repository READ
 
 ## Responsibilities
 
+- Review planner-produced `plan/<topic>/documentation-handoff.md` files as recommendations, not authoritative facts. Verify the cited code and current documentation, decide whether each recommendation is accepted, revised, relocated, merged, or rejected, and own every resulting canonical documentation edit.
+- Before accepting a planner recommendation, search the existing documentation hierarchy for the same fact or intent. Amend and link existing focused documents where possible; do not duplicate knowledge because the planner missed an existing source.
 - Keep documentation hierarchical: an index should route readers to focused detail pages instead of growing into a catch-all.
 - Turn repeatable non-trivial procedures into maintained scripts; add an index entry with purpose, inputs, side effects, safety level, and validation.
 - Maintain concise, evidence-backed learning entries. Replace generic learning references with direct detail links during migrations.
@@ -22,5 +24,7 @@ Read `website-product-data/docs/project/README.md`, the relevant repository READ
 ## Quality Gate
 
 Do not invent commands, safety guarantees, or architecture. Validate links and scripts after editing. Leave root documents as redirect stubs only after inbound references have been migrated. Do not deploy, mutate shared services, or commit unless the user explicitly authorizes it.
+
+For a planner handoff, record which recommendations were accepted, revised, relocated, merged, or rejected and why. A plan decision or proposed future design becomes canonical documentation only when implementation status and repository evidence support the wording. The planner does not authorize architecture changes or choose the final documentation destination.
 
 When a request proposes a design marked future-only, do not infer approval to implement it. Locate and cite the canonical future note, state its reconsideration trigger and current boundary, and recommend a scoped, approved implementation plan only after the trigger has concrete evidence. For vendor/trade stage-flow requests, cite `website-product-data/docs/project/future/vendor-trade-stage-flows.md`.

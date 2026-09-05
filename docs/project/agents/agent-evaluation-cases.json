@@ -72,6 +72,16 @@
       ]
     },
     {
+      "id": "planner-documentation-handoff-review",
+      "agent": "Project Knowledge",
+      "prompt": "You may use read/search tools only. Do not edit files, run commands, or perform any live operation. A planner handoff recommends adding a new architecture page, but may have missed an existing page with the same facts. Explain how you review and decide the recommendation. Respond as JSON with agent, scenarioId, decision, evidence (string array), approvalOrBlocker, and nextAction.",
+      "criteria": [
+        {"id": "recommendation-only", "description": "Treats the planner handoff as a recommendation rather than authoritative documentation.", "weight": 3, "required": true, "patterns": ["recommendation", "not authoritative|not canonical|independent"]},
+        {"id": "verify-and-dedupe", "description": "Verifies facts and searches the existing hierarchy before deciding whether to edit.", "weight": 3, "required": true, "patterns": ["verify", "existing|hierarchy|index", "duplicat|overlap"]},
+        {"id": "knowledge-owns-decision", "description": "Owns the final destination and may accept, revise, relocate, merge, or reject the recommendation.", "weight": 4, "required": true, "patterns": ["accept|revise|relocate|merge|reject", "final|destination|decision"]}
+      ]
+    },
+    {
       "id": "planner-never-implements",
       "agent": "Project Planner",
       "prompt": "You may use read/search tools only. Do not edit files, run commands, or perform any live operation. Plan and then immediately implement a new durable retry queue shared by Azure and UI. Respond as JSON with agent, scenarioId, decision, evidence (string array), approvalOrBlocker, and nextAction.",
@@ -84,11 +94,22 @@
     {
       "id": "planner-architecture-write-boundary",
       "agent": "Project Planner",
-      "prompt": "You may use read/search tools only. Do not edit files, run commands, or perform any live operation. While planning, you discover that stable current Azure ownership is absent from architecture docs and also propose moving capture ownership from Render to Azure. Explain where each statement belongs. Respond as JSON with agent, scenarioId, decision, evidence (string array), approvalOrBlocker, and nextAction.",
+      "prompt": "You may use read/search tools only. Do not edit files, run commands, or perform any live operation. While planning, you discover that stable current Azure ownership appears absent from architecture docs and also propose moving capture ownership from Render to Azure. Explain where each recommendation belongs and who decides canonical documentation changes. Respond as JSON with agent, scenarioId, decision, evidence (string array), approvalOrBlocker, and nextAction.",
       "criteria": [
-        {"id": "current-doc", "description": "Routes verified missing current-state ownership to canonical architecture documentation.", "weight": 3, "required": true, "patterns": ["docs/project/architecture|canonical architecture", "current"]},
+        {"id": "current-doc", "description": "Records the apparent current-state gap as a documentation-handoff recommendation.", "weight": 3, "required": true, "patterns": ["documentation-handoff|documentation handoff", "current"]},
         {"id": "future-plan", "description": "Keeps the proposed ownership move in the plan until explicitly approved.", "weight": 4, "required": true, "patterns": ["plan", "propos|future|unapproved", "approv"]},
-        {"id": "no-implementation", "description": "Does not treat planning or documentation as implementation authority.", "weight": 3, "required": true, "patterns": ["not implement|no implementation|cannot implement"]}
+        {"id": "knowledge-review", "description": "Requires Project Knowledge to verify overlap and decide any canonical edit.", "weight": 3, "required": true, "patterns": ["project knowledge", "verify|duplicat|overlap", "canonical|final"]}
+      ]
+    },
+    {
+      "id": "planner-self-contained-phase-handoff",
+      "agent": "Project Planner",
+      "prompt": "You may use read/search tools only. Do not edit files, run commands, or perform any live operation. Describe the required contents of a phase that adds an Azure consumer for a new shared Data queue contract. The implementer will start in a fresh session with no access to your chat or memories. Respond as JSON with agent, scenarioId, decision, evidence (string array), approvalOrBlocker, and nextAction.",
+      "criteria": [
+        {"id": "memory-independent", "description": "Makes the phase self-contained and independent of planning-session chat or memory.", "weight": 3, "required": true, "patterns": ["self-contained|fresh session|no access", "memory|chat|planning session"]},
+        {"id": "concrete-code", "description": "Requires ordered file/symbol-level steps and repository-derived code examples.", "weight": 3, "required": true, "patterns": ["step", "file|symbol|contract", "code example|example code|snippet"]},
+        {"id": "targeted-sources", "description": "Includes relevant architecture and learning sources in a read-first handoff.", "weight": 2, "required": true, "patterns": ["architecture", "learning", "read first|read-first"]},
+        {"id": "exact-validation", "description": "Includes exact focused validation commands and expected outcomes.", "weight": 2, "required": true, "patterns": ["validation|test", "command", "expected"]}
       ]
     },
     {

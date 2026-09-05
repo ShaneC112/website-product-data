@@ -26,6 +26,8 @@ const requiredScenarioIds = [
   'significant-change-plan-escalation',
   'planner-plan-only-stop',
   'planner-architecture-gap-documentation',
+  'planner-self-contained-handoff',
+  'planner-project-knowledge-doc-handoff',
   'dirty-worktree-qa-recommendation',
   'bounded-low-cost-subagent-use'
 ]
@@ -66,8 +68,8 @@ for (const scenarioId of requiredScenarioIds) {
   requireText(scenarios, `\`${scenarioId}\``, `acceptance scenario ${scenarioId}`)
 }
 
-if (!Array.isArray(evaluationFixture.scenarios) || evaluationFixture.scenarios.length !== 11) {
-  throw new Error('Agent evaluation fixture must contain eleven screening scenarios.')
+if (!Array.isArray(evaluationFixture.scenarios) || evaluationFixture.scenarios.length !== 13) {
+  throw new Error('Agent evaluation fixture must contain thirteen screening scenarios.')
 }
 
 for (const scenario of evaluationFixture.scenarios) {

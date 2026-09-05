@@ -21,13 +21,13 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | Responsibility | Coverage |
 | --- | --- |
 | Purpose and triggers | Maintains project docs, README hierarchy, AGENTS, reusable scripts, learnings, maps, and workspace customizations. |
-| Owned decisions | Canonical knowledge destination, hierarchy, evidence-backed learning shape, script documentation, and customization publication source. |
+| Owned decisions | Canonical knowledge destination, hierarchy, planner-handoff acceptance/revision/rejection, evidence-backed learning shape, script documentation, and customization publication source. |
 | Always-known facts | Canonical cross-repository knowledge lives in Data; customizations are edited only under `workspace-customizations/`. |
 | Progressively loaded sources | Project README, relevant repository README/learning index, and closest operational script or implementation. |
 | Excluded knowledge | Invented commands, guarantees, architecture, production behavior, versions, or changelog claims. |
 | Related repositories/plans | All five product repositories; docs, scripts, learnings, migration, future, and decision plans. |
 | Allowed tools/actions | Read, edit, search, execute, todo, and bounded discovery; documentation and customization maintenance. |
-| Overlap/hand-off | Receives durable knowledge changes from Engineer and supplies documentation review evidence to QA Commit. |
+| Overlap/hand-off | Reviews Planner documentation recommendations, independently verifies facts and duplication, owns canonical edits, receives durable knowledge changes from Engineer, and supplies documentation review evidence to QA Commit. |
 | Latest verification evidence | `npm run docs:check`; `npm run scripts:index:check`; `npm run workspace:sync:check`; `npm run agents:check`. |
 
 ## Project Planner
@@ -35,13 +35,13 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | Responsibility | Coverage |
 | --- | --- |
 | Purpose and triggers | Researches significant or unclear changes and writes implementation-ready plans before code changes begin. |
-| Owned decisions | Plan decomposition, dependency order, explicit assumptions and unknowns, acceptance criteria, approval boundaries, and rollback/recovery requirements. |
+| Owned decisions | Plan decomposition, dependency order, explicit assumptions and unknowns, acceptance criteria, approval boundaries, rollback/recovery requirements, and self-contained implementation handoff detail. |
 | Always-known facts | Repository ownership, durable stage order, Data-first shared contracts, and the absolute prohibition on implementing a phase. |
-| Progressively loaded sources | Workspace/Data instructions, architecture README and project map, relevant detail pages, repository docs, then controlling code and tests. |
+| Progressively loaded sources | Workspace/Data instructions, architecture README and project map, relevant detail pages and learnings, repository docs, then controlling code and tests; phase files retain the targeted sources the implementer needs. |
 | Excluded knowledge | Unverified current behavior, implicit product decisions, implementation authority, and permission to mutate live services or Git state. |
 | Related repositories/plans | All five product repositories, `plan/<topic>/` overview/phase sets, and canonical current-state architecture docs. |
-| Allowed tools/actions | Broad read-only repository/web/MCP research; writes only to plan files and evidence-backed current-state architecture documentation. |
-| Overlap/hand-off | Receives significant-change routing from Project Engineer; stops after requesting plan approval, then hands approved execution back to Engineer or a named plan implementer. Project Knowledge owns broader documentation maintenance. |
+| Allowed tools/actions | Broad read-only repository/web/MCP research; writes only to the active plan topic folder, including a documentation recommendation handoff. |
+| Overlap/hand-off | Receives significant-change routing from Project Engineer; submits `documentation-handoff.md` to Project Knowledge for independent review and final canonical decisions; stops after requesting plan approval, then hands approved execution back to Engineer or a named plan implementer. |
 | Latest verification evidence | Canonical agent source; `npm run agents:check`; [acceptance scenarios](acceptance-scenarios.md). |
 
 ## Project QA Commit
