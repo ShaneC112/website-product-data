@@ -12,7 +12,7 @@ import {
   styleCodeImportResultSchema,
   styleCodeImportRequestStatusSchema,
   styleCodeImportResultOutcomeSchema
-} from '../src/requests/style-code-import.js'
+} from '../dist/requests/style-code-import.js'
 
 describe('Sanity action requests', () => {
   const payload = {sanityProductId: 'product-123', force: true}
@@ -147,6 +147,28 @@ describe('Style-code import contracts', () => {
     })
 
     expect(parsed.status).toBe('pending')
+  })
+
+  it('accepts a pending request document with completedAt set to null', () => {
+    const result = styleCodeImportRequestDocumentSchema.safeParse({
+      _id: 'request-doc-1',
+      _type: 'styleCodeImportRequest',
+      requestId: 'request-1',
+      source: 'studio',
+      requestType: 'stylecode_import',
+      styleCode: 'ST123',
+      status: 'pending',
+      progressMessages: ['Request created'],
+      successResults: [],
+      failureResults: [],
+      requestedAt: '2026-01-01T00:00:00.000Z',
+      completedAt: null
+    })
+
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.completedAt).toBeNull()
+    }
   })
 
   it('accepts only the canonical request statuses and result outcomes', () => {

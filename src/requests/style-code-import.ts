@@ -45,7 +45,7 @@ export const styleCodeImportRequestDocumentSchema = z.object({
   successResults: z.array(styleCodeImportResultSchema),
   failureResults: z.array(styleCodeImportResultSchema),
   requestedAt: z.string().datetime(),
-  completedAt: z.string().datetime().optional()
+  completedAt: z.union([z.string().datetime(), z.null()]).optional()
 })
 
 export type StyleCodeImportPayload = z.infer<typeof styleCodeImportPayloadSchema>
