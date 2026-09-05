@@ -272,8 +272,7 @@
       "dirtyPathsAtInventory": [
         "docs/project/architecture/sanity-and-operator-workflows.md",
         "docs/project/learnings/azure/README.md",
-        "docs/project/learnings/azure/azure-sanity-triggered-action-code-should-be-organized-one-folder-per-action-family-under-operator-actions-sanity.md",
-        "docs/project/migration/project-documentation-inventory.json"
+        "docs/project/learnings/azure/azure-not-every-sanity-triggered-action-goes-through-the-sanity-actions-transport-check-before-assuming-a-missing-dispatcher-entry-is-a-gap.md"
       ],
       "disposition": {
         "category": "consolidated",
@@ -613,13 +612,8 @@
         "customizationPaths": []
       },
       "dirtyPathsAtInventory": [
-        "README.md",
         "src/operator-actions/README.md",
-        "src/operator-actions/sanity/helpers/",
-        "src/operator-actions/sanity/recover-pipeline/",
-        "src/operator-actions/sanity/update-product/",
-        "src/operator-actions/sanityActions.test.ts",
-        "src/operator-actions/sanityActions.ts"
+        "src/operator-actions/sanity/image-generation/"
       ],
       "disposition": {
         "category": "consolidated",
