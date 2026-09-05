@@ -14,7 +14,8 @@ export const STORAGE_TABLES = {
   crawlExtractBatch: 'webcrawlextractbatch',
   crawlStageLedger: 'webcrawlstageledger',
   crawlStageDispatch: 'webcrawlstagedispatch',
-  sanityImageGeneration: 'sanityimagegeneration'
+  sanityImageGeneration: 'sanityimagegeneration',
+  sanityTexturePrompt: 'sanitytextureprompts'
 } as const
 
 export const STORAGE_CONTAINERS = {

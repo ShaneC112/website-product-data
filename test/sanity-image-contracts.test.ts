@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   sanityImageCommandSchema,
+  sanityImageGenerateCommandSchema,
   sanityImagePrepareCommandSchema,
   sanityImageStatementToneSchema,
   type SanityImagePrepareCommand
@@ -122,6 +123,51 @@ describe('sanityImageCommandSchema', () => {
         swatchUrl: 'https://cdn.sanity.io/swatch.png'
       }]
     })
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts paired texture snapshot fields on generate runs', () => {
+    const parsed = sanityImageGenerateCommandSchema.parse({
+      ...basePrepareCommand,
+      commandId: 'request-1:generate',
+      phase: 'generate',
+      runs: [{
+        runId: 'run-1',
+        variantId: 'v1',
+        colourName: 'Cloud',
+        productType: 'carpet',
+        room: 'bedroom',
+        pipeline: 'direct',
+        generationProfile: 'flux-roomshot-v1',
+        finalPrompt: 'A carefully composed room prompt that is long enough to satisfy the shared contract.',
+        swatchUrl: 'https://cdn.sanity.io/swatch.png',
+        texturePrompt: 'Dense, finely finished low-to-medium cut pile with restrained soft lustre and no clouding.',
+        textureSourceFingerprint: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+      }]
+    })
+
+    expect(parsed.runs[0].texturePrompt).toContain('Dense, finely finished')
+  })
+
+  it('rejects partial texture snapshot state on generate runs', () => {
+    const result = sanityImageGenerateCommandSchema.safeParse({
+      ...basePrepareCommand,
+      commandId: 'request-1:generate',
+      phase: 'generate',
+      runs: [{
+        runId: 'run-1',
+        variantId: 'v1',
+        colourName: 'Cloud',
+        productType: 'carpet',
+        room: 'bedroom',
+        pipeline: 'direct',
+        generationProfile: 'flux-roomshot-v1',
+        finalPrompt: 'A carefully composed room prompt that is long enough to satisfy the shared contract.',
+        swatchUrl: 'https://cdn.sanity.io/swatch.png',
+        texturePrompt: 'Dense, finely finished low-to-medium cut pile with restrained soft lustre and no clouding.'
+      }]
+    })
+
     expect(result.success).toBe(false)
   })
 

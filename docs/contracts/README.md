@@ -9,4 +9,10 @@ Use the package subpaths `queues`, `queues/contracts`, `requests`, and `requests
 these contracts. Consumers should parse the shared schemas instead of recreating local stage,
 state, or payload definitions.
 
+The image-generation queue contracts in `src/queues/contracts.ts` also carry the immutable
+prepared-run texture snapshot used by the standalone Sanity imagery pipeline. In particular,
+`sanityImageGenerateRunSchema` accepts `texturePrompt` plus `textureSourceFingerprint` only as a
+paired optional field set, so Studio and Azure either preserve the exact prepared-run texture
+context together or omit it entirely.
+
 Return to the [Data documentation index](../README.md).

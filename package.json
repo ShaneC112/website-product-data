@@ -56,6 +56,10 @@
       "types": "./dist/sanity.d.ts",
       "default": "./dist/sanity.js"
     },
+    "./sanity/ai-texture-prompt.schema": {
+      "types": "./dist/sanity/ai-texture-prompt.schema.d.ts",
+      "default": "./dist/sanity/ai-texture-prompt.schema.js"
+    },
     "./requests": {
       "types": "./dist/requests/index.d.ts",
       "default": "./dist/requests/index.js"

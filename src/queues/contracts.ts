@@ -258,6 +258,34 @@ const sanityImageCommandBaseSchema = z.object({
   requestedAt: z.string().datetime()
 })
 
+const sanityImageGenerateRunSchema = z.object({
+  runId: z.string().trim().min(1),
+  variantId: z.string().trim().min(1),
+  colourName: z.string().trim().min(1),
+  productType: z.enum(SANITY_PRODUCT_TYPES),
+  surfaceAppearance: surfaceAppearanceSchema.optional(),
+  room: z.string().trim().min(1),
+  pipeline: z.enum(['direct', 'patterned-kontext']),
+  generationProfile: z.enum(IMAGE_GENERATION_PROFILE_KEYS),
+  finalPrompt: z.string().trim().min(1).max(16000),
+  swatchUrl: httpsUrlSchema,
+  patternRepeatCm: z.number().positive().optional(),
+  repeatsInSwatch: z.number().int().positive().optional(),
+  texturePrompt: z.string().trim().min(40).max(2400).optional(),
+  textureSourceFingerprint: z.string().regex(/^[a-f0-9]{64}$/).optional()
+}).superRefine((run, ctx) => {
+  const hasTexturePrompt = typeof run.texturePrompt === 'string'
+  const hasTextureSourceFingerprint = typeof run.textureSourceFingerprint === 'string'
+
+  if (hasTexturePrompt !== hasTextureSourceFingerprint) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['texturePrompt'],
+      message: 'texturePrompt and textureSourceFingerprint must be provided together'
+    })
+  }
+})
+
 export const sanityImagePrepareCommandSchema = sanityImageCommandBaseSchema.extend({
   phase: z.literal('prepare'),
   autoCreate: z.boolean().default(true),
@@ -313,20 +341,7 @@ export const sanityImagePrepareCommandSchema = sanityImageCommandBaseSchema.exte
 export const sanityImageGenerateCommandSchema = sanityImageCommandBaseSchema.extend({
   phase: z.literal('generate'),
   settings: sanityImageSettingsSchema.default({}),
-  runs: z.array(z.object({
-    runId: z.string().trim().min(1),
-    variantId: z.string().trim().min(1),
-    colourName: z.string().trim().min(1),
-    productType: z.enum(SANITY_PRODUCT_TYPES),
-    surfaceAppearance: surfaceAppearanceSchema.optional(),
-    room: z.string().trim().min(1),
-    pipeline: z.enum(['direct', 'patterned-kontext']),
-    generationProfile: z.enum(IMAGE_GENERATION_PROFILE_KEYS),
-    finalPrompt: z.string().trim().min(1).max(16000),
-    swatchUrl: httpsUrlSchema,
-    patternRepeatCm: z.number().positive().optional(),
-    repeatsInSwatch: z.number().int().positive().optional()
-  })).min(1)
+  runs: z.array(sanityImageGenerateRunSchema).min(1)
 }).superRefine((command, ctx) => {
   const runIds = command.runs.map((run) => run.runId)
   if (new Set(runIds).size !== runIds.length) {
