@@ -12,6 +12,10 @@ Data is the single source of truth for cross-repository runtime schemas, storage
 
 Identity values are business keys, not incidental URLs. A vendor URL can serve multiple commercial source records, so commercial price and pack data remain scoped to their matched source row rather than copied as a URL-level default.
 
+`urlKey` must be scoped to the crawl/source group, never derived from the URL alone. Multiple distinct commercial records - different SKUs, different widths, even different style codes - can share one vendor URL; a `urlKey` computed as a pure function of the URL treats all of them as the same identity and silently collapses their evidence. A Sanity product is likewise a live style-code group, not a snapshot of source IDs: its M2CRM membership must be resolved from the current, live records at execution time (queue, requeue, or import), never retained from whichever IDs were present when the product was first created, or later membership changes are silently dropped.
+
+Explicit variant membership (`SpecifiedUrls`) is a first-class contract, not something inferred from vendor page headings or URL labels: a request carries a validated URL array as source-authoritative membership, and a group using it must have both its expected variant count and its source-owning product-detail row present before it is eligible to publish - variant transforms run concurrently, so missing either creates a real publish race.
+
 ## Contract Ownership
 
 When a Data schema changes, rebuild Data and refresh file-dependency consumers before testing. Azure, UI, Render, and Studio must update from the same contract revision where they share a protocol. Data's `sanity` export owns pure mapping and gate logic without a runtime Sanity client dependency.

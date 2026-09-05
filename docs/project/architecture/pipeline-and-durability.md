@@ -20,6 +20,10 @@ Azure Tables and blobs hold recoverable state. The stage ledger records one logi
 
 Messages are idempotent and include the identity and generation information Azure needs to reject stale work. Starting a precise recovery advances the target generation; older messages cannot overwrite the current outcome.
 
+Multiple run-summary rows per group are normal, not a bug: a style crawled with N widths or N source records produces N run-summary rows (one runId each), but only one of them is the canonical run that actually progresses; the rest link as duplicates and never advance past their initial status. Any code that reads "the latest run for a group" - in Azure or in a consuming surface such as UI - must pick the most-advanced status, not the most recent timestamp, or it will surface a request that never did any real work.
+
+Fan-out completion (for example, waiting on every discovered variant before composing a range) cannot depend on message arrival timing alone. Persist a durable completion predicate every producer can evaluate, use it to trigger the normal next-stage dispatch, and back it with a narrow periodic reconciliation check for missed delivery or process interruption - the reconciliation check must only retry the already-idempotent next step, never fabricate a new crawl request.
+
 ## Retries And Recovery
 
 Transient failures retry through the owning Azure worker. A recovery request selects a fixed checkpoint rather than a free-form force operation: `render_source`, `extract_source`, `recover_missing_variants`, `extract_variants`, `classify_images`, `compose`, or `publish`.

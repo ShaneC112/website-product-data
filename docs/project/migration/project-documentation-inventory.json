@@ -270,21 +270,12 @@
         ]
       },
       "dirtyPathsAtInventory": [
-        "README.md",
-        "docs/project/learnings/azure/README.md",
-        "docs/project/learnings/azure/azure-style-code-import-requests-need-structured-per-row-results-not-just-terminal-status-strings.md",
-        "docs/project/learnings/data/README.md",
-        "docs/project/learnings/data/data-file-dependency-consumers-can-see-new-exports-before-their-installed-dist-payload-actually-contains-them.md",
-        "docs/project/learnings/studio/README.md",
-        "docs/project/learnings/studio/studio-32-top-level-operator-requests-still-belong-on-the-existing-sanity-actions-transport-not-a-new-browser-to-azure-path.md",
-        "package.json",
-        "src/queues/contracts.ts",
-        "src/requests/contracts.ts",
-        "src/requests/index.ts",
-        "src/requests/style-code-import.ts",
-        "src/storage/page.schema.ts",
-        "src/storage/run-summary.schema.ts",
-        "test/schema-additions.test.ts"
+        "docs/project/architecture/evidence-and-extraction.md",
+        "docs/project/architecture/extension-boundaries.md",
+        "docs/project/architecture/identity-and-contracts.md",
+        "docs/project/architecture/pipeline-and-durability.md",
+        "docs/project/architecture/sanity-and-operator-workflows.md",
+        "docs/project/learnings/azure/azure-m2crm-products-support-direct-stylename-queries-but-not-direct-stylecode-queries.md"
       ],
       "disposition": {
         "category": "consolidated",
@@ -623,19 +614,7 @@
         "rootAgents": "present",
         "customizationPaths": []
       },
-      "dirtyPathsAtInventory": [
-        "README.md",
-        "src/01-source-render/ingress/crawlRequestDispatcher.test.ts",
-        "src/01-source-render/ingress/crawlRequestDispatcher.ts",
-        "src/operator-actions/manualCrawlEnqueue.ts",
-        "src/operator-actions/sanity/",
-        "src/operator-actions/sanityActions.ts",
-        "src/recovery/reconciliationSweeper.test.ts",
-        "src/recovery/reconciliationSweeper.ts",
-        "src/stores/crawlPageStore.ts",
-        "src/stores/crawlRunSummaryStore.test.ts",
-        "src/stores/crawlRunSummaryStore.ts"
-      ],
+      "dirtyPathsAtInventory": [],
       "disposition": {
         "category": "consolidated",
         "detail": "Root learning catalog redirects to the canonical indexed project documentation."
@@ -790,7 +769,15 @@
         "rootAgents": "present",
         "customizationPaths": []
       },
-      "dirtyPathsAtInventory": [],
+      "dirtyPathsAtInventory": [
+        "src/renderPage.ts",
+        "src/vendors/README.md",
+        "src/vendors/westex/README.md",
+        "src/vendors/westex/render.test.ts",
+        "src/vendors/westex/render.ts",
+        "src/vendors/westex/vendorState.ts",
+        "src/vendors/westex/workflow.probe.test.ts"
+      ],
       "disposition": {
         "category": "consolidated",
         "detail": "Root learning catalog redirects to the canonical indexed project documentation."
@@ -934,6 +921,8 @@
         "version": "0.1.0",
         "manager": "pnpm",
         "aliases": [
+          "blueprints:deploy",
+          "blueprints:plan",
           "build",
           "deploy",
           "dev",
@@ -1072,20 +1061,7 @@
         "rootAgents": "present",
         "customizationPaths": []
       },
-      "dirtyPathsAtInventory": [
-        "README.md",
-        "components/ImportByStyleCodePane.tsx",
-        "functions/sanity-actions/index.ts",
-        "sanity.blueprint.ts",
-        "schemaTypes/documents/styleCodeImportRequest.ts",
-        "schemaTypes/index.ts",
-        "schemaTypes/objects/styleCodeImportResult.ts",
-        "src/structure.ts",
-        "test/importByStyleCodePane.test.ts",
-        "test/sanityActionsHandler.test.ts",
-        "test/structure.test.ts",
-        "test/styleCodeImportRequest.schema.test.ts"
-      ],
+      "dirtyPathsAtInventory": [],
       "disposition": {
         "category": "consolidated",
         "detail": "Root learning catalog redirects to the canonical indexed project documentation."
