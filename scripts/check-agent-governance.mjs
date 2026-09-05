@@ -9,6 +9,7 @@ const repositoryRoot = resolve(scriptDirectory, '..')
 const managedAgentFiles = [
   'project-engineer.agent.md',
   'project-knowledge.agent.md',
+  'project-planner.agent.md',
   'project-qa-commit.agent.md'
 ]
 const requiredScenarioIds = [
@@ -23,6 +24,8 @@ const requiredScenarioIds = [
   'architecture-change-adr',
   'qa-commit-evidence-docs-semver-no-push',
   'significant-change-plan-escalation',
+  'planner-plan-only-stop',
+  'planner-architecture-gap-documentation',
   'dirty-worktree-qa-recommendation',
   'bounded-low-cost-subagent-use'
 ]
@@ -63,8 +66,8 @@ for (const scenarioId of requiredScenarioIds) {
   requireText(scenarios, `\`${scenarioId}\``, `acceptance scenario ${scenarioId}`)
 }
 
-if (!Array.isArray(evaluationFixture.scenarios) || evaluationFixture.scenarios.length !== 9) {
-  throw new Error('Agent evaluation fixture must contain nine screening scenarios.')
+if (!Array.isArray(evaluationFixture.scenarios) || evaluationFixture.scenarios.length !== 11) {
+  throw new Error('Agent evaluation fixture must contain eleven screening scenarios.')
 }
 
 for (const scenario of evaluationFixture.scenarios) {

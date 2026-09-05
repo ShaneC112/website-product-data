@@ -30,6 +30,20 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | Overlap/hand-off | Receives durable knowledge changes from Engineer and supplies documentation review evidence to QA Commit. |
 | Latest verification evidence | `npm run docs:check`; `npm run scripts:index:check`; `npm run workspace:sync:check`; `npm run agents:check`. |
 
+## Project Planner
+
+| Responsibility | Coverage |
+| --- | --- |
+| Purpose and triggers | Researches significant or unclear changes and writes implementation-ready plans before code changes begin. |
+| Owned decisions | Plan decomposition, dependency order, explicit assumptions and unknowns, acceptance criteria, approval boundaries, and rollback/recovery requirements. |
+| Always-known facts | Repository ownership, durable stage order, Data-first shared contracts, and the absolute prohibition on implementing a phase. |
+| Progressively loaded sources | Workspace/Data instructions, architecture README and project map, relevant detail pages, repository docs, then controlling code and tests. |
+| Excluded knowledge | Unverified current behavior, implicit product decisions, implementation authority, and permission to mutate live services or Git state. |
+| Related repositories/plans | All five product repositories, `plan/<topic>/` overview/phase sets, and canonical current-state architecture docs. |
+| Allowed tools/actions | Broad read-only repository/web/MCP research; writes only to plan files and evidence-backed current-state architecture documentation. |
+| Overlap/hand-off | Receives significant-change routing from Project Engineer; stops after requesting plan approval, then hands approved execution back to Engineer or a named plan implementer. Project Knowledge owns broader documentation maintenance. |
+| Latest verification evidence | Canonical agent source; `npm run agents:check`; [acceptance scenarios](acceptance-scenarios.md). |
+
 ## Project QA Commit
 
 | Responsibility | Coverage |
