@@ -231,13 +231,13 @@ export const sanityImageInteriorFashionSchema = z.enum([
   'victorian', 'georgian', 'country-cottage', 'coastal'
 ])
 
-export const sanityImageStatementToneSchema = z.enum(['restrained', 'subtle', 'balanced', 'bold', 'dramatic'])
+export const sanityImageStatementToneSchema = z.enum(['none', 'restrained', 'subtle', 'balanced', 'bold', 'dramatic'])
 
 const sanityImageDesignSchema = z.object({
   selectionKey: z.string().trim().min(1),
   furnitureStyle: sanityImageFurnitureStyleSchema,
   interiorFashion: sanityImageInteriorFashionSchema,
-  statementTone: sanityImageStatementToneSchema,
+  statementTone: sanityImageStatementToneSchema.default('balanced'),
   lighting: z.enum(['morning', 'afternoon', 'sunset']),
   pipeline: z.enum(['direct', 'patterned-kontext']),
   generationProfile: z.enum(IMAGE_GENERATION_PROFILE_KEYS),
