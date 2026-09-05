@@ -1,8 +1,10 @@
 # Strict structured-output schemas must match the runtime parser shape, including nullability
 
-## Applies to
+- **ID:** `azure-strict-structured-output-schemas-must-match-the-runtime-parser-shape-including-nullability`
+- **Applies to:** `website-product-enrichment-azure`
+- **Status:** Canonical learning detail.
 
-- website-product-enrichment-azure
+## Learning
 
 ## Symptom
 
