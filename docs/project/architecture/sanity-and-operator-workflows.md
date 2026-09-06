@@ -20,6 +20,16 @@ The Data field registry is authoritative. Azure projects eligible code-managed d
 
 UI reads shared Azure storage through Data schemas and exposes validation, review, matching, swatch, and recovery workflows. Its writes are validated server-side and sent to Azure-owned functions. Studio Blueprint functions send narrow action references to Azure queues; browser code never receives Azure storage credentials or Function keys.
 
+## Image Generation V2 Command Boundary
+
+Image-generation v2 uses one queue-only command boundary from Sanity to Azure. A Studio action creates a strict pending request or guarded-control intent in Sanity. The `request-ai-images-v2` Blueprint function rereads and validates that document, then sends only the Data-owned immutable reference to the dedicated external `sanity-image-submission-v2` queue. The reference identifies the submission and authoritative Sanity document; it does not contain mutable request or control payloads.
+
+Azure is the only consumer of that external queue. It validates the reference, rereads the authoritative Sanity intent, verifies its pending state and identities, and claims the stable submission identity before releasing work to the internal resolve, generate, assemble, render, or persist lifecycle queues. External producers must never address those internal queues. After a durable request or control result is committed, Azure writes the bounded projection directly to Sanity. Redelivery of a completed submission reprojects that durable result without repeating the command.
+
+The former v2 write routes `/api/image-generation-v2/enqueue` and `/api/image-generation-v2/control` have been removed, not deprecated. They must not be called or restored as compatibility paths. The remaining `GET /api/image-generation-v2/status/{requestId}` route is read-only and projects Azure's durable lifecycle state.
+
+This is source- and local-test-verified behavior only. It has not been deployed or live-verified. It does not complete Phase 18: Studio capability readiness, receipt-level convergence for every guarded-control mutation, bounded version/upcast/quarantine handling for every durable row type, and compiler/AST-based isolation proof remain open.
+
 ## Operator Action Transport
 
 An operator action starts as a Sanity write, never a direct browser call to Azure. Studio writes a request document - either an append-only entry on an existing product (`sanityActionRequests[]`) for actions that target content already in Sanity, or a dedicated top-level document (for example `styleCodeImportRequest`) when the action must create content that does not exist in Sanity yet. A Blueprint document-event handler validates that request against the shared contract and forwards only a minimal reference (the document ID and request ID) to the `sanity-actions` queue, using server-only credentials the browser never sees.

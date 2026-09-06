@@ -15,7 +15,10 @@ export const STORAGE_TABLES = {
   crawlStageLedger: 'webcrawlstageledger',
   crawlStageDispatch: 'webcrawlstagedispatch',
   sanityImageGeneration: 'sanityimagegeneration',
-  sanityTexturePrompt: 'sanitytextureprompts'
+  sanityTexturePrompt: 'sanitytextureprompts',
+  sanityImageGenerationV2: 'sanityimagegenerationv2',
+  sanityImageArtifactsV2: 'sanityimageartifactsv2',
+  aiProviderQuotas: 'aiproviderquotas'
 } as const
 
 export const STORAGE_CONTAINERS = {
@@ -40,5 +43,11 @@ export const STORAGE_QUEUES = {
   publishJobs: 'publish-jobs',
   sanityActions: 'sanity-actions',
   sanityImagePrepare: 'sanity-image-prepare',
-  sanityImageGenerate: 'sanity-image-generate'
+  sanityImageGenerate: 'sanity-image-generate',
+  sanityImageSubmissionV2: 'sanity-image-submission-v2',
+  sanityImageResolveV2: 'sanity-image-resolve-v2',
+  sanityImageGenerateV2: 'sanity-image-generate-v2',
+  sanityImageAssembleV2: 'sanity-image-assemble-v2',
+  sanityImageRenderV2: 'sanity-image-render-v2',
+  sanityImagePersistV2: 'sanity-image-persist-v2'
 } as const
