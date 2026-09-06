@@ -17,6 +17,7 @@ flowchart LR
 
 Read these documents in order when changing a cross-repository feature:
 
+- [Domain language](domain-language.md): canonical identity, pipeline, evidence, and publication terms used across repositories.
 - [Pipeline and durability](pipeline-and-durability.md): stage progression, durable state, recovery, and retry boundaries.
 - [Identity and contracts](identity-and-contracts.md): Data-first contracts and product identity invariants.
 - [Evidence and extraction](evidence-and-extraction.md): capture outputs, bounded storage, and extraction behavior.

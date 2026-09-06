@@ -9,7 +9,7 @@ You are the primary implementation agent for Website Product Enrichment. Work di
 
 ## Read First
 
-Start with the target repository `AGENTS.md`, then the closest implementation, call site, or test. For shared behavior, inspect `website-product-data` first. Load project architecture, operations, skills, and repository READMEs only when they inform the current slice.
+Start with the target repository `AGENTS.md`, then the closest implementation, call site, or test. For shared behavior, inspect `website-product-data` first. Load project architecture, operations, skills, and repository READMEs only when they inform the current slice. Read `website-product-data/docs/project/architecture/domain-language.md` when interpreting ambiguous cross-repository terms or introducing a durable domain name.
 
 ## Product Roles
 
@@ -24,6 +24,14 @@ Do not move responsibility across these boundaries without an explicit architect
 ## Specialist Assistance
 
 Use a targeted read-only subagent for non-trivial repository discovery, exact call sites, tests, or ownership boundaries. Load the relevant project skill before specialized work. Use a purpose-built specialist agent only when an actively maintained agent explicitly covers the requested workflow; legacy or one-off agents are not standing dependencies. Otherwise retain ownership and use focused subagents rather than broad exploration. Treat subagent findings as evidence to validate against current code, not permission to bypass safety or review.
+
+Load the `diagnosing-bugs` skill for hard, intermittent, or performance-related failures that need a reproducible feedback loop, ranked hypotheses, or temporary instrumentation. Keep routine failures on the smaller local hypothesis-and-validation path below.
+
+Load the `codebase-design` skill when designing or restructuring a module, reducing a public interface, choosing a dependency seam, or making behavior testable through the caller-facing contract. Do not invoke it to widen a routine fix into an architectural refactor.
+
+Load the `simplifying-changes` skill after substantive implementation has settled or when the user asks what can be deleted, reused, or made less complex. Keep its scope to task-owned code, preserve approved structure and protected behavior, and validate each applied reduction before continuing.
+
+Load the `source-grounded-development` skill when an implementation depends on an unfamiliar, deprecated, migration-sensitive, security-sensitive, or version-specific external API. Verify the installed version and exact external contract against official sources without treating those sources as authority over local ownership or safety rules.
 
 Use the lowest-cost available subagent model when the task is bounded, read-only, and has a concrete expected result, such as locating a symbol, listing call sites, inventorying tests, or checking documentation links. Use a stronger model only when cross-repository reasoning, ambiguous ownership, architecture, security, or complex debugging requires it. Give every subagent a narrow question, exact scope, and expected evidence; do not delegate implementation merely to reduce the primary agent's work.
 

@@ -6,8 +6,18 @@ import {
   normaliseVariantToken,
   normaliseWidth
 } from '../src/storage/keys.js'
+import { STORAGE_QUEUES } from '../src/storage/constants.js'
 
 describe('storage key helpers', () => {
+  it('keeps the image generation submission queue external to lifecycle queues', () => {
+    expect(STORAGE_QUEUES.sanityImageSubmissionV2).toBe('sanity-image-submission-v2')
+    expect(STORAGE_QUEUES.sanityImageSubmissionV2).not.toBe(STORAGE_QUEUES.sanityImageResolveV2)
+    expect(STORAGE_QUEUES.sanityImageSubmissionV2).not.toBe(STORAGE_QUEUES.sanityImageGenerateV2)
+    expect(STORAGE_QUEUES.sanityImageSubmissionV2).not.toBe(STORAGE_QUEUES.sanityImageAssembleV2)
+    expect(STORAGE_QUEUES.sanityImageSubmissionV2).not.toBe(STORAGE_QUEUES.sanityImageRenderV2)
+    expect(STORAGE_QUEUES.sanityImageSubmissionV2).not.toBe(STORAGE_QUEUES.sanityImagePersistV2)
+  })
+
   it('round-trips reversible storage keys including percent and slash', () => {
     const raw = '50%/WOOL'
     expect(encodeStorageKey(raw)).toBe('50%25%2FWOOL')

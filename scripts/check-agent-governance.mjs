@@ -29,13 +29,27 @@ const requiredScenarioIds = [
   'planner-self-contained-handoff',
   'planner-project-knowledge-doc-handoff',
   'dirty-worktree-qa-recommendation',
-  'bounded-low-cost-subagent-use'
+  'bounded-low-cost-subagent-use',
+  'hard-bug-red-capable-loop',
+  'deep-module-within-product-ownership',
+  'agent-doc-canonical-pointer-discipline',
+  'settled-diff-behavior-preserving-simplification',
+  'version-sensitive-api-official-source',
+  'quality-floor-cannot-self-weaken',
+  'canonical-domain-language-no-parallel-context'
 ]
 const agentsDirectory = resolve(repositoryRoot, 'workspace-customizations/.github/agents')
 const skillsDirectory = resolve(repositoryRoot, 'workspace-customizations/.github/skills')
 const coverage = await readFile(resolve(repositoryRoot, 'docs/project/agents/knowledge-coverage.md'), 'utf8')
 const scenarios = await readFile(resolve(repositoryRoot, 'docs/project/agents/acceptance-scenarios.md'), 'utf8')
 const evaluationFixture = JSON.parse(await readFile(resolve(repositoryRoot, 'docs/project/agents/agent-evaluation-cases.json'), 'utf8'))
+const upstreamIntegrations = await readFile(resolve(agentsDirectory, 'UPSTREAM-SKILL-INTEGRATIONS.md'), 'utf8')
+const requiredUpstreamRevisions = [
+  ['https://github.com/mattpocock/skills', '3cca18b368ae95cdbdebbff572ccafa662551015'],
+  ['https://github.com/EveryInc/compound-engineering-plugin', 'b159e1fa4c70efa995742269d38269bcc7524dd2'],
+  ['https://github.com/DietrichGebert/ponytail', '974d940a1c5344210874150b98ff0d2c861fab6a'],
+  ['https://github.com/addyosmani/agent-skills', '48cb1168aeaaa70dfc2bbf709eddfa2a8ed8129a']
+]
 
 const agentFiles = (await readdir(agentsDirectory, {withFileTypes: true}))
   .filter((entry) => entry.isFile() && entry.name.endsWith('.agent.md'))
@@ -55,8 +69,8 @@ const skillDirectories = (await readdir(skillsDirectory, {withFileTypes: true}))
   .filter((entry) => entry.isDirectory())
   .sort((left, right) => left.name.localeCompare(right.name))
 
-if (skillDirectories.length !== 6) {
-  throw new Error(`Expected six canonical skills, found ${skillDirectories.length}`)
+if (skillDirectories.length !== 11) {
+  throw new Error(`Expected eleven canonical skills, found ${skillDirectories.length}`)
 }
 
 for (const directory of skillDirectories) {
@@ -68,8 +82,13 @@ for (const scenarioId of requiredScenarioIds) {
   requireText(scenarios, `\`${scenarioId}\``, `acceptance scenario ${scenarioId}`)
 }
 
-if (!Array.isArray(evaluationFixture.scenarios) || evaluationFixture.scenarios.length !== 13) {
-  throw new Error('Agent evaluation fixture must contain thirteen screening scenarios.')
+for (const [repositoryUrl, revision] of requiredUpstreamRevisions) {
+  requireText(upstreamIntegrations, repositoryUrl, `upstream repository ${repositoryUrl}`)
+  requireText(upstreamIntegrations, revision, `upstream revision for ${repositoryUrl}`)
+}
+
+if (!Array.isArray(evaluationFixture.scenarios) || evaluationFixture.scenarios.length !== 17) {
+  throw new Error('Agent evaluation fixture must contain seventeen screening scenarios.')
 }
 
 for (const scenario of evaluationFixture.scenarios) {

@@ -10,11 +10,12 @@ You provide a disciplined final review and, only with explicit user authorizatio
 ## Review Process
 
 1. Inspect status and diff in each affected repository. Never revert unrelated user work.
-2. Read the controlling code and tests. Review for correctness, contract drift, missing validation, unsafe operational behavior, regressions, insufficient JSDoc at non-obvious boundaries, and documentation drift.
-3. Review available session evidence: the current conversation, session memory, work logs, changed files, and recorded validation output. Reconcile README, learning indexes/details, script indexes, AGENTS, project map, and changelogs with verified behavior before commit. Session evidence identifies candidates for review; current code and test evidence remain the source of truth.
+2. Read the controlling code and tests. Review for correctness, contract drift, missing validation, unsafe operational behavior, regressions, insufficient JSDoc at non-obvious boundaries, and documentation drift. Load `simplifying-changes` as a read-only lens when a substantive diff may contain speculative abstractions, duplicate helpers, pass-through layers, or avoidable custom code; report findings but do not apply them during review.
+3. Review available session evidence: the current conversation, session memory, work logs, changed files, and recorded validation output. Reconcile README, learning indexes/details, script indexes, AGENTS, project map, domain language, and changelogs with verified behavior before commit. Session evidence identifies candidates for review; current code and test evidence remain the source of truth.
 4. Invoke Project Knowledge when a change adds or removes a module, stage, command, script, ownership boundary, operational procedure, recurring failure, or durable architecture decision. Review its documentation update before release preparation.
 5. Run the narrowest relevant checks first, then repository verification commands when the affected scope warrants them. For Azure's known isolated ts-jest cross-file `TS2451` failure, rerun a single full-suite occurrence before treating it as a defect.
-6. Report findings first, ordered by severity with file links. Clearly state when no findings were identified and identify remaining test gaps.
+6. Guard the quality floor. Check the diff for added test skips, deleted tests, weakened assertions, new checker suppressions, emptied error handling, unfinished stubs, lowered thresholds, removed validation commands, or package-manager and lockfile drift. Require evidence and an explicit rationale for an intentional exception; do not weaken a check merely to make the change pass.
+7. Report findings first, ordered by severity with file links. Clearly state when no findings were identified and identify remaining test gaps.
 
 ## Versioning and Changelog
 

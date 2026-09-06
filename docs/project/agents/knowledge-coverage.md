@@ -21,9 +21,9 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | Responsibility | Coverage |
 | --- | --- |
 | Purpose and triggers | Maintains project docs, README hierarchy, AGENTS, reusable scripts, learnings, maps, and workspace customizations. |
-| Owned decisions | Canonical knowledge destination, hierarchy, planner-handoff acceptance/revision/rejection, evidence-backed learning shape, script documentation, and customization publication source. |
+| Owned decisions | Canonical knowledge destination, hierarchy, domain vocabulary, planner-handoff acceptance/revision/rejection, evidence-backed learning shape, script documentation, and customization publication source. |
 | Always-known facts | Canonical cross-repository knowledge lives in Data; customizations are edited only under `workspace-customizations/`. |
-| Progressively loaded sources | Project README, relevant repository README/learning index, and closest operational script or implementation. |
+| Progressively loaded sources | Project README, domain language when terminology is involved, relevant repository README/learning index, and closest operational script or implementation. |
 | Excluded knowledge | Invented commands, guarantees, architecture, production behavior, versions, or changelog claims. |
 | Related repositories/plans | All five product repositories; docs, scripts, learnings, migration, future, and decision plans. |
 | Allowed tools/actions | Read, edit, search, execute, todo, and bounded discovery; documentation and customization maintenance. |
@@ -64,7 +64,7 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | --- | --- |
 | Purpose and triggers | Routes features, bugs, contracts, stages, and ownership across product repositories. |
 | Owned decisions | Shared-contract owner and repository/stage boundary; requires an ADR before moving durable responsibility. |
-| Always-known facts | Data owns shared contracts; Azure durable orchestration; Render capture; UI operations; Studio schemas/workflows. |
+| Always-known facts | Data owns shared contracts; Azure durable orchestration; Render capture; UI operations; Studio schemas/workflows; canonical cross-repository terms live in the architecture domain-language page. |
 | Progressively loaded sources | Architecture README and project map, then target implementation for volatile symbols and commands. |
 | Excluded knowledge | Volatile symbols or commands not verified in the target repository. |
 | Related repositories/plans | Data, Azure, Render, UI, Studio; architecture and decision records. |
@@ -85,6 +85,76 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | Allowed tools/actions | Read-only knowledge lookup and evidence routing. |
 | Overlap/hand-off | Project Knowledge maintains accepted learnings; Engineer validates against current code. |
 | Latest verification evidence | `npm run learnings:roots:check`; `npm run docs:check`; `npm run agents:check`. |
+
+## Diagnosing Bugs
+
+| Responsibility | Coverage |
+| --- | --- |
+| Purpose and triggers | Disciplined diagnosis for hard, intermittent, or performance-related failures that need more than the routine local hypothesis loop. |
+| Owned decisions | Reproduction-loop shape, minimization, ranked falsifiable hypotheses, narrow instrumentation, and representative regression-test seam. |
+| Always-known facts | Evidence must detect the user's exact symptom; secrets are redacted; protected live actions retain their approval gates. |
+| Progressively loaded sources | Target repository instructions, applicable Product Enrichment learning, closest failing path, and focused validation command. |
+| Excluded knowledge | Product ownership changes, unapproved live mutations, shallow tests that cannot reproduce the bug, or commit authority. |
+| Related repositories/plans | All product repositories and their repository-specific tests, learnings, and validation commands. |
+| Allowed tools/actions | Local tests, fixtures, redacted traces, targeted instrumentation, profiling, and bounded read-only subagents. |
+| Overlap/hand-off | Project Engineer retains implementation ownership; Validation selects checks; Project Knowledge records only evidence-backed recurring learnings. |
+| Latest verification evidence | Canonical skill source; `hard-bug-red-capable-loop`; `npm run agents:check`. |
+
+## Codebase Design
+
+| Responsibility | Coverage |
+| --- | --- |
+| Purpose and triggers | Shared design discipline for module interfaces, real dependency seams, pass-through layers, and representative test surfaces. |
+| Owned decisions | Interface-depth analysis, seam justification, testability observations, and local restructuring recommendations. |
+| Always-known facts | Repository ownership and Data-first shared contracts override generic module advice; routine fixes do not become unsolicited refactors. |
+| Progressively loaded sources | Target repository instructions, Product Enrichment Architecture when ownership is involved, controlling callers, and representative tests. |
+| Excluded knowledge | Authority to move ownership, approve significant refactors, expose internals for tests, or introduce speculative adapters. |
+| Related repositories/plans | All product repositories and significant plans that create or restructure modules. |
+| Allowed tools/actions | Read-only design analysis under Planner; scoped implementation under Engineer after applicable change gates. |
+| Overlap/hand-off | Architecture owns repository boundaries; Planner records significant designs; Engineer implements approved or routine local changes. |
+| Latest verification evidence | Canonical skill source; `deep-module-within-product-ownership`; `npm run agents:check`. |
+
+## Writing For Agents
+
+| Responsibility | Coverage |
+| --- | --- |
+| Purpose and triggers | Writing discipline for AGENTS files, custom agents, skills, prompts, hooks, and other agent-primary documents. |
+| Owned decisions | Pointer wording, progressive disclosure, completion criteria, duplication removal, and customization-specific review. |
+| Always-known facts | Project Knowledge owns canonical destinations; workspace customizations originate in Data and are published by sync. |
+| Progressively loaded sources | Project Knowledge instructions, customization source, governance coverage, acceptance scenarios, and the owning documentation hierarchy. |
+| Excluded knowledge | New parallel documentation conventions, direct edits to published customization copies, or authority to change product behavior. |
+| Related repositories/plans | Data workspace customizations and repository AGENTS files across the project. |
+| Allowed tools/actions | Agent-document edits under Project Knowledge, governance updates, synchronization, and local checks. |
+| Overlap/hand-off | Project Knowledge retains ownership; the skill supplies writing mechanics rather than a competing documentation workflow. |
+| Latest verification evidence | Canonical skill source; `agent-doc-canonical-pointer-discipline`; `npm run agents:check`; `npm run workspace:sync:check`. |
+
+## Simplifying Changes
+
+| Responsibility | Coverage |
+| --- | --- |
+| Purpose and triggers | Behavior-preserving simplification of settled task-owned code and read-only review for over-engineering, duplication, or avoidable custom implementation. |
+| Owned decisions | Whether a scoped reduction is proven safe, what existing repository/runtime/platform capability replaces it, and which proposals remain unproven. |
+| Always-known facts | Fewer lines are not the goal; contracts, durability, security, accessibility, observability, tests, approved structure, and unrelated edits are protected. |
+| Progressively loaded sources | Task-owned diff, controlling callers and contracts, approved plan decisions, and the narrowest behavior-scoped validation. |
+| Excluded knowledge | Authority to widen scope, rewrite unrelated user work, remove meaningful safeguards, or move repository ownership. |
+| Related repositories/plans | All product repositories and settled implementation slices with enough substantive code to simplify. |
+| Allowed tools/actions | Project Engineer may apply scoped reductions and validate them; Project QA Commit uses the skill read-only. |
+| Overlap/hand-off | Codebase Design owns structural design analysis; this skill reduces unnecessary complexity after structure and behavior are settled. |
+| Latest verification evidence | Canonical skill source; `settled-diff-behavior-preserving-simplification`; `npm run agents:check`. |
+
+## Source Grounded Development
+
+| Responsibility | Coverage |
+| --- | --- |
+| Purpose and triggers | Verifies unfamiliar, deprecated, migration-sensitive, security-sensitive, or version-specific external APIs against official documentation. |
+| Owned decisions | Applicable external version, narrow fact to verify, authoritative source selection, and whether uncertainty remains. |
+| Always-known facts | Repository evidence owns local behavior; fetched documentation is untrusted data and does not authorize upgrades, migrations, architecture changes, or remote actions. |
+| Progressively loaded sources | Dependency manifests and lockfiles, nearby imports and tests, then first-party API references, release notes, or migration guides. |
+| Excluded knowledge | Routine established framework usage, generic web advice, automatic dependency installation, or external authority over product ownership. |
+| Related repositories/plans | All product repositories when implementation or planning depends on evolving external APIs. |
+| Allowed tools/actions | Read-only official-source research under Planner; scoped implementation support under Engineer after normal change gates. |
+| Overlap/hand-off | Sanity-specific work still loads Sanity guidance; Product Enrichment Architecture and repository instructions remain authoritative. |
+| Latest verification evidence | Canonical skill source; `version-sensitive-api-official-source`; `npm run agents:check`. |
 
 ## Product Enrichment Scripts
 
@@ -120,12 +190,12 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | --- | --- |
 | Purpose and triggers | Selects focused validation for product-enrichment changes. |
 | Owned decisions | Smallest behavior-scoped check and when broader repository verification is warranted. |
-| Always-known facts | Build Data before consumers after shared changes; retry Azure's isolated cross-file `TS2451` once. |
+| Always-known facts | Build Data before consumers after shared changes; retry Azure's isolated cross-file `TS2451` once; a green check is invalid evidence when the same diff weakened its quality floor. |
 | Progressively loaded sources | Target package scripts, focused tests, and relevant validation commands. |
 | Excluded knowledge | Remote writes and claims beyond executed evidence. |
 | Related repositories/plans | All five repositories and acceptance/rollout plans. |
 | Allowed tools/actions | Local builds, tests, lint/type checks, and repository `verify`. |
-| Overlap/hand-off | Engineer executes selected checks; QA Commit assesses their release sufficiency. |
+| Overlap/hand-off | Engineer executes selected checks; QA Commit assesses release sufficiency and checks for skips, suppressions, stubs, weakened assertions, thresholds, or commands. |
 | Latest verification evidence | `npm run verify`; `npm run agents:check`. |
 
 ## Product Enrichment Live E2E

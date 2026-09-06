@@ -10,3 +10,5 @@ Canonical managed-agent sources are `website-product-data/workspace-customizatio
 | Project QA Commit | Owns final readiness review, validation sufficiency, documentation reconciliation, and SemVer recommendations. It may make a local commit only after explicit authorization; it never pushes or performs remote mutations. |
 
 Specialized plan implementation agents in the workspace root are legacy one-off files, not managed agents or standing dependencies. See [knowledge coverage](../../docs/project/agents/knowledge-coverage.md) and [acceptance scenarios](../../docs/project/agents/acceptance-scenarios.md).
+
+External repositories reviewed for managed-agent skills, the exact source revisions, local adaptations, exclusions, licenses, and refresh procedure are recorded in the [upstream skill integration ledger](../.github/agents/UPSTREAM-SKILL-INTEGRATIONS.md).

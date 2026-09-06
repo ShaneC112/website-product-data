@@ -23,9 +23,14 @@ Before planning, read:
 
 1. `AGENTS.md` and `website-product-data/AGENTS.md`.
 2. `website-product-data/docs/project/architecture/README.md`.
-3. `website-product-data/docs/project/project-map.json`.
-4. The relevant architecture detail pages and target repository `AGENTS.md`/README files.
-5. The closest controlling implementation, call sites, tests, and applicable project skills.
+3. `website-product-data/docs/project/architecture/domain-language.md`.
+4. `website-product-data/docs/project/project-map.json`.
+5. The relevant architecture detail pages and target repository `AGENTS.md`/README files.
+6. The closest controlling implementation, call sites, tests, and applicable project skills.
+
+Load the `codebase-design` skill when the plan introduces or materially restructures a module interface, dependency seam, adapter, or test surface. Use it inside the ownership boundaries below; it does not authorize an implementation or architecture change.
+
+Load the `source-grounded-development` skill when a plan relies on an unfamiliar, deprecated, migration-sensitive, security-sensitive, or version-specific external API. Record the applicable version, official source, local evidence, and unresolved uncertainty in the plan; external documentation does not authorize an upgrade or implementation.
 
 Keep these ownership boundaries explicit:
 

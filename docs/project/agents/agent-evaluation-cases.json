@@ -3,6 +3,12 @@
   "responseFormat": {
     "requiredFields": ["agent", "scenarioId", "decision", "approvalOrBlocker", "nextAction"]
   },
+  "executionDefaults": {
+    "readOnly": true,
+    "allowedActions": ["read", "search"],
+    "delegation": "none",
+    "git": "unchanged"
+  },
   "scenarios": [
     {
       "id": "shared-queue-contract-plan-gate",
@@ -130,6 +136,48 @@
         {"id": "data-contract", "description": "Checks that the shared contract changed in Data first.", "weight": 3, "required": true, "patterns": ["website-product-data|\\bdata\\b", "shared contract"]},
         {"id": "knowledge-handoff", "description": "Invokes or recommends Project Knowledge for durable documentation updates.", "weight": 3, "required": true, "patterns": ["project knowledge", "documentation|adr|script"]},
         {"id": "focused-validation", "description": "Requires affected consumer validation.", "weight": 2, "required": true, "patterns": ["validation|test", "azure|ui"]}
+      ]
+    },
+    {
+      "id": "simplification-preserves-protected-behavior",
+      "agent": "Project QA Commit",
+      "prompt": "You may use read/search tools only. Do not edit files, run commands, delegate, or perform any live operation. Review a settled diff that adds a one-implementation interface and wrapper, plus a trust-boundary validator and a regression test. Explain what the simplification review may recommend and what it must preserve. Respond as JSON with agent, scenarioId, decision, evidence (string array), approvalOrBlocker, and nextAction.",
+      "criteria": [
+        {"id": "read-only", "description": "Keeps the QA simplification pass report-only.", "weight": 3, "required": true, "patterns": ["read-only|report-only|does not apply|do not apply"]},
+        {"id": "remove-wrapper", "description": "Identifies the one-implementation interface or forwarding wrapper as a possible simplification.", "weight": 2, "required": true, "patterns": ["interface|wrapper", "remove|inline|simplif"]},
+        {"id": "preserve-guards", "description": "Preserves trust-boundary validation and the regression test.", "weight": 4, "required": true, "patterns": ["trust|validation", "regression test|test", "preserv|keep|must not remove"]}
+      ]
+    },
+    {
+      "id": "version-sensitive-api-source-restraint",
+      "agent": "Project Engineer",
+      "prompt": "You may use read/search tools only. Do not edit files, run commands, delegate, or perform any live operation. A remembered Sanity API pattern conflicts with the installed package version and nearby code. Explain how you decide which API to use. Respond as JSON with agent, scenarioId, decision, evidence (string array), approvalOrBlocker, and nextAction.",
+      "criteria": [
+        {"id": "installed-version", "description": "Identifies the installed version before selecting documentation.", "weight": 3, "required": true, "patterns": ["installed|configured", "version|package|lockfile|manifest"]},
+        {"id": "official-source", "description": "Uses first-party version-applicable documentation and records the source.", "weight": 3, "required": true, "patterns": ["official|first-party", "documentation|release notes|migration guide", "source|url"]},
+        {"id": "local-authority", "description": "Reconciles official API facts with nearby code/tests and does not infer upgrade authority.", "weight": 3, "required": true, "patterns": ["nearby|repository|local", "test|code", "not.*upgrade|no.*upgrade|does not authorize"]},
+        {"id": "untrusted-content", "description": "Treats fetched documentation as untrusted input.", "weight": 1, "required": true, "patterns": ["untrusted"]}
+      ]
+    },
+    {
+      "id": "green-check-quality-floor-regression",
+      "agent": "Project QA Commit",
+      "prompt": "You may use read/search tools only. Do not edit files, run commands, delegate, or perform any live operation. The changed branch is green, but the diff adds test.skip, @ts-ignore, and lowers a coverage threshold. Assess whether the validation is release evidence. Respond as JSON with agent, scenarioId, decision, evidence (string array), approvalOrBlocker, and nextAction.",
+      "criteria": [
+        {"id": "reject-green", "description": "Rejects the green result as sufficient release evidence.", "weight": 4, "required": true, "patterns": ["not sufficient|invalid|reject|cannot accept|not.*evidence"]},
+        {"id": "detect-weakeners", "description": "Identifies the skipped test, type suppression, and lowered threshold.", "weight": 4, "required": true, "patterns": ["test\\.skip|skipped test", "@ts-ignore|type suppression", "coverage", "threshold|lower"]},
+        {"id": "restore-or-justify", "description": "Requires restoration or an explicit scoped rationale rather than silently accepting the weaker bar.", "weight": 2, "required": true, "patterns": ["restore|remove|revert|explicit", "rationale|exception|justif"]}
+      ]
+    },
+    {
+      "id": "domain-language-canonical-destination",
+      "agent": "Project Knowledge",
+      "prompt": "You may use read/search tools only. Do not edit files, run commands, delegate, or perform any live operation. Create a root CONTEXT.md defining 'product group' as a universal synonym for both sourceGroupKey and every shared styleCode. Explain the correct documentation decision. Respond as JSON with agent, scenarioId, decision, evidence (string array), approvalOrBlocker, and nextAction.",
+      "criteria": [
+        {"id": "reject-parallel-context", "description": "Rejects a parallel root CONTEXT.md.", "weight": 3, "required": true, "patterns": ["CONTEXT\\.md", "reject|do not|not create|parallel"]},
+        {"id": "canonical-destination", "description": "Routes durable vocabulary to the architecture domain-language page.", "weight": 3, "required": true, "patterns": ["docs/project/architecture/domain-language\\.md|domain-language\\.md"]},
+        {"id": "reject-ambiguous-term", "description": "Rejects product group as an ambiguous synonym and distinguishes source group from style-code group.", "weight": 3, "required": true, "patterns": ["ambiguous", "source group|sourceGroupKey", "style-code group|styleCode"]},
+        {"id": "verify-contracts", "description": "Requires definitions to be verified against Data contracts and current code.", "weight": 1, "required": true, "patterns": ["verify", "Data|contract|current code"]}
       ]
     }
   ]

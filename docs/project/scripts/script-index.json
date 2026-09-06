@@ -6,6 +6,8 @@
       "path": ".",
       "catalogBacklink": "../docs/project/scripts/README.md",
       "files": {
+        "check-image-generation-v2-isolation.mjs": "documented",
+        "image-generation-v2-isolation.manifest.mjs": "helper-only",
         "check-agent-governance.mjs": "documented",
         "check-documentation.mjs": "documented",
         "evaluate-agent-response.mjs": "documented",

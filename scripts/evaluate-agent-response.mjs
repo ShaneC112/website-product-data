@@ -53,6 +53,7 @@ const score = requiredFailure ? 0 : rawScore
 console.info(JSON.stringify({
   scenarioId: scenario.id,
   agent: scenario.agent,
+  executionContract: {...fixture.executionDefaults, ...scenario.executionContract},
   score,
   rawScore,
   screeningOnly: true,
@@ -79,6 +80,9 @@ function validateFixture(candidate) {
   }
   if (!Array.isArray(candidate.responseFormat?.requiredFields) || !candidate.responseFormat.requiredFields.includes('agent')) {
     throw new Error('Agent evaluation fixture must define the structured response fields.')
+  }
+  if (candidate.executionDefaults?.readOnly !== true || !Array.isArray(candidate.executionDefaults?.allowedActions) || candidate.executionDefaults.delegation !== 'none' || candidate.executionDefaults.git !== 'unchanged') {
+    throw new Error('Agent evaluation fixture must define a read-only, no-delegation, unchanged-Git default execution contract.')
   }
   for (const scenario of candidate.scenarios) {
     if (!scenario.id || !scenario.agent || !scenario.prompt || !Array.isArray(scenario.criteria) || scenario.criteria.length === 0) {

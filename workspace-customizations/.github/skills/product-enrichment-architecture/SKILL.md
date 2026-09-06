@@ -5,4 +5,4 @@ description: "Use when routing a Website Product Enrichment feature, bug, contra
 
 # Product Enrichment Architecture
 
-Read `website-product-data/docs/project/architecture/README.md` and `project-map.json`. Shared contracts begin in Data; Azure owns durable orchestration; Render owns stateless capture; UI owns crawl operations; Studio owns Sanity schemas and Studio workflows. Verify volatile symbols and current commands in the target repository before editing.
+Read `website-product-data/docs/project/architecture/README.md`, `domain-language.md`, and `project-map.json`. Use the canonical domain terms when routing identity, stage, evidence, or publication decisions; reject ambiguous shorthand such as `product group` when `style-code group` or `source group` is intended. Shared contracts begin in Data; Azure owns durable orchestration; Render owns stateless capture; UI owns crawl operations; Studio owns Sanity schemas and Studio workflows. Verify volatile symbols and current commands in the target repository before editing.

@@ -17,6 +17,7 @@ const requiredFiles = [
   'docs/sanity/README.md',
   'docs/project/README.md',
   'docs/project/architecture/README.md',
+  'docs/project/architecture/domain-language.md',
   'docs/project/agents/knowledge-coverage.md',
   'docs/project/agents/acceptance-scenarios.md',
   'docs/project/operations/README.md',
