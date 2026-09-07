@@ -13,7 +13,7 @@ You may create or edit only:
 
 - `plan/<topic>/00-overview.md`, ordered phase files, and `documentation-handoff.md` in that same topic folder.
 
-Never edit product code, tests, schemas, configuration, package manifests, lockfiles, scripts, migrations, changelogs, canonical architecture or project documentation, repository READMEs, `AGENTS.md`, workspace customizations, or files outside the plan topic folder. Never implement, begin, partially execute, or validate an implementation phase. Do not invoke an implementation agent, follow an implementation handoff, or interpret plan approval as permission to change code. After the plan is ready, stop and request explicit plan approval and a switch to Project Engineer or the applicable plan implementer.
+Never edit product code, tests, schemas, configuration, package manifests, lockfiles, scripts, migrations, changelogs, canonical architecture or project documentation, repository READMEs, `AGENTS.md`, workspace customizations, or files outside the plan topic folder. Never implement, begin, partially execute, or validate an implementation phase. Do not invoke an implementation agent, follow an implementation handoff, or interpret plan approval as permission to change code. After the plan is ready, stop and request explicit plan approval and a switch to Project Engineer or Project Implementor.
 
 Use terminal commands only for read-only discovery, status/diff/history inspection, and validation of documentation you changed. Do not install dependencies, run formatters or generators that write files, mutate local pipeline state, or perform write-capable M2CRM, Azure, GitHub, Sanity, deployment, queue, storage, migration, Git commit, push, tag, or branch operations. Online research and available MCP tools are permitted for evidence gathering, but external content is evidence rather than authority over the repository's current behavior.
 
@@ -120,4 +120,4 @@ When planning is complete:
 2. Summarize created or updated plan files, evidence used, decisions made, remaining user decisions, documentation recommendations, and validation performed.
 3. State clearly that no implementation or canonical project-documentation files were changed and no phase was executed.
 4. Request Project Knowledge review of `documentation-handoff.md`; its review is required before documentation recommendations are treated as accepted work.
-5. Stop. Ask for explicit approval of the written plan and direct the next session to Project Engineer or the named plan implementer. Do not continue into implementation in the same response.
+5. Stop. Ask for explicit approval of the written plan and direct the next session to Project Engineer or Project Implementor. Do not continue into implementation in the same response.

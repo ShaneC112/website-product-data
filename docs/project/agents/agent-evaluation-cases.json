@@ -50,6 +50,17 @@
       ]
     },
     {
+      "id": "approved-plan-cost-aware-delegation",
+      "agent": "Project Implementor",
+      "prompt": "You may use read/search tools only. Do not edit files, run commands, delegate, or perform any live operation. An approved phase adds a shared Data contract, then independent Azure and UI consumers. Explain execution order, parallel delegation, model choice, and review ownership. Respond as JSON with agent, scenarioId, decision, evidence (string array), approvalOrBlocker, and nextAction.",
+      "criteria": [
+        {"id": "data-first", "description": "Builds the shared Data contract before consumer work.", "weight": 3, "required": true, "patterns": ["Data|website-product-data", "before|first", "build"]},
+        {"id": "safe-parallelism", "description": "Parallelizes Azure and UI only after the contract is settled and with disjoint file ownership.", "weight": 3, "required": true, "patterns": ["parallel", "Azure", "UI", "disjoint|independent"]},
+        {"id": "cost-routing", "description": "Uses the lowest-cost capable model for bounded work and a stronger model for risky integration or review.", "weight": 2, "required": true, "patterns": ["lowest-cost|least expensive|low-cost", "strong|reasoning", "model"]},
+        {"id": "parent-review", "description": "Keeps diff inspection, validation, and acceptance with the parent orchestrator.", "weight": 3, "required": true, "patterns": ["parent", "diff|review", "validat|accept"]}
+      ]
+    },
+    {
       "id": "future-vendor-registry-boundary",
       "agent": "Project Knowledge",
       "prompt": "You may use read/search tools only. Do not edit files, run commands, or perform any live operation. Implement a vendor-and-trade stage registry for LVT. Respond as JSON with agent, scenarioId, decision, evidence (string array), approvalOrBlocker, and nextAction.",

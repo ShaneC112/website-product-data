@@ -31,6 +31,16 @@ export const imageGenerationQueueEnvelopeSchema = z.object({
 export const imageGenerationSanitySubmissionSchema = z.discriminatedUnion('submissionKind', [
   z.object({
     schemaVersion: z.literal(1),
+    submissionKind: z.literal('product.request.enqueue'),
+    submissionId: z.string().trim().min(1),
+    documentId: z.string().trim().min(1),
+    productId: z.string().trim().min(1),
+    payloadKey: z.string().trim().min(1),
+    requestId: z.string().trim().min(1),
+    requestedAt: z.string().datetime()
+  }).strict(),
+  z.object({
+    schemaVersion: z.literal(1),
     submissionKind: z.literal('request.enqueue'),
     submissionId: z.string().trim().min(1),
     documentId: z.string().trim().min(1),
@@ -54,16 +64,24 @@ export const imageGenerationSanitySubmissionSchema = z.discriminatedUnion('submi
     requestedAt: z.string().datetime()
   }).strict()
 ]).superRefine((value, context) => {
-  const intentId = value.submissionKind === 'request.enqueue'
+  const intentId = value.submissionKind === 'product.request.enqueue'
+    ? value.requestId
+    : value.submissionKind === 'request.enqueue'
     ? value.requestId
     : value.submissionKind === 'control.submit'
       ? value.controlId
       : value.templateId
 
-  if (value.submissionId !== intentId || value.documentId !== intentId) {
+  const documentIdMatches = value.submissionKind === 'product.request.enqueue'
+    ? value.documentId === value.productId
+    : value.documentId === intentId
+
+  if (value.submissionId !== intentId || !documentIdMatches) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: `${value.submissionKind} submissionId, documentId, and intent ID must match`
+        message: value.submissionKind === 'product.request.enqueue'
+          ? 'product.request.enqueue submissionId must match requestId and documentId must match productId'
+          : `${value.submissionKind} submissionId, documentId, and intent ID must match`
       })
   }
 })

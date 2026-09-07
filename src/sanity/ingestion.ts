@@ -301,6 +301,25 @@ function firstNonBlank(...values: Array<string | undefined>): string | undefined
   return values.find((value) => value?.trim())?.trim()
 }
 
+function deriveCanonicalVariantId(variant: ExtractedVendorVariant, index: number): string {
+  const explicitVariantId = firstNonBlank(variant.variantId)
+  if (explicitVariantId) {
+    return explicitVariantId
+  }
+
+  const displayName = firstNonBlank(variant.label, variant.colourName)
+  if (!displayName) {
+    return `variant-${index + 1}`
+  }
+
+  const slug = displayName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+
+  return slug || `variant-${index + 1}`
+}
+
 function buildPrice(retailExVatMinor: number, unit: SanityPrice['unit']): SanityPrice {
   return {_type: 'productPrice', currency: 'EUR', unit, retailExVat: retailExVatMinor / 100, vatRate: 0.23, retailIncVat: calculateRetailIncVat(retailExVatMinor)}
 }
@@ -318,7 +337,7 @@ function buildVariant(
   variantOverrides: Record<string, {price?: number; boxSalesPrice?: number; rawWidthHint?: {value: number; unit: string}[]; packInfoHint?: PackInfoHint}> | undefined,
   pricingUnit: SanityPrice['unit'],
 ): SanityProductDraft['variants'][number] {
-  const variantId = variant.variantId ?? variant.label ?? `variant-${index + 1}`
+  const variantId = deriveCanonicalVariantId(variant, index)
   const override = variantOverrides?.[variantId]
   const resolvedPrice = override?.price != null ? buildPrice(override.price, pricingUnit) : price
   const resolvedPackPrice = override?.boxSalesPrice != null ? buildPrice(override.boxSalesPrice, 'pack') : packPrice
@@ -375,7 +394,7 @@ function resolveVariantOwnWidths(
   index: number,
   variantOverrides: Record<string, {price?: number; boxSalesPrice?: number; rawWidthHint?: {value: number; unit: string}[]; packInfoHint?: PackInfoHint}> | undefined,
 ): SanityMeasurement[] {
-  const variantId = variant.variantId ?? variant.label ?? `variant-${index + 1}`
+  const variantId = deriveCanonicalVariantId(variant, index)
   const override = variantOverrides?.[variantId]
   const pageWidths = (variant.widths ?? []).map(readWidthSlot).filter(isDefined)
   const hintWidths = (override?.rawWidthHint ?? []).map(readMeasurement).filter(isDefined)

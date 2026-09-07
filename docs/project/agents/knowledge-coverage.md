@@ -16,6 +16,20 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | Overlap/hand-off | Hands durable docs/scripts to Project Knowledge; sends release readiness and mixed-worktree review to Project QA Commit; uses Architecture for ownership. |
 | Latest verification evidence | Canonical agent source; `npm run agents:check`; [acceptance scenarios](acceptance-scenarios.md). |
 
+## Project Implementor
+
+| Responsibility | Coverage |
+| --- | --- |
+| Purpose and triggers | Executes an explicitly approved implementation plan or phase range with dependency-aware delegation, integration, review, and validation. |
+| Owned decisions | Phase scheduling, bounded worker assignments, cost-versus-risk model class, integration order, review findings, and acceptance evidence. |
+| Always-known facts | Data-first shared contracts; workers cannot transfer approval; self-delegation is one level only; the parent owns diff inspection, validation, and acceptance. |
+| Progressively loaded sources | Workspace and repository instructions, approved overview and phase files, then TDD, Validation, Reviewing Changes, and other skills only when triggered. |
+| Excluded knowledge | Unapproved plan decisions, permission for protected live operations or Git actions, and trust in a worker report without inspecting current code. |
+| Related repositories/plans | Approved plans across Data, Azure, Render, UI, and Studio. |
+| Allowed tools/actions | Read, edit, search, execute, todo, bounded self-workers, and specialist agents; parallel writes only across independent disjoint manifests. |
+| Overlap/hand-off | Receives approved plans from Project Planner or Engineer; uses Project Knowledge for durable documentation and Project QA Commit for final release readiness. |
+| Latest verification evidence | Canonical agent source; `project-implementor-cost-aware-parallel-review`; `npm run agents:evaluate:check`; `npm run agents:check`. |
+
 ## Project Knowledge
 
 | Responsibility | Coverage |
@@ -197,6 +211,34 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | Allowed tools/actions | Local builds, tests, lint/type checks, and repository `verify`. |
 | Overlap/hand-off | Engineer executes selected checks; QA Commit assesses release sufficiency and checks for skips, suppressions, stubs, weakened assertions, thresholds, or commands. |
 | Latest verification evidence | `npm run verify`; `npm run agents:check`. |
+
+## Test Driven Development
+
+| Responsibility | Coverage |
+| --- | --- |
+| Purpose and triggers | Red-green behavioral proof for new logic, behavior changes, and bug fixes executed from an approved plan. |
+| Owned decisions | Stable test seam, independent expected value, red evidence, minimal green implementation, and justified characterization exceptions. |
+| Always-known facts | Tests observe behavior rather than internals; test and implementation of the same behavior do not run concurrently; green evidence cannot come from a weakened quality floor. |
+| Progressively loaded sources | Target repository instructions, neighboring tests, phase acceptance criterion, then Codebase Design when the public seam is unclear. |
+| Excluded knowledge | Repository command selection, broad validation policy, documentation-only changes, and authority to invent behavior absent from the plan. |
+| Related repositories/plans | Any approved phase that changes observable behavior in Data, Azure, Render, UI, or Studio. |
+| Allowed tools/actions | Focused local tests and task-owned test/implementation edits under Engineer or Implementor ownership. |
+| Overlap/hand-off | Product Enrichment Validation chooses commands and broader gates; Reviewing Changes assesses the settled result. |
+| Latest verification evidence | Canonical skill source; `project-implementor-cost-aware-parallel-review`; `npm run agents:check`. |
+
+## Reviewing Changes
+
+| Responsibility | Coverage |
+| --- | --- |
+| Purpose and triggers | Independent plan-fidelity and engineering-quality review of a settled implementation slice before acceptance. |
+| Owned decisions | Fixed review scope, independent reviewer lenses, finding severity, reconciliation, and bounded stop conditions. |
+| Always-known facts | Worker reports are leads rather than verdicts; an author cannot be the only reviewer; the parent verifies findings and reruns affected checks. |
+| Progressively loaded sources | Approved phase, task-owned diff, repository instructions, architecture sources, tests, and controlling callers. |
+| Excluded knowledge | Permission to mutate in read-only review, unrelated cleanup, unbounded recursive review, or authority to override plan and safety gates. |
+| Related repositories/plans | Settled phase changes across all product repositories, especially agent-authored and cross-repository work. |
+| Allowed tools/actions | Independent read-only review subagents; fixes only through the invoking parent that owns implementation. |
+| Overlap/hand-off | Project Implementor applies it per phase; Project QA Commit retains final release-readiness ownership; Simplifying Changes handles optional settled-code reduction. |
+| Latest verification evidence | Canonical skill source; `project-implementor-cost-aware-parallel-review`; `npm run agents:check`. |
 
 ## Product Enrichment Live E2E
 

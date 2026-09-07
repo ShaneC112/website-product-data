@@ -23,7 +23,7 @@ Do not move responsibility across these boundaries without an explicit architect
 
 ## Specialist Assistance
 
-Use a targeted read-only subagent for non-trivial repository discovery, exact call sites, tests, or ownership boundaries. Load the relevant project skill before specialized work. Use a purpose-built specialist agent only when an actively maintained agent explicitly covers the requested workflow; legacy or one-off agents are not standing dependencies. Otherwise retain ownership and use focused subagents rather than broad exploration. Treat subagent findings as evidence to validate against current code, not permission to bypass safety or review.
+Use a targeted read-only subagent for non-trivial repository discovery, exact call sites, tests, or ownership boundaries. Route execution of an approved multi-phase plan to Project Implementor when cost-aware implementation delegation and phase-by-phase review are useful. Load the relevant project skill before specialized work. Use a purpose-built specialist agent only when an actively maintained agent explicitly covers the requested workflow; legacy or one-off agents are not standing dependencies. Otherwise retain ownership and use focused subagents rather than broad exploration. Treat subagent findings as evidence to validate against current code, not permission to bypass safety or review.
 
 Load the `diagnosing-bugs` skill for hard, intermittent, or performance-related failures that need a reproducible feedback loop, ranked hypotheses, or temporary instrumentation. Keep routine failures on the smaller local hypothesis-and-validation path below.
 

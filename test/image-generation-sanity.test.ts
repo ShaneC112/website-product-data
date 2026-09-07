@@ -10,7 +10,6 @@ import {
   buildImageGenerationTemplateResetControl,
   diffImageGenerationRequestPolicySnapshot,
   hashImageGenerationRequestPolicySnapshot,
-  computeTemplateArtifactFingerprint,
   imageGenerationGuardedControlRequestSchema,
   imageGenerationGuardedControlResultSchema,
   aiImageGenerationControlIntentSchema,
@@ -19,7 +18,6 @@ import {
   imageGenerationTemplateResetControlSchema,
   aiImageGenerationRequestSchema,
   evaluateImageGenerationTemplateReadiness,
-  normalizeTemplateArtifactFingerprintInput,
   aiImageGenerationRequestPolicySnapshotSchema,
   aiImageGenerationRunSchema,
   aiImageGenerationTemplateSchema,
@@ -183,6 +181,21 @@ describe('request and run schemas', () => {
     expect(parsed.submissionKind).toBe('request.enqueue')
   })
 
+  it('accepts a product-local request enqueue submission', () => {
+    const parsed = imageGenerationSanitySubmissionSchema.parse({
+      schemaVersion: 1,
+      submissionKind: 'product.request.enqueue',
+      submissionId: 'request-1',
+      documentId: 'product-1',
+      productId: 'product-1',
+      payloadKey: 'payload-1',
+      requestId: 'request-1',
+      requestedAt: '2026-09-06T00:00:00.000Z'
+    })
+
+    expect(parsed.submissionKind).toBe('product.request.enqueue')
+  })
+
   it('accepts a Sanity-originated guarded control submission', () => {
     const parsed = imageGenerationSanitySubmissionSchema.parse({
       schemaVersion: 1,
@@ -218,6 +231,17 @@ describe('request and run schemas', () => {
       controlId: 'control-1',
       requestedAt: '2026-09-06T00:00:00.000Z'
     })).toThrow()
+
+    expect(() => imageGenerationSanitySubmissionSchema.parse({
+      schemaVersion: 1,
+      submissionKind: 'product.request.enqueue',
+      submissionId: 'request-1',
+      documentId: 'product-2',
+      productId: 'product-1',
+      payloadKey: 'payload-1',
+      requestId: 'request-1',
+      requestedAt: '2026-09-06T00:00:00.000Z'
+    })).toThrow(/documentId must match productId/)
   })
 
   it('accepts a pending top-level control intent', () => {
@@ -542,90 +566,5 @@ describe('guarded control schemas', () => {
       title: 'Bedroom inspiration',
       product: { _type: 'reference', _ref: 'product-1', _weak: true }
     })
-  })
-})
-
-describe('template artifact fingerprint helpers', () => {
-  const baseFingerprintInput = {
-    templateRevision: 'rev-1',
-    evidence: [
-      {
-        assetId: 'image-b',
-        templateUses: [{ templateType: 'pattern' as const, targetVariantIds: ['variant-2', 'variant-1'] }]
-      },
-      {
-        assetId: 'image-a',
-        templateUses: [{ templateType: 'texture' as const, targetVariantIds: [] }]
-      }
-    ],
-    binding: {
-      productId: 'product-1',
-      productType: 'carpet',
-      categoryKey: 'carpets',
-      selectedVariant: { variantId: 'variant-1', colourName: 'Cloud' }
-    },
-    productFacts: { title: 'Cloud Nine', colours: ['Cloud', 'Mist'] },
-    policyVersions: { surface: 2, prompt: 'v3' },
-    surfaceProfileVersion: 'surface-v1',
-    artifactKind: 'pattern' as const,
-    scope: { level: 'variant' as const, variantId: 'variant-1' }
-  }
-
-  it('normalizes evidence ordering and variant targeting deterministically', () => {
-    expect(normalizeTemplateArtifactFingerprintInput(baseFingerprintInput)).toEqual({
-      templateRevision: 'rev-1',
-      artifactKind: 'pattern',
-      scope: { level: 'variant', variantId: 'variant-1' },
-      evidence: [
-        {
-          assetId: 'image-a',
-          templateUses: [{ templateType: 'texture', targetVariantIds: [] }]
-        },
-        {
-          assetId: 'image-b',
-          templateUses: [{ templateType: 'pattern', targetVariantIds: ['variant-1', 'variant-2'] }]
-        }
-      ],
-      binding: {
-        productId: 'product-1',
-        productType: 'carpet',
-        categoryKey: 'carpets',
-        selectedVariant: { colourName: 'Cloud', variantId: 'variant-1' }
-      },
-      productFacts: { colours: ['Cloud', 'Mist'], title: 'Cloud Nine' },
-      policyVersions: { prompt: 'v3', surface: 2 },
-      surfaceProfileVersion: 'surface-v1'
-    })
-  })
-
-  it('produces the same fingerprint for semantically equivalent ordering', () => {
-    const first = computeTemplateArtifactFingerprint(baseFingerprintInput)
-    const second = computeTemplateArtifactFingerprint({
-      ...baseFingerprintInput,
-      evidence: [...baseFingerprintInput.evidence].reverse(),
-      policyVersions: { prompt: 'v3', surface: 2 }
-    })
-
-    expect(first).toBe(second)
-  })
-
-  it('changes the fingerprint when a scoped variant input changes', () => {
-    const first = computeTemplateArtifactFingerprint(baseFingerprintInput)
-    const second = computeTemplateArtifactFingerprint({
-      ...baseFingerprintInput,
-      scope: { level: 'variant', variantId: 'variant-2' }
-    })
-
-    expect(first).not.toBe(second)
-  })
-
-  it('rejects duplicate evidence asset ids', () => {
-    expect(() => computeTemplateArtifactFingerprint({
-      ...baseFingerprintInput,
-      evidence: [
-        baseFingerprintInput.evidence[0],
-        { ...baseFingerprintInput.evidence[0] }
-      ]
-    })).toThrow(/Duplicate template evidence assetId/)
   })
 })

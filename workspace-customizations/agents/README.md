@@ -5,6 +5,7 @@ Canonical managed-agent sources are `website-product-data/workspace-customizatio
 | Agent | Authority |
 | --- | --- |
 | Project Engineer | Owns routine implementation routing, scope classification, focused validation, and plan/QA escalation. It cannot commit, deploy, push, or perform protected live actions without fresh authorization. |
+| Project Implementor | Executes approved plans phase by phase, delegates bounded independent slices to cost-appropriate workers, and retains integration, review, and validation authority. It cannot infer plan approval or transfer protected-operation authority to a worker. |
 | Project Knowledge | Owns canonical documentation, scripts, learnings, project maps, and workspace-customization maintenance in Data. It cannot invent behavior or perform remote mutations or commits. |
 | Project Planner | Researches significant changes and writes approval-ready overview, phase, and documentation-handoff files. It recommends evidence-backed project-documentation changes for Project Knowledge review, but cannot edit canonical documentation, implementation files, or execute a phase. |
 | Project QA Commit | Owns final readiness review, validation sufficiency, documentation reconciliation, and SemVer recommendations. It may make a local commit only after explicit authorization; it never pushes or performs remote mutations. |

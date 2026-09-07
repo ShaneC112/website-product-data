@@ -75,6 +75,17 @@ describe('per-colour price resolution', () => {
     })
   })
 
+  it('derives a slug variant id from the display label when upstream variantId is missing', () => {
+    const plan = buildSanityIngestionPlan(baseRow(), buildBlob({
+      variants: [{label: 'Positano Arienzo 557011', colourName: 'Positano Arienzo 557011'}],
+    }), {vendorId: 'victoria-carpets'})
+
+    expect(plan.document.variants[0]).toMatchObject({
+      variantId: 'positano-arienzo-557011',
+      colourName: 'Positano Arienzo 557011',
+    })
+  })
+
   it('marks a product as price on request only when neither the product nor any colour has a price', () => {
     const noPrices = buildSanityIngestionPlan(baseRow(), buildBlob({
       variants: [{variantId: 'blue', colourName: 'Blue'}],
