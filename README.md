@@ -18,6 +18,8 @@ UIs should parse these schemas instead of maintaining local stage/state response
 
 `@shane-corrigan/website-product-data/image-generation` owns the v2 request, guarded-control, lifecycle, status, AI-operation, and storage contracts. Sanity-originated commands cross into Azure only as a strict `request.enqueue` or `control.submit` reference on `STORAGE_QUEUES.sanityImageSubmissionV2` (`sanity-image-submission-v2`). The reference carries stable identity and requested time, never the mutable request or control payload. The resolve, generate, assemble, render, and persist queues are Azure-internal lifecycle resources and are not producer entry points.
 
+The request document is the authoritative runtime source for the active generation snapshot. `aiImageGenerationRequest.currentRun` carries the live `runId`, `runEpoch`, `recordedAt`, and `promptContributions` summary, while legacy `aiImageGenerationRun` and `aiImageGenerationQueueJob` state remains intentionally removed from the active Studio contract. Azure patches the request document with the current run snapshot; Studio reads from `request.currentRun` instead of following stale join tables or run-job records.
+
 The shared terminal status contract treats blocked and quarantined work as failed, requires verified attached-media evidence before reporting completion, and keeps recovery disposition explicit. These are source and local-test claims only; the v2 workflow has not been deployed or live-verified, and Phase 18 remains open for Studio capability readiness, complete control-mutation receipt convergence, complete durable-row version/upcast quarantine, and compiler/AST isolation proof.
 
 ## Sanity media projections

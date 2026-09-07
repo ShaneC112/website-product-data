@@ -1,7 +1,18 @@
 import { z } from 'zod'
 import { SANITY_SUITABLE_ROOMS } from '../../registry/product-taxonomy.js'
+import { promptContributionSummarySchema } from '../contracts/prompt-generation.js'
 import { imageGenerationAspectRatioSchema } from '../registry/camera.js'
 import { creativeDirectionSchema } from '../registry/creative-direction.js'
+
+export const aiImageGenerationRequestCurrentRunSchema = z.object({
+  runId: z.string().trim().min(1),
+  runEpoch: z.number().int().nonnegative(),
+  recordedAt: z.string().datetime(),
+  promptContributions: promptContributionSummarySchema.default([])
+}).strict().refine((value) => value.runId && value.runEpoch >= 0 && value.recordedAt, {
+  message: 'currentRun requires runId, runEpoch, and recordedAt together',
+  path: ['runId']
+})
 
 export const aiImageGenerationRequestPolicySnapshotSchema = z.object({
   room: z.enum(SANITY_SUITABLE_ROOMS),
@@ -39,6 +50,7 @@ export const aiImageGenerationRequestSchema = z.object({
   aspectRatio: imageGenerationAspectRatioSchema,
   creativeDirection: creativeDirectionSchema,
   currentPolicy: aiImageGenerationRequestPolicySnapshotSchema,
+  currentRun: aiImageGenerationRequestCurrentRunSchema.optional(),
   requestedAt: z.string().datetime()
 }).strict().superRefine((value, context) => {
   if (value._id !== value.requestId || value.submissionId !== value.requestId) {
@@ -61,6 +73,7 @@ export const aiImageGenerationRequestSchema = z.object({
   }
 })
 
+export type AiImageGenerationRequestCurrentRun = z.infer<typeof aiImageGenerationRequestCurrentRunSchema>
 export type AiImageGenerationRequestPolicySnapshot = z.infer<typeof aiImageGenerationRequestPolicySnapshotSchema>
 export type AiImageGenerationRequest = z.infer<typeof aiImageGenerationRequestSchema>
 export type ImageGenerationSubmissionState = z.infer<typeof imageGenerationSubmissionStateSchema>

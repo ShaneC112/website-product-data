@@ -17,6 +17,7 @@ import {
   imageGenerationTemplateAuditEntrySchema,
   imageGenerationTemplateResetControlSchema,
   aiImageGenerationRequestSchema,
+  aiImageGenerationRequestCurrentRunSchema,
   evaluateImageGenerationTemplateReadiness,
   aiImageGenerationRequestPolicySnapshotSchema,
   aiImageGenerationRunSchema,
@@ -131,7 +132,7 @@ describe('aiImageGenerationTemplateSchema', () => {
 })
 
 describe('request and run schemas', () => {
-  it('accepts a request document', () => {
+  it('accepts a request document without currentRun', () => {
     const parsed = aiImageGenerationRequestSchema.parse({
       _id: 'request-1',
       _type: 'aiImageGenerationRequest',
@@ -166,6 +167,90 @@ describe('request and run schemas', () => {
     })
 
     expect(parsed.room).toBe('bedroom')
+    expect(parsed.currentRun).toBeUndefined()
+  })
+
+  it('accepts a request document with a valid currentRun snapshot', () => {
+    const parsed = aiImageGenerationRequestSchema.parse({
+      _id: 'request-1',
+      _type: 'aiImageGenerationRequest',
+      requestId: 'request-1',
+      submissionId: 'request-1',
+      submissionState: 'accepted',
+      submissionOutcome: { outcome: 'accepted', recordedAt: '2026-09-06T00:00:00.000Z' },
+      templateId: 'template-1',
+      variantKey: 'variant-key-1',
+      room: 'bedroom',
+      aspectRatio: '3:2',
+      creativeDirection: {
+        fashion: 'soft-contemporary',
+        tone: 'balanced',
+        furnitureTier: 'high',
+        lighting: 'bright-even-daylight',
+        version: 1
+      },
+      currentPolicy: {
+        room: 'bedroom',
+        aspectRatio: '3:2',
+        creativeDirection: {
+          fashion: 'soft-contemporary',
+          tone: 'balanced',
+          furnitureTier: 'high',
+          lighting: 'bright-even-daylight',
+          version: 1
+        },
+        policyHash: 'policy-hash-1',
+        capturedAt: '2026-09-06T00:00:00.000Z'
+      },
+      currentRun: {
+        runId: 'run-42',
+        runEpoch: 3,
+        recordedAt: '2026-09-06T00:00:00.000Z',
+        promptContributions: [{ key: 'pattern', applied: true, origin: 'deterministic-policy', warningCode: 'pattern-review-required' }]
+      },
+      requestedAt: '2026-09-06T00:00:00.000Z'
+    })
+
+    expect(aiImageGenerationRequestCurrentRunSchema.parse(parsed.currentRun)).toMatchObject({ runId: 'run-42', runEpoch: 3 })
+  })
+
+  it('rejects a partially populated currentRun snapshot', () => {
+    expect(() => aiImageGenerationRequestSchema.parse({
+      _id: 'request-1',
+      _type: 'aiImageGenerationRequest',
+      requestId: 'request-1',
+      submissionId: 'request-1',
+      submissionState: 'pending',
+      templateId: 'template-1',
+      variantKey: 'variant-key-1',
+      room: 'bedroom',
+      aspectRatio: '3:2',
+      creativeDirection: {
+        fashion: 'soft-contemporary',
+        tone: 'balanced',
+        furnitureTier: 'high',
+        lighting: 'bright-even-daylight',
+        version: 1
+      },
+      currentPolicy: {
+        room: 'bedroom',
+        aspectRatio: '3:2',
+        creativeDirection: {
+          fashion: 'soft-contemporary',
+          tone: 'balanced',
+          furnitureTier: 'high',
+          lighting: 'bright-even-daylight',
+          version: 1
+        },
+        policyHash: 'policy-hash-1',
+        capturedAt: '2026-09-06T00:00:00.000Z'
+      },
+      currentRun: {
+        runId: 'run-42',
+        runEpoch: 3
+      },
+      requestedAt: '2026-09-06T00:00:00.000Z'
+    })).toThrow(/currentRun requires runId, runEpoch, and recordedAt together|recordedAt/)
   })
 
   it('accepts a Sanity-originated request enqueue submission', () => {
