@@ -75,6 +75,24 @@ Write every overview and phase for a new agent session with no access to the pla
 - State all assumptions and unresolved decisions explicitly. A phase with a blocking decision must stop at that decision; it must not delegate product or architecture design to the implementer.
 - Link related phases and identify artifacts the next phase can assume exist. When a phase changes a shared contract, show how each consumer adopts it and which build output or package resolution it uses.
 
+## Workflow Direction Gate
+
+For every user-initiated flow, the plan must state the complete direction of travel before any implementation phase is considered ready. Do not infer the entry point from a convenient internal document, queue, helper, or schema.
+
+- Name the **user-visible entry point**: the screen, document type, action, command, API, or scheduler that starts the flow. State the owning repository and exact action, component, or symbol when known.
+- State the **trigger condition** that causes work to begin, including the persisted record, event, or queue message created at that boundary. Distinguish opening or publishing an internal document from the action that actually creates a command.
+- Trace every ownership handoff in order: user action -> persisted intent -> event/function -> external queue -> Azure durable claim/outbox -> internal work -> result projection. Name the authoritative record at each transition and identify steps that are internal implementation details rather than operator setup.
+- State the lifecycle of supporting resources such as templates, snapshots, bindings, artifacts, or queue jobs. For each resource, explicitly choose one: user-authored prerequisite, automatically created on first run, automatically reused when compatible, refreshed/reset by an operator control, or hidden implementation detail. Never leave this choice implicit.
+- Include a **repeatable manual workflow** with numbered steps that begins at the user-visible entry point and ends at the expected observable result. List required preconditions, expected documents, queue states, status transitions, logs or bounded outcomes to inspect, and recovery steps for a failed or pending run.
+- Include at least one acceptance test that starts at the same public trigger. Lower-level contract tests may complement it, but an internal-template, direct-queue, or helper-only test is not proof that the intended user workflow works.
+- When an existing implementation uses a different entry point from the confirmed user workflow, record it as a verified gap and correct it in the earliest owning phase. Do not describe an internal path as an acceptable alternative without explicit user approval.
+
+Before finalizing a plan, read the proposed manual workflow as a first-time operator. If it requires creating, binding, enqueueing, or otherwise managing a resource that the intended flow says is automatic, the plan is incomplete: stop for a user decision or add the automatic lifecycle phase.
+
+## Durability Lifecycle Gate
+
+For every plan that adds or changes queue, Table, blob, receipt, lease, manifest, snapshot, or orchestration state, identify the authoritative result or artifact owner before proposing a ledger. Name the active-journal fields, finalization and cleanup trigger, cleanup-failure retry behavior, redelivery behavior after cleanup, and any bounded retention exception with its necessity. Do not retain a persistent payload duplicate merely because it crosses pipeline stages. Include a falsifiable completion check that journal cleanup converges after the authoritative write and a later run works with the completed journal absent.
+
 Code examples are implementation guidance, not implementation. They belong only in the plan topic folder and do not authorize the planner to edit product or canonical documentation files.
 
 ## Project Documentation Handoff

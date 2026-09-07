@@ -1,7 +1,9 @@
 import { z } from 'zod'
 import {
   aiTemplateEvidenceImageSchema,
+  imageGenerationTemplateArtifactCacheEntrySchema,
   imageGenerationTemplateArtifactFamiliesSchema,
+  imageGenerationTemplateArtifactProvenanceEntrySchema,
   imageGenerationTemplateAuditEntrySchema,
   imageGenerationTemplateBindingSchema
 } from '../contracts/sanity.js'
@@ -13,6 +15,8 @@ export const aiImageGenerationTemplateSchema = z.object({
   product: z.object({ _type: z.literal('reference'), _ref: z.string().trim().min(1), _weak: z.literal(true).optional() }).strict(),
   evidenceImages: z.array(aiTemplateEvidenceImageSchema).default([]),
   artifactFamilies: imageGenerationTemplateArtifactFamiliesSchema.default({ portable: [], bindingLocal: [] }),
+  artifactCache: z.array(imageGenerationTemplateArtifactCacheEntrySchema).default([]),
+  artifactProvenance: z.array(imageGenerationTemplateArtifactProvenanceEntrySchema).default([]),
   audit: z.array(imageGenerationTemplateAuditEntrySchema).default([]),
   binding: imageGenerationTemplateBindingSchema.optional()
 }).strict()

@@ -85,6 +85,10 @@
       "types": "./dist/ai/index.d.ts",
       "default": "./dist/ai/index.js"
     },
+    "./ai/*": {
+      "types": "./dist/ai/*.d.ts",
+      "default": "./dist/ai/*.js"
+    },
     "./image-generation": {
       "types": "./dist/image-generation/index.d.ts",
       "default": "./dist/image-generation/index.js"

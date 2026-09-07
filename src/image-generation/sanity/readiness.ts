@@ -8,7 +8,6 @@ import { aiImageGenerationTemplateSchema } from './template.schema.js'
 const linkedProductSchema = z.object({
   _id: z.string().trim().min(1),
   productType: z.enum(SANITY_PRODUCT_TYPES),
-  suitableRooms: z.array(z.enum(SANITY_SUITABLE_ROOMS)).min(1),
 }).strict()
 
 export type ImageGenerationTemplateReadiness = {
@@ -57,7 +56,6 @@ export function evaluateImageGenerationTemplateReadiness(input: {
     if (template.binding.productType !== product.productType) reasons.push('binding-product-type-mismatch')
     if (!template.binding.variantBindings.some((binding) => binding.variantId === variantId)) reasons.push('variant-not-bound')
   }
-  if (!product.suitableRooms.includes(roomResult.data)) reasons.push('room-not-supported')
   if (Object.values(getImageGenerationCapability(product.productType)).every((requirement) => requirement === 'not-applicable')) {
     reasons.push('product-type-not-supported')
   }

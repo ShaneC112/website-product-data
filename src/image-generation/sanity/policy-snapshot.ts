@@ -1,9 +1,9 @@
-import { createHash } from 'node:crypto'
 import { z } from 'zod'
 import {
   aiImageGenerationRequestPolicySnapshotSchema,
   type AiImageGenerationRequestPolicySnapshot
 } from './request.schema.js'
+import { sha256 } from './sha256.js'
 
 const requestPolicySnapshotInputSchema = aiImageGenerationRequestPolicySnapshotSchema.pick({
   room: true,
@@ -16,7 +16,7 @@ export type ImageGenerationRequestPolicySnapshotInput = z.infer<typeof requestPo
 export function hashImageGenerationRequestPolicySnapshot(input: ImageGenerationRequestPolicySnapshotInput): string {
   const normalized = requestPolicySnapshotInputSchema.parse(input)
 
-  return createHash('sha256').update(JSON.stringify(normalized)).digest('hex')
+  return sha256(JSON.stringify(normalized))
 }
 
 export function buildImageGenerationRequestPolicySnapshot(

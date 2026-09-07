@@ -62,6 +62,51 @@ export const imageGenerationTemplateArtifactFamiliesSchema = z.object({
   bindingLocal: z.array(z.string().trim().min(1)).default([])
 }).strict()
 
+export const imageGenerationTemplateArtifactKindSchema = z.enum([
+  'texture',
+  'pattern',
+  'scene',
+  'colour-design'
+])
+
+export const imageGenerationTemplateArtifactScopeSchema = z.discriminatedUnion('level', [
+  z.object({ level: z.literal('product') }).strict(),
+  z.object({ level: z.literal('variant'), variantId: z.string().trim().min(1) }).strict()
+])
+
+export const imageGenerationTemplateArtifactCacheEntrySchema = z.object({
+  cacheEntryId: z.string().trim().min(1),
+  artifactKind: imageGenerationTemplateArtifactKindSchema,
+  scope: imageGenerationTemplateArtifactScopeSchema,
+  fingerprint: z.string().trim().min(1),
+  artifactRef: z.string().trim().min(1),
+  provenanceRef: z.string().trim().min(1),
+  producerKey: z.string().trim().min(1),
+  producerVersion: z.string().trim().min(1),
+  policyVersion: z.string().trim().min(1),
+  surfaceProfileVersion: z.string().trim().min(1).optional(),
+  templateGeneration: z.number().int().nonnegative().default(0),
+  createdAt: z.string().datetime(),
+  requestId: z.string().trim().min(1).optional(),
+  runId: z.string().trim().min(1).optional()
+}).strict()
+
+export const imageGenerationTemplateArtifactProvenanceEntrySchema = z.object({
+  provenanceEntryId: z.string().trim().min(1),
+  artifactKind: imageGenerationTemplateArtifactKindSchema,
+  scope: imageGenerationTemplateArtifactScopeSchema,
+  fingerprint: z.string().trim().min(1),
+  artifactRef: z.string().trim().min(1),
+  producerKey: z.string().trim().min(1),
+  producerVersion: z.string().trim().min(1),
+  policyVersion: z.string().trim().min(1),
+  surfaceProfileVersion: z.string().trim().min(1).optional(),
+  templateGeneration: z.number().int().nonnegative().default(0),
+  recordedAt: z.string().datetime(),
+  requestId: z.string().trim().min(1),
+  runId: z.string().trim().min(1)
+}).strict()
+
 const imageGenerationTemplateAuditEntryBaseSchema = z.object({
   auditId: z.string().trim().min(1),
   recordedAt: z.string().datetime(),
@@ -107,3 +152,8 @@ export function buildImageGenerationTemplateResetAuditEntry(input: z.input<typeo
 export function buildImageGenerationTemplateRebindAuditEntry(input: z.input<typeof imageGenerationTemplateRebindAuditEntrySchema>) {
   return imageGenerationTemplateRebindAuditEntrySchema.parse(input)
 }
+
+export type ImageGenerationTemplateArtifactKind = z.infer<typeof imageGenerationTemplateArtifactKindSchema>
+export type ImageGenerationTemplateArtifactScope = z.infer<typeof imageGenerationTemplateArtifactScopeSchema>
+export type ImageGenerationTemplateArtifactCacheEntry = z.infer<typeof imageGenerationTemplateArtifactCacheEntrySchema>
+export type ImageGenerationTemplateArtifactProvenanceEntry = z.infer<typeof imageGenerationTemplateArtifactProvenanceEntrySchema>

@@ -16,9 +16,21 @@ Render stops after emitting completion evidence. It never decides the next stage
 
 ## Durable State
 
-Azure Tables and blobs hold recoverable state. The stage ledger records one logical target's progress for a run and recovery generation. The dispatch table acts as a durable outbox: Azure persists a dispatch record before sending the corresponding queue message. This prevents a process failure between state mutation and queue delivery from silently losing work.
+Azure Tables and blobs may hold recoverable execution state only while work is in flight. The stage ledger records one logical target's progress for a run and recovery generation. The dispatch table acts as a durable outbox: Azure persists a dispatch record before sending the corresponding queue message. This prevents a process failure between state mutation and queue delivery from silently losing work.
 
 Messages are idempotent and include the identity and generation information Azure needs to reject stale work. Starting a precise recovery advances the target generation; older messages cannot overwrite the current outcome.
+
+### Durable While In-Flight
+
+**Durable while in-flight** permits queue, Table, blob, receipt, lease, and orchestration state only while an active workflow needs retries, handoffs, idempotency, recovery, or safe finalization. It does not permit a persistent second copy of business or artifact data after the authoritative result exists.
+
+Before adding a ledger or other persistent orchestration record, identify the authoritative durable home for its result. Crawl, render, and extract artifacts retain the evidence and facts; pipeline state must not persist their payload as a workflow duplicate. In V2 image generation, Sanity templates, cache, and media outcomes are business data, while Azure retains only the active execution journal.
+
+After a successful final authoritative write, remove the execution journal and any temporary blobs or receipts when safe. Cleanup is itself recoverable: a cleanup failure retries idempotently, and a redelivery after cleanup must observe the authoritative result and converge without recreating completed journal state. A later run starts from authoritative inputs and artifacts, never from a completed Azure journal, manifest, or snapshot.
+
+A plan or implementation that creates durable state must name the authoritative result or artifact owner, active-journal fields, finalization and cleanup trigger, cleanup-failure retry behavior, redelivery behavior after cleanup, and any retention exception. Exceptions must state why their bounded retention is necessary, such as a short quota window, and must not be described as retained business data. Do not add a persistent orchestrator merely because transient data crosses pipeline stages.
+
+The completion check is falsifiable: a successful result is complete only when journal cleanup can converge and a later run works with that journal absent.
 
 Multiple run-summary rows per group are normal, not a bug: a style crawled with N widths or N source records produces N run-summary rows (one runId each), but only one of them is the canonical run that actually progresses; the rest link as duplicates and never advance past their initial status. Any code that reads "the latest run for a group" - in Azure or in a consuming surface such as UI - must pick the most-advanced status, not the most recent timestamp, or it will surface a request that never did any real work.
 

@@ -10,6 +10,7 @@ import {
   buildImageGenerationTemplateResetControl,
   diffImageGenerationRequestPolicySnapshot,
   hashImageGenerationRequestPolicySnapshot,
+  computeTemplateArtifactFingerprint,
   imageGenerationGuardedControlRequestSchema,
   imageGenerationGuardedControlResultSchema,
   aiImageGenerationControlIntentSchema,
@@ -18,6 +19,7 @@ import {
   imageGenerationTemplateResetControlSchema,
   aiImageGenerationRequestSchema,
   evaluateImageGenerationTemplateReadiness,
+  normalizeTemplateArtifactFingerprintInput,
   aiImageGenerationRequestPolicySnapshotSchema,
   aiImageGenerationRunSchema,
   aiImageGenerationTemplateSchema,
@@ -55,6 +57,35 @@ describe('aiImageGenerationTemplateSchema', () => {
         portable: ['mask/base'],
         bindingLocal: ['render/run-1']
       },
+      artifactCache: [{
+        cacheEntryId: 'cache-1',
+        artifactKind: 'texture',
+        scope: { level: 'product' },
+        fingerprint: 'fingerprint-1',
+        artifactRef: 'artifact:texture:1',
+        provenanceRef: 'provenance:texture:1',
+        producerKey: 'texture-generator',
+        producerVersion: 'v1',
+        policyVersion: 'policy-v1',
+        templateGeneration: 0,
+        createdAt: '2026-09-06T00:00:00.000Z',
+        requestId: 'request-1',
+        runId: 'run-1'
+      }],
+      artifactProvenance: [{
+        provenanceEntryId: 'prov-1',
+        artifactKind: 'texture',
+        scope: { level: 'product' },
+        fingerprint: 'fingerprint-1',
+        artifactRef: 'artifact:texture:1',
+        producerKey: 'texture-generator',
+        producerVersion: 'v1',
+        policyVersion: 'policy-v1',
+        templateGeneration: 0,
+        recordedAt: '2026-09-06T00:00:00.000Z',
+        requestId: 'request-1',
+        runId: 'run-1'
+      }],
       audit: [buildImageGenerationTemplateResetAuditEntry({
         auditId: 'audit-1',
         operation: 'template.reset',
@@ -74,6 +105,8 @@ describe('aiImageGenerationTemplateSchema', () => {
 
     expect(parsed.evidenceImages).toHaveLength(1)
     expect(parsed.artifactFamilies.bindingLocal).toEqual(['render/run-1'])
+    expect(parsed.artifactCache).toHaveLength(1)
+    expect(parsed.artifactProvenance).toHaveLength(1)
     expect(parsed.audit).toHaveLength(1)
   })
 
@@ -161,6 +194,19 @@ describe('request and run schemas', () => {
     })
 
     expect(parsed.submissionKind).toBe('control.submit')
+  })
+
+  it('accepts a Sanity-originated template deletion submission', () => {
+    const parsed = imageGenerationSanitySubmissionSchema.parse({
+      schemaVersion: 1,
+      submissionKind: 'template.delete',
+      submissionId: 'template-1',
+      documentId: 'template-1',
+      templateId: 'template-1',
+      requestedAt: '2026-09-06T00:00:00.000Z'
+    })
+
+    expect(parsed.submissionKind).toBe('template.delete')
   })
 
   it('rejects invalid Sanity-originated submission payload combinations', () => {
@@ -282,6 +328,7 @@ describe('request and run schemas', () => {
     }).policyHash
 
     expect(firstHash).toBe(secondHash)
+    expect(firstHash).toBe('886d438e8b6258497e45cc1c597cff956ac7ea9a524b50fa546a757856d49f1d')
   })
 
   it('detects no-op versus refresh-required policy recomputes', () => {
@@ -375,11 +422,11 @@ describe('image generation template readiness', () => {
   const selection = {variantId: 'variant-1', room: 'bedroom', aspectRatio: '4:3', creativeDirection: {fashion: 'soft-contemporary', tone: 'balanced', furnitureTier: 'high', lighting: 'bright-even-daylight', version: 1}}
 
   it('accepts an explicit request selection bound to the linked product', () => {
-    expect(evaluateImageGenerationTemplateReadiness({template, linkedProduct: {_id: 'product-1', productType: 'carpet', suitableRooms: ['bedroom']}, ...selection})).toEqual({canSubmit: true, reasons: [], templateId: 'template-1'})
+    expect(evaluateImageGenerationTemplateReadiness({template, linkedProduct: {_id: 'product-1', productType: 'carpet'}, ...selection})).toEqual({canSubmit: true, reasons: [], templateId: 'template-1'})
   })
 
-  it('returns stable blockers for unbound variants and unavailable rooms', () => {
-    expect(evaluateImageGenerationTemplateReadiness({template, linkedProduct: {_id: 'product-1', productType: 'carpet', suitableRooms: ['living-room']}, ...selection, variantId: 'variant-2'})).toEqual(expect.objectContaining({canSubmit: false, reasons: ['variant-not-bound', 'room-not-supported']}))
+  it('returns stable blockers for unbound variants without using website room metadata', () => {
+    expect(evaluateImageGenerationTemplateReadiness({template, linkedProduct: {_id: 'product-1', productType: 'carpet'}, ...selection, variantId: 'variant-2'})).toEqual(expect.objectContaining({canSubmit: false, reasons: ['variant-not-bound']}))
   })
 })
 
@@ -495,5 +542,90 @@ describe('guarded control schemas', () => {
       title: 'Bedroom inspiration',
       product: { _type: 'reference', _ref: 'product-1', _weak: true }
     })
+  })
+})
+
+describe('template artifact fingerprint helpers', () => {
+  const baseFingerprintInput = {
+    templateRevision: 'rev-1',
+    evidence: [
+      {
+        assetId: 'image-b',
+        templateUses: [{ templateType: 'pattern' as const, targetVariantIds: ['variant-2', 'variant-1'] }]
+      },
+      {
+        assetId: 'image-a',
+        templateUses: [{ templateType: 'texture' as const, targetVariantIds: [] }]
+      }
+    ],
+    binding: {
+      productId: 'product-1',
+      productType: 'carpet',
+      categoryKey: 'carpets',
+      selectedVariant: { variantId: 'variant-1', colourName: 'Cloud' }
+    },
+    productFacts: { title: 'Cloud Nine', colours: ['Cloud', 'Mist'] },
+    policyVersions: { surface: 2, prompt: 'v3' },
+    surfaceProfileVersion: 'surface-v1',
+    artifactKind: 'pattern' as const,
+    scope: { level: 'variant' as const, variantId: 'variant-1' }
+  }
+
+  it('normalizes evidence ordering and variant targeting deterministically', () => {
+    expect(normalizeTemplateArtifactFingerprintInput(baseFingerprintInput)).toEqual({
+      templateRevision: 'rev-1',
+      artifactKind: 'pattern',
+      scope: { level: 'variant', variantId: 'variant-1' },
+      evidence: [
+        {
+          assetId: 'image-a',
+          templateUses: [{ templateType: 'texture', targetVariantIds: [] }]
+        },
+        {
+          assetId: 'image-b',
+          templateUses: [{ templateType: 'pattern', targetVariantIds: ['variant-1', 'variant-2'] }]
+        }
+      ],
+      binding: {
+        productId: 'product-1',
+        productType: 'carpet',
+        categoryKey: 'carpets',
+        selectedVariant: { colourName: 'Cloud', variantId: 'variant-1' }
+      },
+      productFacts: { colours: ['Cloud', 'Mist'], title: 'Cloud Nine' },
+      policyVersions: { prompt: 'v3', surface: 2 },
+      surfaceProfileVersion: 'surface-v1'
+    })
+  })
+
+  it('produces the same fingerprint for semantically equivalent ordering', () => {
+    const first = computeTemplateArtifactFingerprint(baseFingerprintInput)
+    const second = computeTemplateArtifactFingerprint({
+      ...baseFingerprintInput,
+      evidence: [...baseFingerprintInput.evidence].reverse(),
+      policyVersions: { prompt: 'v3', surface: 2 }
+    })
+
+    expect(first).toBe(second)
+  })
+
+  it('changes the fingerprint when a scoped variant input changes', () => {
+    const first = computeTemplateArtifactFingerprint(baseFingerprintInput)
+    const second = computeTemplateArtifactFingerprint({
+      ...baseFingerprintInput,
+      scope: { level: 'variant', variantId: 'variant-2' }
+    })
+
+    expect(first).not.toBe(second)
+  })
+
+  it('rejects duplicate evidence asset ids', () => {
+    expect(() => computeTemplateArtifactFingerprint({
+      ...baseFingerprintInput,
+      evidence: [
+        baseFingerprintInput.evidence[0],
+        { ...baseFingerprintInput.evidence[0] }
+      ]
+    })).toThrow(/Duplicate template evidence assetId/)
   })
 })

@@ -44,9 +44,21 @@ export const imageGenerationSanitySubmissionSchema = z.discriminatedUnion('submi
     documentId: z.string().trim().min(1),
     controlId: z.string().trim().min(1),
     requestedAt: z.string().datetime()
+  }).strict(),
+  z.object({
+    schemaVersion: z.literal(1),
+    submissionKind: z.literal('template.delete'),
+    submissionId: z.string().trim().min(1),
+    documentId: z.string().trim().min(1),
+    templateId: z.string().trim().min(1),
+    requestedAt: z.string().datetime()
   }).strict()
 ]).superRefine((value, context) => {
-  const intentId = value.submissionKind === 'request.enqueue' ? value.requestId : value.controlId
+  const intentId = value.submissionKind === 'request.enqueue'
+    ? value.requestId
+    : value.submissionKind === 'control.submit'
+      ? value.controlId
+      : value.templateId
 
   if (value.submissionId !== intentId || value.documentId !== intentId) {
       context.addIssue({

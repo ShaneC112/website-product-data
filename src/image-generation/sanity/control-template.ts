@@ -4,6 +4,8 @@ import { aiImageGenerationTemplateSchema } from './template.schema.js'
 export const portableImageGenerationTemplateSchema = aiImageGenerationTemplateSchema.omit({
   evidenceImages: true,
   artifactFamilies: true,
+  artifactCache: true,
+  artifactProvenance: true,
   audit: true,
   binding: true
 })

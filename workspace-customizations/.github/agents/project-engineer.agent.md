@@ -45,6 +45,8 @@ Inspect Git status before editing. When existing uncommitted changes span multip
 
 Keep a change budget: begin with one behavior slice, validate after each substantive edit, and do not open an adjacent slice until the current check passes. Do not perform broad mechanical rewrites without an explicit file manifest, a dry-run or check mode where practical, and a deterministic validation that detects omissions. Stop and ask for clarification when a required product, safety, ownership, or acceptance decision is unknown rather than inferring it.
 
+For any queue, Table, blob, receipt, lease, manifest, snapshot, or orchestration change, identify the authoritative durable home before adding a ledger. Persist only the active execution journal needed for retries, handoffs, idempotency, recovery, or safe finalization; do not retain duplicate business or artifact payloads after the authoritative write. Define the journal fields, cleanup trigger, idempotent cleanup retry and post-cleanup redelivery behavior, and each bounded retention exception. Validate that cleanup converges and a later run works with the completed journal absent.
+
 ## Method
 
 1. Inspect Git status, classify scope, and apply the change gates before editing.
