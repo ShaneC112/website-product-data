@@ -11,6 +11,10 @@ import {
   styleCodeImportRequestDocumentSchema,
   type StyleCodeImportRequestDocument
 } from './style-code-import.js'
+import {
+  imageGenerationTemplateCreateRequestDocumentSchema,
+  type ImageGenerationTemplateCreateRequestDocument
+} from './image-generation-template-create.js'
 
 export const manualCrawlEnqueueSchema = z.object({
   tableName: z.enum(['m2crmproducts']),
@@ -68,6 +72,10 @@ const sanityRecoveryActionPayloadSchema = z.object({
   checkpoint: crawlRecoveryCheckpointSchema,
 })
 
+const imageGenerationTemplateCreateActionPayloadSchema = z.object({
+  productId: z.string().trim().min(1),
+})
+
 export const sanityActionRequestSchema = z.discriminatedUnion('action', [
   z.object({
     requestId: z.string().trim().min(1),
@@ -89,11 +97,18 @@ export const sanityActionRequestSchema = z.discriminatedUnion('action', [
     action: z.literal('stylecode_import'),
     payload: styleCodeImportPayloadSchema,
   }),
+  z.object({
+    requestId: z.string().trim().min(1),
+    action: z.literal('image_generation_template_create'),
+    payload: imageGenerationTemplateCreateActionPayloadSchema,
+  }),
 ])
 
 export type SanityActionRequest = z.infer<typeof sanityActionRequestSchema>
 export type StyleCodeImportRequestDocumentContract = StyleCodeImportRequestDocument
+export type ImageGenerationTemplateCreateRequestDocumentContract = ImageGenerationTemplateCreateRequestDocument
 export { styleCodeImportRequestDocumentSchema }
+export { imageGenerationTemplateCreateRequestDocumentSchema }
 export type { CrawlRequestOrigin }
 
 export const matchingLedgerApprovalSchema = z.object({

@@ -8,6 +8,7 @@ import { composeOutputTableSchema } from '../src/storage/compose-output.schema.j
 import { crawlRunSummaryTableSchema } from '../src/storage/run-summary.schema.js'
 import { sanityImageGenerationTableSchema } from '../src/storage/sanity-image-generation.schema.js'
 import { manualCrawlEnqueueSchema, sanityActionRequestSchema } from '../src/requests/contracts.js'
+import { imageGenerationTemplateCreateRequestDocumentSchema } from '../src/requests/image-generation-template-create.js'
 import {
   styleCodeImportRequestDocumentSchema,
   styleCodeImportResultSchema,
@@ -75,6 +76,37 @@ describe('Sanity action requests', () => {
       action: 'stylecode_import',
       payload: {styleCode: 'ST123'}
     })
+  })
+
+  it('accepts a template-create action with only the product identity in its payload', () => {
+    const parsed = sanityActionRequestSchema.parse({
+      requestId,
+      action: 'image_generation_template_create',
+      payload: {productId: 'product-123'}
+    })
+
+    expect(parsed).toEqual({
+      requestId,
+      action: 'image_generation_template_create',
+      payload: {productId: 'product-123'}
+    })
+  })
+})
+
+describe('Image-generation template-create contracts', () => {
+  it('accepts the queued request lifecycle written by the Blueprint', () => {
+    const parsed = imageGenerationTemplateCreateRequestDocumentSchema.parse({
+      _id: 'template-request-1',
+      _type: 'imageGenerationTemplateCreateRequest',
+      requestId: 'template-request-1',
+      requestType: 'image_generation_template_create',
+      productId: 'product-123',
+      status: 'queued',
+      progressMessages: ['Queued for Azure processing'],
+      requestedAt: '2026-01-01T00:00:00.000Z'
+    })
+
+    expect(parsed.status).toBe('queued')
   })
 })
 

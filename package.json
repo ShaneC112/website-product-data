@@ -73,6 +73,10 @@
       "types": "./dist/requests/style-code-import.d.ts",
       "default": "./dist/requests/style-code-import.js"
     },
+    "./requests/image-generation-template-create": {
+      "types": "./dist/requests/image-generation-template-create.d.ts",
+      "default": "./dist/requests/image-generation-template-create.js"
+    },
     "./queues": {
       "types": "./dist/queues/index.d.ts",
       "default": "./dist/queues/index.js"
