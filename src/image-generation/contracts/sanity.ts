@@ -42,7 +42,7 @@ export const aiTemplateEvidenceImageSchema = z.object({
 }).strict()
 
 export const imageGenerationVariantBindingSchema = z.object({
-  variantId: z.string().trim().min(1),
+  variantKey: z.string().trim().min(1),
   colourName: z.string().trim().min(1),
   colourHex: z.string().regex(/^#[0-9a-f]{6}$/i).optional(),
   patternClassification: patternClassificationSchema.default('unknown')

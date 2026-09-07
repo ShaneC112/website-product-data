@@ -20,6 +20,13 @@ Explicit variant membership (`SpecifiedUrls`) is a first-class contract, not som
 
 When a Data schema changes, rebuild Data and refresh file-dependency consumers before testing. Azure, UI, Render, and Studio must update from the same contract revision where they share a protocol. Data's `sanity` export owns pure mapping and gate logic without a runtime Sanity client dependency.
 
+Put a contract in Data when it is a project-controlled runtime or transport surface shared by two
+or more repositories. A shared external-system document shape is not automatically Data-owned:
+Studio-owned Sanity entity schemas remain the source of truth, while Azure and other consumers read
+those entities through the Sanity/API surface. For image-generation v2, this means the selected
+variant reference is the Sanity-native `variantKey` (`variants[]` item `_key`), while any broader
+product `variantId` remains outside that v2 selector contract.
+
 The render-completion contract intentionally echoes full identity and evidence metadata. Azure may be seeing a discovered variant page for the first time, leaving no safe alternate source for that context.
 
 ## Registry And Taxonomy

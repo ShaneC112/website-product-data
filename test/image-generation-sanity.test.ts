@@ -99,7 +99,7 @@ describe('aiImageGenerationTemplateSchema', () => {
         productId: 'product-1',
         productType: 'carpet',
         categoryKey: 'carpets',
-        variantBindings: [{ variantId: 'variant-1', colourName: 'Cloud', patternClassification: 'unknown' }]
+        variantBindings: [{ variantKey: 'variant-key-1', colourName: 'Cloud', patternClassification: 'unknown' }]
       })
     })
 
@@ -141,7 +141,7 @@ describe('request and run schemas', () => {
       submissionId: 'request-1',
       submissionState: 'pending',
       templateId: 'template-1',
-      variantId: 'variant-1',
+      variantKey: 'variant-key-1',
       room: 'bedroom',
       aspectRatio: '3:2',
       creativeDirection: {
@@ -417,16 +417,16 @@ describe('image generation template readiness', () => {
   const template = {
     _id: 'template-1', _type: 'aiImageGenerationTemplate', title: 'Template',
     product: {_type: 'reference', _ref: 'product-1'}, evidenceImages: [], artifactFamilies: {portable: [], bindingLocal: []}, audit: [],
-    binding: {productId: 'product-1', productType: 'carpet', categoryKey: 'carpets', variantBindings: [{variantId: 'variant-1', colourName: 'Natural'}]},
+    binding: {productId: 'product-1', productType: 'carpet', categoryKey: 'carpets', variantBindings: [{variantKey: 'variant-key-1', colourName: 'Natural'}]},
   }
-  const selection = {variantId: 'variant-1', room: 'bedroom', aspectRatio: '4:3', creativeDirection: {fashion: 'soft-contemporary', tone: 'balanced', furnitureTier: 'high', lighting: 'bright-even-daylight', version: 1}}
+  const selection = {variantKey: 'variant-key-1', room: 'bedroom', aspectRatio: '4:3', creativeDirection: {fashion: 'soft-contemporary', tone: 'balanced', furnitureTier: 'high', lighting: 'bright-even-daylight', version: 1}}
 
   it('accepts an explicit request selection bound to the linked product', () => {
     expect(evaluateImageGenerationTemplateReadiness({template, linkedProduct: {_id: 'product-1', productType: 'carpet'}, ...selection})).toEqual({canSubmit: true, reasons: [], templateId: 'template-1'})
   })
 
   it('returns stable blockers for unbound variants without using website room metadata', () => {
-    expect(evaluateImageGenerationTemplateReadiness({template, linkedProduct: {_id: 'product-1', productType: 'carpet'}, ...selection, variantId: 'variant-2'})).toEqual(expect.objectContaining({canSubmit: false, reasons: ['variant-not-bound']}))
+    expect(evaluateImageGenerationTemplateReadiness({template, linkedProduct: {_id: 'product-1', productType: 'carpet'}, ...selection, variantKey: 'variant-key-2'})).toEqual(expect.objectContaining({canSubmit: false, reasons: ['variant-not-bound']}))
   })
 })
 
@@ -532,7 +532,7 @@ describe('guarded control schemas', () => {
         productId: 'product-1',
         productType: 'carpet',
         categoryKey: 'carpets',
-        variantBindings: [{ variantId: 'variant-1', colourName: 'Cloud', patternClassification: 'unknown' }]
+        variantBindings: [{ variantKey: 'variant-key-1', colourName: 'Cloud', patternClassification: 'unknown' }]
       }
     })
 

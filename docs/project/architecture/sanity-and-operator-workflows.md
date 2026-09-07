@@ -28,6 +28,19 @@ Azure is the only consumer of that external queue. It validates the reference, r
 
 The former v2 write routes `/api/image-generation-v2/enqueue` and `/api/image-generation-v2/control` have been removed, not deprecated. They must not be called or restored as compatibility paths. The remaining `GET /api/image-generation-v2/status/{requestId}` route is read-only and projects Azure's durable lifecycle state.
 
+Image-generation v2 uses Sanity-native variant identity throughout its request and writeback path:
+the authoritative selected variant is `productId + variantKey`, where `variantKey` is the selected
+product variant array item's Sanity `_key`. Studio may show `colourName` as the operator-facing
+label, but it writes the `_key` as `variantKey` in the product-local payload, request document, and
+template binding. Azure rereads those documents, resolves the binding by `variantKey`, and patches
+`variants[_key == variantKey]` directly. `variantId` remains part of the broader product model,
+but is not an authoritative selector for image-generation v2 and must not be reconstructed from a
+display label or used as a fallback.
+
+The request and template document shapes remain Studio-owned Sanity schemas. Data owns the runtime
+validation surface consumed by both repositories where that surface is a project-controlled
+transport contract; it does not replace the Studio schema source of truth.
+
 This is source- and local-test-verified behavior only. It has not been deployed or live-verified. It does not complete Phase 18: Studio capability readiness, receipt-level convergence for every guarded-control mutation, bounded version/upcast/quarantine handling for every durable row type, and compiler/AST-based isolation proof remain open.
 
 ## Operator Action Transport

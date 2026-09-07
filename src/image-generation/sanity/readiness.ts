@@ -20,7 +20,7 @@ export type ImageGenerationTemplateReadiness = {
 export function evaluateImageGenerationTemplateReadiness(input: {
   template: unknown
   linkedProduct: unknown
-  variantId: unknown
+  variantKey: unknown
   room: unknown
   aspectRatio: unknown
   creativeDirection: unknown
@@ -34,7 +34,7 @@ export function evaluateImageGenerationTemplateReadiness(input: {
 
   if (!templateResult.success) reasons.push('template-invalid')
   if (!productResult.success) reasons.push('linked-product-invalid')
-  if (!z.string().trim().min(1).safeParse(input.variantId).success) reasons.push('variant-required')
+  if (!z.string().trim().min(1).safeParse(input.variantKey).success) reasons.push('variant-required')
   if (!roomResult.success) reasons.push('room-invalid')
   if (!aspectRatioResult.success) reasons.push('aspect-ratio-invalid')
   if (!creativeDirectionResult.success) reasons.push('creative-direction-invalid')
@@ -43,18 +43,18 @@ export function evaluateImageGenerationTemplateReadiness(input: {
   if (!templateResult.success || !productResult.success || !roomResult.success || !aspectRatioResult.success || !creativeDirectionResult.success) {
     return {canSubmit: false, reasons}
   }
-  const variantIdResult = z.string().trim().min(1).safeParse(input.variantId)
-  if (!variantIdResult.success) return {canSubmit: false, reasons: [...reasons, 'variant-required']}
+  const variantKeyResult = z.string().trim().min(1).safeParse(input.variantKey)
+  if (!variantKeyResult.success) return {canSubmit: false, reasons: [...reasons, 'variant-required']}
 
   const template = templateResult.data
   const product = productResult.data
-  const variantId = variantIdResult.data
+  const variantKey = variantKeyResult.data
   if (!template.binding || template.binding.variantBindings.length === 0) {
     reasons.push('template-binding-missing')
   } else {
     if (template.product._ref !== product._id || template.binding.productId !== product._id) reasons.push('binding-product-mismatch')
     if (template.binding.productType !== product.productType) reasons.push('binding-product-type-mismatch')
-    if (!template.binding.variantBindings.some((binding) => binding.variantId === variantId)) reasons.push('variant-not-bound')
+    if (!template.binding.variantBindings.some((binding) => binding.variantKey === variantKey)) reasons.push('variant-not-bound')
   }
   if (Object.values(getImageGenerationCapability(product.productType)).every((requirement) => requirement === 'not-applicable')) {
     reasons.push('product-type-not-supported')

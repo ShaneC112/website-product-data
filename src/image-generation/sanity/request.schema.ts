@@ -34,7 +34,7 @@ export const aiImageGenerationRequestSchema = z.object({
   submissionState: imageGenerationSubmissionStateSchema,
   submissionOutcome: imageGenerationSubmissionOutcomeSchema.optional(),
   templateId: z.string().trim().min(1),
-  variantId: z.string().trim().min(1),
+  variantKey: z.string().trim().min(1),
   room: z.enum(SANITY_SUITABLE_ROOMS),
   aspectRatio: imageGenerationAspectRatioSchema,
   creativeDirection: creativeDirectionSchema,
