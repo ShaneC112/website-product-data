@@ -71,7 +71,8 @@ export const imageGenerationTemplateArtifactKindSchema = z.enum([
   'scene',
   'colour-design',
   'visual-product',
-  'room'
+  'room',
+  'scene'
 ])
 
 export const imageGenerationTemplateArtifactScopeSchema = z.discriminatedUnion('level', [
