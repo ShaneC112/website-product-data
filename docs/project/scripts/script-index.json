@@ -30,6 +30,8 @@
         "campaign-report.ts": "documented",
         "clear-crawl-queues.ts": "documented",
         "clear-sanity-image-queues.ts": "documented",
+        "clear-sanity-image-v2-queues.ts": "documented",
+        "clear-sanity-image-v2-state.ts": "documented",
         "diagnose-image-prompt-policy.mjs": "documented",
         "estimate-swatch-colour.mjs": "documented",
         "inspect-campaign-result.test.ts": "test",
