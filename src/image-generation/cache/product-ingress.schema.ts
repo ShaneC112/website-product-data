@@ -8,6 +8,7 @@ const optionalNumber = z.number().finite().optional()
 export const normalizedProductVariantSchema = z.object({
   variantKey: z.string().trim().min(1),
   colourName: z.string().trim().min(1),
+  patternClassification: z.enum(['plain', 'patterned', 'unknown']).default('unknown'),
   colourFamily: optionalText,
   hex: z.string().regex(/^#[0-9a-f]{6}$/i).optional(),
   vendorSku: optionalText,

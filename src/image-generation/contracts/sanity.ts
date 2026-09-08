@@ -69,7 +69,8 @@ export const imageGenerationTemplateArtifactKindSchema = z.enum([
   'texture',
   'pattern',
   'scene',
-  'colour-design'
+  'colour-design',
+  'visual-product'
 ])
 
 export const imageGenerationTemplateArtifactScopeSchema = z.discriminatedUnion('level', [
