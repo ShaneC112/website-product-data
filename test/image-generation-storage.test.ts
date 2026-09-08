@@ -4,6 +4,9 @@ import {
   buildColourDesignVariantKey,
   colourDesignArtifactSchema,
   computeColourDesignFingerprint,
+  buildFullProductCacheKey,
+  buildProductVariantKey,
+  normalizedFullProductSchema,
   cameraAngleSourceRowSchema,
   cameraPolicySchema,
   imageGenerationArtifactLedgerSchema,
@@ -175,6 +178,23 @@ describe('imageGenerationRunContentClaimSchema', () => {
 })
 
 describe('promptCacheValueSchema', () => {
+  it('accepts the normalized full-product ingress contract and stable keys', () => {
+    const product = {
+      version: 1 as const,
+      documentKey: 'product-1',
+      revision: 'rev-1',
+      productType: 'carpet' as const,
+      categoryKey: 'carpets',
+      name: 'Cloud',
+      features: [], specs: [], suitableRooms: [], widths: [],
+      variants: [{variantKey: 'variant-key-1', colourName: 'Cloud', images: [], overrides: {price: false, packPrice: false, packInfo: false, widths: false, suitableRooms: false, pattern: false, specs: false}}]
+    }
+    expect(normalizedFullProductSchema.parse(product)).toEqual(expect.objectContaining({documentKey: 'product-1'}))
+    expect(buildFullProductCacheKey('product-1')).toBe('product:fullProduct:product-1')
+    expect(buildProductVariantKey('product-1', 'variant-key-1')).toBe('variant:product-1:variant-key-1')
+    expect(promptCacheValueSchema.parse({type: 'product', schemaVersion: 1, value: product}).type).toBe('product')
+  })
+
   it('accepts the approved deterministic colour/design content and artifact contracts', () => {
     const fingerprint = computeColourDesignFingerprint({
       documentKey: 'product-doc-1',
