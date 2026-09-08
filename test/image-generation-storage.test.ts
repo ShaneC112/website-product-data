@@ -10,7 +10,9 @@ import {
   promptCacheValueSchema,
   upcastImageGenerationOrchestrationLedger,
   upcastImageGenerationRunContentClaim,
-  upcastImageGenerationRunContentRow
+  upcastImageGenerationRunContentRow,
+  brandIdentityFingerprint,
+  brandIdentitySchema
 } from '../src/image-generation/index.js'
 
 describe('imageGenerationOrchestrationLedgerSchema', () => {
@@ -167,6 +169,56 @@ describe('imageGenerationRunContentClaimSchema', () => {
 })
 
 describe('promptCacheValueSchema', () => {
+  it('accepts and normalizes the approved brand identity contract', () => {
+    const parsed = brandIdentitySchema.parse({
+      version: 1,
+      visualGuidance: '  Grounded   Irish   home styling. ',
+      brandGuidance: '  Keep   the   prompt coherent. '
+    })
+
+    expect(parsed).toEqual({
+      version: 1,
+      visualGuidance: 'Grounded Irish home styling.',
+      brandGuidance: 'Keep the prompt coherent.'
+    })
+    expect(brandIdentityFingerprint(parsed)).toHaveLength(64)
+  })
+
+  it('accepts a brand identity cache value and feature type', () => {
+    const parsed = promptCacheValueSchema.parse({
+      type: 'brand-identity',
+      schemaVersion: 1,
+      value: {
+        version: 1,
+        visualGuidance: 'Grounded Irish home styling.',
+        brandGuidance: 'Keep the prompt coherent.'
+      }
+    })
+
+    expect(parsed.type).toBe('brand-identity')
+    expect(buildImageGenerationRunContentRowKey('run-1', 0, 'brand-identity')).toBe('run:run-1:epoch:0:content:brand-identity')
+  })
+
+  it('rejects missing or overlong brand identity guidance', () => {
+    expect(() => brandIdentitySchema.parse({
+      version: 1,
+      visualGuidance: '',
+      brandGuidance: 'Valid guidance.'
+    })).toThrow()
+
+    expect(() => brandIdentitySchema.parse({
+      version: 1,
+      visualGuidance: 'a'.repeat(281),
+      brandGuidance: 'Valid guidance.'
+    })).toThrow()
+
+    expect(() => brandIdentitySchema.parse({
+      version: 1,
+      visualGuidance: 'Valid guidance.',
+      brandGuidance: 'a'.repeat(221)
+    })).toThrow()
+  })
+
   it('accepts a completed texture cache value', () => {
     const parsed = promptCacheValueSchema.parse({
       type: 'texture',

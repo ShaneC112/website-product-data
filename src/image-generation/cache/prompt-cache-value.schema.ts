@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { brandIdentitySchema } from './brand-identity.schema.js'
 
 const textureCompletedValueSchema = z.object({
   kind: z.literal('completed'),
@@ -49,6 +50,11 @@ export const promptCacheValueSchema = z.discriminatedUnion('type', [
     type: z.literal('texture'),
     schemaVersion: z.literal(1),
     value: normalizedTextureSchema
+  }).strict(),
+  z.object({
+    type: z.literal('brand-identity'),
+    schemaVersion: z.literal(1),
+    value: brandIdentitySchema
   }).strict()
 ])
 
