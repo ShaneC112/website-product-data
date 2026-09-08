@@ -28,14 +28,16 @@ export const sanityHotspotSchema = z.object({
 }).strict()
 
 export const aiTemplateUseSchema = z.object({
+  _key: z.string().trim().min(1).optional(),
+  _type: z.string().trim().min(1).optional(),
   templateType: z.enum(['texture', 'pattern']),
   targetVariantIds: z.array(z.string().trim().min(1)).min(1).optional()
 }).strict()
 
 export const aiTemplateEvidenceImageSchema = z.object({
-  _type: z.literal('image'),
+  _type: z.string().trim().min(1),
   _key: z.string().trim().min(1),
-  asset: z.object({ _type: z.literal('reference'), _ref: sanityImageAssetRefSchema }).strict(),
+  asset: z.object({ _type: z.literal('reference'), _ref: sanityImageAssetRefSchema, _weak: z.boolean().optional() }).strict(),
   crop: sanityCropSchema.optional(),
   hotspot: sanityHotspotSchema.optional(),
   templateUses: z.array(aiTemplateUseSchema).min(1).optional()

@@ -14,11 +14,15 @@ A queue message is not ownership. Azure Queue can deliver the same logical work 
 
 The claim must happen once. The resolve worker previously performed a second `queued -> running` transition inside its handler after the worker boundary had already claimed the row. That double claim was removed; the handler now updates an already-running row.
 
-## Recovery must rebuild missing dispatches and recover the durable states it inventories
+## Recovery rebuilds missing dispatches and reclaims expired running leases
 
-A 30-second recovery timer now redelivers expired or pending dispatch intents, requeues retryable failed work through the normal dispatch path, and recreates dispatch intents for queued orchestration rows whose dispatch intent was lost. Recovery logs the action and its request, run, and work identity. Duplicate queue deliveries are therefore harmless and missing dispatch records are repairable without manually clearing storage.
+A 30-second recovery timer now:
+1. Redelivers expired or pending dispatch intents.
+2. Reclaims orchestration rows stranded in `running` state whose lease has expired back to `queued`.
+3. Requeues retryable failed work through the normal dispatch path.
+4. Recreates dispatch intents for queued orchestration rows whose dispatch intent was lost.
 
-This inventory is not yet a complete stranded-work detector. An orchestration row that is `running` with an expired lease but whose queue message and dispatch intent were both permanently lost is not found by the current recovery scans. That case needs a future expired-running reconciliation scan, with care to avoid reclaiming genuinely long-running provider work.
+Recovery logs the action along with its request, run, and work identity. Duplicate queue deliveries are therefore harmless, mid-execution crash states with expired leases are automatically recovered, and missing dispatch records are repairable without manually clearing storage.
 
 ## Prevention and diagnosis
 

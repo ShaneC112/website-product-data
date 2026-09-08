@@ -38,6 +38,19 @@ describe('aiTemplateEvidenceImageSchema', () => {
 
     expect(parsed.templateUses?.[0]?.templateType).toBe('texture')
   })
+
+  it('accepts Sanity aiTemplateEvidenceImage type and templateUses with _key and _type', () => {
+    const parsed = aiTemplateEvidenceImageSchema.parse({
+      _type: 'aiTemplateEvidenceImage',
+      _key: 'image-2',
+      asset: { _type: 'reference', _ref: 'image-def456-1000x1000-png', _weak: true },
+      templateUses: [{ _key: 'use-1', _type: 'templateUse', templateType: 'texture', targetVariantIds: ['variant-1'] }]
+    })
+
+    expect(parsed._type).toBe('aiTemplateEvidenceImage')
+    expect(parsed.templateUses?.[0]?._key).toBe('use-1')
+    expect(parsed.templateUses?.[0]?._type).toBe('templateUse')
+  })
 })
 
 describe('aiImageGenerationTemplateSchema', () => {
