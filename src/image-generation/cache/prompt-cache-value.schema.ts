@@ -3,6 +3,7 @@ import { brandIdentitySchema } from './brand-identity.schema.js'
 import { cameraPolicySchema } from './camera-policy.schema.js'
 import { normalizedColourDesignSchema } from './colour-design.schema.js'
 import { normalizedFullProductSchema } from './product-ingress.schema.js'
+import { normalizedRoomSchema } from './room.schema.js'
 
 const textureCompletedValueSchema = z.object({
   kind: z.literal('completed'),
@@ -73,6 +74,11 @@ export const promptCacheValueSchema = z.discriminatedUnion('type', [
     type: z.literal('product'),
     schemaVersion: z.literal(1),
     value: normalizedFullProductSchema
+  }).strict(),
+  z.object({
+    type: z.literal('room'),
+    schemaVersion: z.literal(1),
+    value: normalizedRoomSchema
   }).strict()
 ])
 

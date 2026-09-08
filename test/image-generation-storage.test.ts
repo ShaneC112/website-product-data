@@ -4,6 +4,9 @@ import {
   buildColourDesignVariantKey,
   colourDesignArtifactSchema,
   computeColourDesignFingerprint,
+  buildRoomCacheKey,
+  buildRoomKey,
+  normalizedRoomSchema,
   buildFullProductCacheKey,
   buildProductVariantKey,
   normalizedFullProductSchema,
@@ -178,6 +181,14 @@ describe('imageGenerationRunContentClaimSchema', () => {
 })
 
 describe('promptCacheValueSchema', () => {
+  it('accepts the architectural room contract and stable key', () => {
+    const room = {roomCategory: 'bedroom' as const, architecturalInputs: {approximateScale: 'medium', ceilingHeight: 'standard 2.4m', doorPlacement: 'north wall', windowPlacement: 'east wall', fireplace: {present: false}, fixedArchitecturalAnchors: ['wardrobe']}, roomGenerationVersion: 1 as const}
+    const roomKey = buildRoomKey(room)
+    const value = {version: 1 as const, documentKey: 'product-1', roomKey, roomCategory: 'bedroom' as const, architecturalInputs: room.architecturalInputs, cameraOverlap: {cropSafeFloorMinimumPercent: 33 as const}, roomGenerationVersion: 1 as const, semanticFingerprint: 'a'.repeat(64)}
+    expect(normalizedRoomSchema.parse(value)).toEqual(value)
+    expect(buildRoomCacheKey('product-1', roomKey)).toBe(`product:room:product-1:${roomKey}`)
+  })
+
   it('accepts the normalized full-product ingress contract and stable keys', () => {
     const product = {
       version: 1 as const,
