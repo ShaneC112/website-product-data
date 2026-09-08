@@ -1,10 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import {
+  buildImageGenerationRunContentRowKey,
   imageGenerationArtifactLedgerSchema,
   imageGenerationDispatchIntentSchema,
   imageGenerationOrchestrationLedgerSchema,
+  imageGenerationRunContentClaimSchema,
+  imageGenerationRunContentRowSchema,
   imageGenerationRunSnapshotSchema,
-  upcastImageGenerationOrchestrationLedger
+  promptCacheValueSchema,
+  upcastImageGenerationOrchestrationLedger,
+  upcastImageGenerationRunContentClaim,
+  upcastImageGenerationRunContentRow
 } from '../src/image-generation/index.js'
 
 describe('imageGenerationOrchestrationLedgerSchema', () => {
@@ -71,6 +77,111 @@ describe('durable row upcasts', () => {
       status: 'quarantined',
       reason: 'unsupported-schema-version:2'
     })
+  })
+})
+
+describe('imageGenerationRunContentRowSchema', () => {
+  it('accepts a valid run-content row', () => {
+    const parsed = imageGenerationRunContentRowSchema.parse({
+      schemaVersion: 1,
+      partitionKey: 'request-1',
+      rowKey: 'run:run-1:epoch:0:content:texture',
+      requestId: 'request-1',
+      runId: 'run-1',
+      runEpoch: 0,
+      featureType: 'texture',
+      payloadFingerprint: 'fingerprint-1',
+      payloadJson: '{"type":"texture"}',
+      capturedAt: '2026-09-08T00:00:00.000Z'
+    })
+
+    expect(parsed.featureType).toBe('texture')
+  })
+
+  it('rejects extra fields', () => {
+    expect(() => imageGenerationRunContentRowSchema.parse({
+      schemaVersion: 1,
+      partitionKey: 'request-1',
+      rowKey: 'run:run-1:epoch:0:content:texture',
+      requestId: 'request-1',
+      runId: 'run-1',
+      runEpoch: 0,
+      featureType: 'texture',
+      payloadFingerprint: 'fingerprint-1',
+      payloadJson: '{"type":"texture"}',
+      capturedAt: '2026-09-08T00:00:00.000Z',
+      extra: true
+    })).toThrow()
+  })
+
+  it('round-trips the row key convention', () => {
+    expect(buildImageGenerationRunContentRowKey('run-1', 0, 'texture')).toBe('run:run-1:epoch:0:content:texture')
+  })
+
+  it('quarantines unsupported versions', () => {
+    expect(upcastImageGenerationRunContentRow({ schemaVersion: 2 })).toEqual({
+      status: 'quarantined',
+      reason: 'unsupported-schema-version:2'
+    })
+  })
+})
+
+describe('imageGenerationRunContentClaimSchema', () => {
+  it('accepts a valid run-content claim', () => {
+    const parsed = imageGenerationRunContentClaimSchema.parse({
+      schemaVersion: 1,
+      partitionKey: 'request-1',
+      rowKey: 'run:run-1:epoch:0:content:texture:claim',
+      requestId: 'request-1',
+      runId: 'run-1',
+      runEpoch: 0,
+      featureType: 'texture',
+      leaseOwner: 'worker-1',
+      leaseToken: 'lease-1',
+      expiresAt: '2026-09-08T00:05:00.000Z'
+    })
+
+    expect(parsed.leaseOwner).toBe('worker-1')
+  })
+
+  it('rejects missing required fields', () => {
+    expect(() => imageGenerationRunContentClaimSchema.parse({
+      schemaVersion: 1,
+      partitionKey: 'request-1',
+      rowKey: 'run:run-1:epoch:0:content:texture:claim',
+      requestId: 'request-1',
+      runId: 'run-1',
+      runEpoch: 0,
+      featureType: 'texture',
+      leaseOwner: 'worker-1',
+      expiresAt: '2026-09-08T00:05:00.000Z'
+    })).toThrow()
+  })
+
+  it('quarantines unsupported versions', () => {
+    expect(upcastImageGenerationRunContentClaim({ schemaVersion: 2 })).toEqual({
+      status: 'quarantined',
+      reason: 'unsupported-schema-version:2'
+    })
+  })
+})
+
+describe('promptCacheValueSchema', () => {
+  it('accepts a texture cache value using the existing texture prompt shape', () => {
+    const parsed = promptCacheValueSchema.parse({
+      type: 'texture',
+      schemaVersion: 1,
+      value: {
+        prompt: 'Synthetic texture prompt placeholder that is long enough to satisfy validation.',
+        sourceFingerprint: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        sourceAssetRefs: ['image-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-100x100-jpg'],
+        generatedAt: '2026-09-08T00:00:00.000Z',
+        model: 'gpt-test',
+        promptVersion: 1
+      }
+    })
+
+    expect(parsed.type).toBe('texture')
   })
 })
 

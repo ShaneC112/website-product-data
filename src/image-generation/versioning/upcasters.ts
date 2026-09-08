@@ -3,6 +3,7 @@ import { imageGenerationQueueEnvelopeSchema } from '../contracts/queue.js'
 import { imageGenerationOrchestrationLedgerSchema } from '../storage/orchestration-ledger.schema.js'
 import { imageGenerationArtifactLedgerSchema } from '../storage/artifact-ledger.schema.js'
 import { imageGenerationDispatchIntentSchema } from '../storage/dispatch-intent.schema.js'
+import { imageGenerationRunContentClaimSchema, imageGenerationRunContentRowSchema } from '../storage/run-content.schema.js'
 import { imageGenerationRunSnapshotSchema } from '../storage/run-snapshot.schema.js'
 import { imageGenerationSubmissionClaimSchema } from '../storage/submission-claim.schema.js'
 
@@ -44,6 +45,14 @@ export function upcastImageGenerationDispatchIntent(input: unknown) {
 
 export function upcastImageGenerationRunSnapshot(input: unknown) {
   return upcastVersionOneRow(input, imageGenerationRunSnapshotSchema)
+}
+
+export function upcastImageGenerationRunContentRow(input: unknown) {
+  return upcastVersionOneRow(input, imageGenerationRunContentRowSchema)
+}
+
+export function upcastImageGenerationRunContentClaim(input: unknown) {
+  return upcastVersionOneRow(input, imageGenerationRunContentClaimSchema)
 }
 
 export function upcastImageGenerationSubmissionClaim(input: unknown) {
