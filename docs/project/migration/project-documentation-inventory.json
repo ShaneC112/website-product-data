@@ -278,7 +278,10 @@
         ]
       },
       "dirtyPathsAtInventory": [
-        "docs/project/scripts/script-index.json"
+        "docs/project/learnings/azure/README.md",
+        "docs/project/learnings/azure/azure-a-live-recovery-proof-found-two-v2-image-generation-state-transition-gaps.md",
+        "src/image-generation/cache/prompt-cache-value.schema.ts",
+        "test/image-generation-storage.test.ts"
       ],
       "disposition": {
         "category": "consolidated",
@@ -612,6 +615,10 @@
           "live-pdf-probe.mjs",
           "m2crmAuth.ts",
           "m2crmProductFields.ts",
+          "prove-run-content-store-live.ts",
+          "prove-texture-caching-live.ts",
+          "prove-texture-poison-live.ts",
+          "prove-texture-resolver-live.ts",
           "query-m2crm-custom-fields.ts",
           "query-m2crm-products.ts",
           "reset-pipeline-state.ts",
@@ -627,10 +634,9 @@
         "customizationPaths": []
       },
       "dirtyPathsAtInventory": [
-        "package.json",
-        "scripts/README.md",
-        "scripts/clear-sanity-image-v2-state.ts",
-        "scripts/reset-and-clear-operations.md"
+        "src/sanity-images-v2/02-generate/worker.test.ts",
+        "src/sanity-images-v2/core/runContentResolver.test.ts",
+        "src/sanity-images-v2/core/runContentResolver.ts"
       ],
       "disposition": {
         "category": "consolidated",
@@ -1080,7 +1086,9 @@
         "rootAgents": "present",
         "customizationPaths": []
       },
-      "dirtyPathsAtInventory": [],
+      "dirtyPathsAtInventory": [
+        "schemaTypes/image-generation-v2/documents/aiImageGenerationTemplate.ts"
+      ],
       "disposition": {
         "category": "consolidated",
         "detail": "Root learning catalog redirects to the canonical indexed project documentation."

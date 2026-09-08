@@ -167,21 +167,41 @@ describe('imageGenerationRunContentClaimSchema', () => {
 })
 
 describe('promptCacheValueSchema', () => {
-  it('accepts a texture cache value using the existing texture prompt shape', () => {
+  it('accepts a completed texture cache value', () => {
     const parsed = promptCacheValueSchema.parse({
       type: 'texture',
       schemaVersion: 1,
       value: {
-        prompt: 'Synthetic texture prompt placeholder that is long enough to satisfy validation.',
+        kind: 'completed',
+        mode: 'generated-vision-prompt',
+        texturePrompt: 'Synthetic texture prompt placeholder that is long enough to satisfy validation.',
         sourceFingerprint: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-        sourceAssetRefs: ['image-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-100x100-jpg'],
-        generatedAt: '2026-09-08T00:00:00.000Z',
-        model: 'gpt-test',
-        promptVersion: 1
+        evidence: {
+          templateId: 'template-1',
+          imageAssetCount: 1
+        }
       }
     })
 
     expect(parsed.type).toBe('texture')
+  })
+
+  it('accepts a non-completed texture cache value without placeholder fields', () => {
+    const parsed = promptCacheValueSchema.parse({
+      type: 'texture',
+      schemaVersion: 1,
+      value: {
+        kind: 'blocked',
+        mode: 'invalid-evidence',
+        reasonCode: 'texture-evidence-insufficient'
+      }
+    })
+
+    expect(parsed.value).toEqual({
+      kind: 'blocked',
+      mode: 'invalid-evidence',
+      reasonCode: 'texture-evidence-insufficient'
+    })
   })
 })
 
