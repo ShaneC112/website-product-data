@@ -13,7 +13,7 @@ const templateArtifactFingerprintEvidenceSchema = z.object({
 
 const templateArtifactFingerprintScopeSchema = z.discriminatedUnion('level', [
   z.object({ level: z.literal('product') }).strict(),
-  z.object({ level: z.literal('variant'), variantId: z.string().trim().min(1) }).strict()
+  z.object({ level: z.literal('variant'), documentKey: z.string().trim().min(1), variantKey: z.string().trim().min(1) }).strict()
 ])
 
 const templateArtifactFingerprintBindingSchema = z.object({
@@ -59,7 +59,7 @@ function normalizeEvidenceForScope(input: TemplateArtifactFingerprintInput) {
           return true
         }
 
-        return use.targetVariantIds.length === 0 || use.targetVariantIds.includes(input.scope.variantId)
+        return use.targetVariantIds.length === 0 || use.targetVariantIds.includes(input.scope.variantKey)
       })
       .sort((left, right) => {
         const typeCompare = left.templateType.localeCompare(right.templateType)

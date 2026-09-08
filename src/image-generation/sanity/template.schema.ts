@@ -11,6 +11,7 @@ import { sanityAiTexturePromptCacheSchema } from './texture-prompt.schema.js'
 
 export const aiImageGenerationTemplateSchema = z.object({
   _id: z.string().trim().min(1),
+  _rev: z.string().trim().min(1).optional(),
   _type: z.literal('aiImageGenerationTemplate'),
   title: z.string().trim().min(1),
   product: z.object({ _type: z.literal('reference'), _ref: z.string().trim().min(1), _weak: z.literal(true).optional() }).strict(),

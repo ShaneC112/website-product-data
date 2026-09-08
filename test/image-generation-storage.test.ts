@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildImageGenerationRunContentRowKey,
+  buildColourDesignVariantKey,
+  colourDesignArtifactSchema,
+  computeColourDesignFingerprint,
   cameraAngleSourceRowSchema,
   cameraPolicySchema,
   imageGenerationArtifactLedgerSchema,
@@ -10,6 +13,7 @@ import {
   imageGenerationRunContentRowSchema,
   imageGenerationRunSnapshotSchema,
   promptCacheValueSchema,
+  normalizedColourDesignSchema,
   upcastImageGenerationOrchestrationLedger,
   upcastImageGenerationRunContentClaim,
   upcastImageGenerationRunContentRow,
@@ -171,6 +175,61 @@ describe('imageGenerationRunContentClaimSchema', () => {
 })
 
 describe('promptCacheValueSchema', () => {
+  it('accepts the approved deterministic colour/design content and artifact contracts', () => {
+    const fingerprint = computeColourDesignFingerprint({
+      documentKey: 'product-doc-1',
+      variantKey: 'variant-key-1',
+      templateId: 'template-1',
+      templateRevision: 'rev-1',
+      colourName: 'Cloud',
+      colourHex: '#AABBCC',
+      fashion: 'soft-contemporary',
+      tone: 'balanced',
+      furnitureTier: 'high',
+      lighting: 'bright-even-daylight'
+    })
+    const value = {
+      version: 1 as const,
+      documentKey: 'product-doc-1',
+      variantKey: 'variant-key-1',
+      colourName: 'Cloud',
+      colourHex: '#AABBCC',
+      fashion: 'soft-contemporary',
+      tone: 'balanced',
+      furnitureTier: 'high',
+      lighting: 'bright-even-daylight',
+      semanticFingerprint: fingerprint
+    }
+
+    expect(normalizedColourDesignSchema.parse(value)).toEqual(value)
+    expect(promptCacheValueSchema.parse({type: 'colour-design', schemaVersion: 1, value}).type).toBe('colour-design')
+    expect(colourDesignArtifactSchema.parse({
+      artifactVersion: 1,
+      artifactKind: 'colour-design',
+      scope: {documentKey: 'product-doc-1', variantKey: 'variant-key-1'},
+      value
+    }).scope).toEqual({documentKey: 'product-doc-1', variantKey: 'variant-key-1'})
+    expect(buildColourDesignVariantKey('product-doc-1', 'variant-key-1')).toBe('variant:product-doc-1:variant-key-1')
+  })
+
+  it('rejects colour/design identity or artifact version drift', () => {
+    const valid = {
+      version: 1,
+      documentKey: 'product-doc-1',
+      variantKey: 'variant-key-1',
+      colourName: 'Cloud',
+      fashion: 'soft-contemporary',
+      tone: 'balanced',
+      furnitureTier: 'high',
+      lighting: 'bright-even-daylight',
+      semanticFingerprint: 'a'.repeat(64)
+    }
+
+    expect(() => normalizedColourDesignSchema.parse({...valid, version: 2})).toThrow()
+    expect(() => normalizedColourDesignSchema.parse({...valid, documentKey: ''})).toThrow()
+    expect(() => colourDesignArtifactSchema.parse({artifactVersion: 2, artifactKind: 'colour-design', scope: {documentKey: 'product-doc-1', variantKey: 'variant-key-1'}, value: valid})).toThrow()
+  })
+
   it('accepts the approved camera policy and source row', () => {
     const sourceRow = {
       room: 'bedroom',

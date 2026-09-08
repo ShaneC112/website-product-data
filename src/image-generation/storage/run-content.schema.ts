@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const promptFeatureTypeSchema = z.enum(['texture', 'brand-identity', 'camera'])
+export const promptFeatureTypeSchema = z.enum(['texture', 'brand-identity', 'camera', 'colour-design'])
 
 export function buildImageGenerationRunContentRowKey(runId: string, runEpoch: number, featureType: z.infer<typeof promptFeatureTypeSchema>): string {
   return `run:${runId}:epoch:${runEpoch}:content:${featureType}`

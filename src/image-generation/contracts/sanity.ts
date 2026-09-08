@@ -74,7 +74,7 @@ export const imageGenerationTemplateArtifactKindSchema = z.enum([
 
 export const imageGenerationTemplateArtifactScopeSchema = z.discriminatedUnion('level', [
   z.object({ level: z.literal('product') }).strict(),
-  z.object({ level: z.literal('variant'), variantId: z.string().trim().min(1) }).strict()
+  z.object({ level: z.literal('variant'), documentKey: z.string().trim().min(1), variantKey: z.string().trim().min(1) }).strict()
 ])
 
 export const imageGenerationTemplateArtifactCacheEntrySchema = z.object({
