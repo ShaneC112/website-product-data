@@ -10,7 +10,12 @@ import {
 describe('imageGenerationWorkflowSchema', () => {
   it('accepts the initial workflow registry', () => {
     const parsed = imageGenerationWorkflowSchema.parse(IMAGE_GENERATION_WORKFLOW)
-    expect(parsed).toHaveLength(12)
+    expect(parsed).toHaveLength(13)
+  })
+
+  it('registers room as an active generate dependency', () => {
+    const room = IMAGE_GENERATION_WORKFLOW.find((entry) => entry.workKind === 'generate.room')
+    expect(room).toEqual({ step: 'generate', workKind: 'generate.room', lifecycle: 'active' })
   })
 
   it('keeps pattern review work in the generate step and disabled refinement branches', () => {

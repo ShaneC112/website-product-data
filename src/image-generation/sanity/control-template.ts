@@ -3,6 +3,7 @@ import { aiImageGenerationTemplateSchema } from './template.schema.js'
 
 export const portableImageGenerationTemplateSchema = aiImageGenerationTemplateSchema.omit({
   evidenceImages: true,
+  roomSources: true,
   artifactFamilies: true,
   artifactCache: true,
   artifactProvenance: true,
@@ -19,6 +20,9 @@ export function toPortableImageGenerationTemplate(template: z.input<typeof aiIma
     _id: parsed._id,
     _type: parsed._type,
     title: parsed.title,
-    product: parsed.product
+    product: parsed.product,
+    texturePrompt: parsed.texturePrompt,
+    colourDesignPrompts: parsed.colourDesignPrompts,
+    roomPrompts: parsed.roomPrompts
   })
 }

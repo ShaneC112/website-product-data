@@ -7,6 +7,7 @@ export const normalizedSceneSchema = z.object({
   documentKey: z.string().trim().min(1),
   sceneKey: z.string().trim().min(1),
   roomKey: z.string().trim().min(1),
+  roomFingerprint: z.string().length(64),
   roomCategory: z.enum(SANITY_SUITABLE_ROOMS),
   tradeProductType: z.enum(SANITY_PRODUCT_TYPES),
   colourDesignFingerprint: z.string().length(64),
@@ -31,7 +32,7 @@ export const sceneArtifactSchema = z.object({
 export type NormalizedScene = z.infer<typeof normalizedSceneSchema>
 export type SceneArtifact = z.infer<typeof sceneArtifactSchema>
 
-export function buildSceneKey(input: Pick<NormalizedScene, 'roomKey' | 'tradeProductType' | 'colourDesignFingerprint' | 'lighting' | 'fashion' | 'tone' | 'furnitureTier' | 'sceneGenerationVersion'>): string {
+export function buildSceneKey(input: Pick<NormalizedScene, 'roomKey' | 'roomFingerprint' | 'tradeProductType' | 'colourDesignFingerprint' | 'lighting' | 'fashion' | 'tone' | 'furnitureTier' | 'sceneGenerationVersion'>): string {
   return sha256(JSON.stringify(input))
 }
 

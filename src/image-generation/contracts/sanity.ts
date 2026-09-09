@@ -58,6 +58,20 @@ export const imageGenerationTemplateBindingSchema = z.object({
   variantBindings: z.array(imageGenerationVariantBindingSchema).default([])
 }).strict()
 
+export const imageGenerationTemplateRoomSourceSchema = z.object({
+  roomKey: z.string().regex(/^[a-z]+(?:-[a-z]+)*$/, 'roomKey must be lowercase kebab-case'),
+  roomDescription: z.string().trim().min(1),
+  fingerprint: z.string().trim().min(1)
+}).strict().superRefine((value, context) => {
+  if (value.fingerprint !== value.roomDescription) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['fingerprint'],
+      message: 'fingerprint must match roomDescription'
+    })
+  }
+})
+
 export const imageGenerationTemplateArtifactFamilySchema = z.enum(['portable', 'binding-local'])
 
 export const imageGenerationTemplateArtifactFamiliesSchema = z.object({
@@ -159,7 +173,26 @@ export function buildImageGenerationTemplateRebindAuditEntry(input: z.input<type
   return imageGenerationTemplateRebindAuditEntrySchema.parse(input)
 }
 
+export const colourDesignPromptSchema = z.object({
+  variantKey: z.string().trim().min(1),
+  fingerprint: z.string().trim().min(1),
+  prompt: z.string().trim().min(1),
+  schemaVersion: z.literal(1),
+  generatedAt: z.string().datetime()
+}).strict()
+
+export const roomPromptSchema = z.object({
+  roomKey: z.enum(SANITY_SUITABLE_ROOMS),
+  fingerprint: z.string().trim().min(1),
+  prompt: z.string().trim().min(1),
+  schemaVersion: z.literal(1),
+  generatedAt: z.string().datetime()
+}).strict()
+
 export type ImageGenerationTemplateArtifactKind = z.infer<typeof imageGenerationTemplateArtifactKindSchema>
 export type ImageGenerationTemplateArtifactScope = z.infer<typeof imageGenerationTemplateArtifactScopeSchema>
 export type ImageGenerationTemplateArtifactCacheEntry = z.infer<typeof imageGenerationTemplateArtifactCacheEntrySchema>
 export type ImageGenerationTemplateArtifactProvenanceEntry = z.infer<typeof imageGenerationTemplateArtifactProvenanceEntrySchema>
+export type ImageGenerationTemplateRoomSource = z.infer<typeof imageGenerationTemplateRoomSourceSchema>
+export type ColourDesignPrompt = z.infer<typeof colourDesignPromptSchema>
+export type RoomPrompt = z.infer<typeof roomPromptSchema>

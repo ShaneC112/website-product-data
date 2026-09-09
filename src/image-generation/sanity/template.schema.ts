@@ -5,7 +5,10 @@ import {
   imageGenerationTemplateArtifactFamiliesSchema,
   imageGenerationTemplateArtifactProvenanceEntrySchema,
   imageGenerationTemplateAuditEntrySchema,
-  imageGenerationTemplateBindingSchema
+  imageGenerationTemplateBindingSchema,
+  imageGenerationTemplateRoomSourceSchema,
+  colourDesignPromptSchema,
+  roomPromptSchema
 } from '../contracts/sanity.js'
 import { sanityAiTexturePromptCacheSchema } from './texture-prompt.schema.js'
 
@@ -17,6 +20,9 @@ export const aiImageGenerationTemplateSchema = z.object({
   product: z.object({ _type: z.literal('reference'), _ref: z.string().trim().min(1), _weak: z.literal(true).optional() }).strict(),
   evidenceImages: z.array(aiTemplateEvidenceImageSchema).default([]),
   texturePrompt: sanityAiTexturePromptCacheSchema.optional(),
+  colourDesignPrompts: z.array(colourDesignPromptSchema).default([]),
+  roomPrompts: z.array(roomPromptSchema).default([]),
+  roomSources: z.array(imageGenerationTemplateRoomSourceSchema).default([]),
   artifactFamilies: imageGenerationTemplateArtifactFamiliesSchema.default({ portable: [], bindingLocal: [] }),
   artifactCache: z.array(imageGenerationTemplateArtifactCacheEntrySchema).default([]),
   artifactProvenance: z.array(imageGenerationTemplateArtifactProvenanceEntrySchema).default([]),

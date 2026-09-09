@@ -1,22 +1,13 @@
 import {z} from 'zod'
-import {sha256} from '../sanity/sha256.js'
 import {SANITY_SUITABLE_ROOMS} from '../../registry/product-taxonomy.js'
-
-const architecturalInputsSchema = z.object({
-  approximateScale: z.string().trim().min(1),
-  ceilingHeight: z.string().trim().min(1),
-  doorPlacement: z.string().trim().min(1),
-  windowPlacement: z.string().trim().min(1),
-  fireplace: z.object({present: z.boolean(), placement: z.string().trim().min(1).optional()}).strict().optional(),
-  fixedArchitecturalAnchors: z.array(z.string().trim().min(1)).default([])
-}).strict()
 
 export const normalizedRoomSchema = z.object({
   version: z.literal(1),
   documentKey: z.string().trim().min(1),
   roomKey: z.string().trim().min(1),
   roomCategory: z.enum(SANITY_SUITABLE_ROOMS),
-  architecturalInputs: architecturalInputsSchema,
+  roomDescription: z.string().trim().min(1),
+  roomSourceFingerprint: z.string().trim().min(1),
   cameraOverlap: z.object({targetFloorSharePercent: z.tuple([z.number().int().min(1).max(100), z.number().int().min(1).max(100)]).optional(), cropSafeFloorMinimumPercent: z.literal(33).optional()}).strict(),
   roomGenerationVersion: z.literal(1),
   semanticFingerprint: z.string().length(64)
@@ -35,10 +26,10 @@ export const roomArtifactSchema = z.object({
 export type NormalizedRoom = z.infer<typeof normalizedRoomSchema>
 export type RoomArtifact = z.infer<typeof roomArtifactSchema>
 
-export function buildRoomKey(input: Pick<NormalizedRoom, 'roomCategory' | 'architecturalInputs' | 'roomGenerationVersion'>): string {
-  return sha256(JSON.stringify(input))
+export function buildRoomKey(roomCategory: NormalizedRoom['roomCategory']): string {
+  return roomCategory
 }
 
-export function buildRoomCacheKey(documentKey: string, roomKey: string): string {
-  return `product:room:${documentKey}:${roomKey}`
+export function buildRoomCacheKey(documentKey: string, roomKey: string, roomSourceFingerprint: string): string {
+  return `product:room:${documentKey}:${roomKey}:${roomSourceFingerprint}`
 }

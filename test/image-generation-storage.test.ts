@@ -181,12 +181,14 @@ describe('imageGenerationRunContentClaimSchema', () => {
 })
 
 describe('promptCacheValueSchema', () => {
-  it('accepts the architectural room contract and stable key', () => {
-    const room = {roomCategory: 'bedroom' as const, architecturalInputs: {approximateScale: 'medium', ceilingHeight: 'standard 2.4m', doorPlacement: 'north wall', windowPlacement: 'east wall', fireplace: {present: false}, fixedArchitecturalAnchors: ['wardrobe']}, roomGenerationVersion: 1 as const}
-    const roomKey = buildRoomKey(room)
-    const value = {version: 1 as const, documentKey: 'product-1', roomKey, roomCategory: 'bedroom' as const, architecturalInputs: room.architecturalInputs, cameraOverlap: {cropSafeFloorMinimumPercent: 33 as const}, roomGenerationVersion: 1 as const, semanticFingerprint: 'a'.repeat(64)}
+  it('uses the selected room as stable identity and its description fingerprint for cache invalidation', () => {
+    const room = {roomCategory: 'bedroom' as const, roomDescription: 'Colour-neutral bedroom architecture with fixed openings.', roomSourceFingerprint: 'Colour-neutral bedroom architecture with fixed openings.', roomGenerationVersion: 1 as const}
+    const roomKey = buildRoomKey(room.roomCategory)
+    const value = {version: 1 as const, documentKey: 'product-1', roomKey, roomCategory: 'bedroom' as const, roomDescription: room.roomDescription, roomSourceFingerprint: room.roomSourceFingerprint, cameraOverlap: {cropSafeFloorMinimumPercent: 33 as const}, roomGenerationVersion: 1 as const, semanticFingerprint: 'a'.repeat(64)}
     expect(normalizedRoomSchema.parse(value)).toEqual(value)
-    expect(buildRoomCacheKey('product-1', roomKey)).toBe(`product:room:product-1:${roomKey}`)
+    expect(buildRoomKey('bedroom')).toBe(roomKey)
+    expect(buildRoomCacheKey('product-1', room.roomCategory, room.roomSourceFingerprint)).toBe(`product:room:product-1:bedroom:${room.roomSourceFingerprint}`)
+    expect(buildRoomCacheKey('product-1', room.roomCategory, 'Colour-neutral bedroom architecture with a different floor plane.')).not.toBe(buildRoomCacheKey('product-1', room.roomCategory, room.roomSourceFingerprint))
   })
 
   it('accepts the normalized full-product ingress contract and stable keys', () => {

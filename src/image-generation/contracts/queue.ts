@@ -6,6 +6,7 @@ export const imageGenerationWorkKindSchema = z.enum([
   'resolve.request',
   'generate.texture',
   'generate.pattern',
+  'generate.room',
   'generate.scene',
   'generate.colour-design',
   'assemble.direct',

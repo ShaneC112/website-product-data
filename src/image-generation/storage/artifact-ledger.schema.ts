@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const imageGenerationArtifactKindSchema = z.enum(['texture', 'pattern', 'scene', 'colour-design'])
+export const imageGenerationArtifactKindSchema = z.enum(['texture', 'pattern', 'room', 'scene', 'colour-design'])
 export const imageGenerationArtifactValidationStateSchema = z.enum(['pending', 'validated', 'review-required', 'failed'])
 
 export const imageGenerationArtifactLedgerSchema = z.object({

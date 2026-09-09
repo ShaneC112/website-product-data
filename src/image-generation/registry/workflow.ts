@@ -13,6 +13,7 @@ export const IMAGE_GENERATION_WORKFLOW = [
   { step: 'resolve', workKind: 'resolve.request', lifecycle: 'active' },
   { step: 'generate', workKind: 'generate.texture', lifecycle: 'active' },
   { step: 'generate', workKind: 'generate.pattern', lifecycle: 'active' },
+  { step: 'generate', workKind: 'generate.room', lifecycle: 'active' },
   { step: 'generate', workKind: 'generate.scene', lifecycle: 'active' },
   { step: 'generate', workKind: 'generate.colour-design', lifecycle: 'active' },
   { step: 'assemble', workKind: 'assemble.direct', lifecycle: 'active' },
