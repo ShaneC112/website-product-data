@@ -1,7 +1,7 @@
 # Prompt feature cache hits must validate the persisted schema before reuse
 
 - **ID:** `azure-prompt-feature-cache-hits-must-validate-the-persisted-schema-before-reuse`
-- **Applies to:** website-product-enrichment-azure
+- **Applies to:** `website-product-enrichment-azure`
 - **Status:** Canonical learning detail.
 
 ## Learning

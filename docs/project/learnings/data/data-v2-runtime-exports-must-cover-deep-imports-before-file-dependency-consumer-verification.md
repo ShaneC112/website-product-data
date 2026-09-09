@@ -18,3 +18,11 @@ shared package; consumers must not replace it with sibling source imports or loc
 Before Studio verification, build Data and refresh Studio's `file:` dependency so its installed
 runtime artifact matches the export map. Then run Studio's normal local typecheck/test validation.
 This supplements [File-dependency consumers can see new exports before their installed `dist/` payload actually contains them](data-file-dependency-consumers-can-see-new-exports-before-their-installed-dist-payload-actually-contains-them.md): an export-map change and its emitted runtime files are one compatibility boundary.
+
+## Cache Contract Cleanup
+
+The V2 template cache contract keeps one reusable prompt entry per logical variant or room identity.
+The fingerprint determines whether a requested value is compatible with that entry; it is not a
+second identity dimension that permits multiple historical entries for the same variant or room.
+Retiring a generic cache surface also requires removing unowned shared fields and their tests rather
+than adding a contract that has no producer, consumer, or lifecycle owner.

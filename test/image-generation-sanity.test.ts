@@ -23,8 +23,6 @@ import {
   aiImageGenerationRunSchema,
   aiImageGenerationTemplateSchema,
   aiTemplateEvidenceImageSchema,
-  buildImageGenerationTemplateArtifactProjection,
-  imageGenerationTemplateRoomSourceSchema,
   imageGenerationTemplateBindingSchema
 } from '../src/image-generation/index.js'
 import { toPortableImageGenerationTemplate } from '../src/image-generation/sanity/control-template.js'
@@ -67,39 +65,6 @@ describe('aiImageGenerationTemplateSchema', () => {
         _key: 'image-1',
         asset: { _type: 'reference', _ref: 'image-abc123-1000x1000-png' }
       }],
-      artifactFamilies: {
-        portable: ['mask/base'],
-        bindingLocal: ['render/run-1']
-      },
-      artifactCache: [{
-        cacheEntryId: 'cache-1',
-        artifactKind: 'texture',
-        scope: { level: 'product' },
-        fingerprint: 'fingerprint-1',
-        artifactRef: 'artifact:texture:1',
-        provenanceRef: 'provenance:texture:1',
-        producerKey: 'texture-generator',
-        producerVersion: 'v1',
-        policyVersion: 'policy-v1',
-        templateGeneration: 0,
-        createdAt: '2026-09-06T00:00:00.000Z',
-        requestId: 'request-1',
-        runId: 'run-1'
-      }],
-      artifactProvenance: [{
-        provenanceEntryId: 'prov-1',
-        artifactKind: 'texture',
-        scope: { level: 'product' },
-        fingerprint: 'fingerprint-1',
-        artifactRef: 'artifact:texture:1',
-        producerKey: 'texture-generator',
-        producerVersion: 'v1',
-        policyVersion: 'policy-v1',
-        templateGeneration: 0,
-        recordedAt: '2026-09-06T00:00:00.000Z',
-        requestId: 'request-1',
-        runId: 'run-1'
-      }],
       audit: [buildImageGenerationTemplateResetAuditEntry({
         auditId: 'audit-1',
         operation: 'template.reset',
@@ -107,7 +72,7 @@ describe('aiImageGenerationTemplateSchema', () => {
         templateRevision: 'rev-1',
         targetRunId: 'run-1',
         targetRunEpoch: 2,
-        clearedArtifactFamilies: ['binding-local']
+        clearedFields: ['texturePrompt', 'colourDesignPrompts', 'roomPrompts']
       })],
       binding: imageGenerationTemplateBindingSchema.parse({
         productId: 'product-1',
@@ -118,9 +83,6 @@ describe('aiImageGenerationTemplateSchema', () => {
     })
 
     expect(parsed.evidenceImages).toHaveLength(1)
-    expect(parsed.artifactFamilies.bindingLocal).toEqual(['render/run-1'])
-    expect(parsed.artifactCache).toHaveLength(1)
-    expect(parsed.artifactProvenance).toHaveLength(1)
     expect(parsed.audit).toHaveLength(1)
   })
 
@@ -130,111 +92,45 @@ describe('aiImageGenerationTemplateSchema', () => {
       operation: 'template.reset',
       recordedAt: '2026-09-06T00:00:00.000Z',
       targetRunId: 'run-1',
-      clearedArtifactFamilies: ['binding-local']
+      clearedFields: ['texturePrompt']
     })).toThrow(/targetRunId and targetRunEpoch/)
   })
 
-  it('rejects rebind audit entries without rebound artifact families', () => {
+  it('rejects rebind audit entries without rebound cache fields', () => {
     expect(() => buildImageGenerationTemplateRebindAuditEntry({
       auditId: 'audit-3',
       operation: 'template.rebind',
       recordedAt: '2026-09-06T00:00:00.000Z',
       nextProductId: 'product-2',
       nextVariantIds: ['variant-2'],
-      reboundArtifactFamilies: []
+      reboundFields: []
     })).toThrow(/at least 1 element/)
   })
-})
 
-describe('image generation template artifact projections', () => {
-  const cacheEntry = {
-    cacheEntryId: 'cache-colour-1',
-    artifactKind: 'colour-design' as const,
-    scope: {level: 'variant' as const, documentKey: 'product-1', variantKey: 'variant-1'},
-    fingerprint: 'fingerprint-colour-1',
-    artifactRef: 'artifact:colour-design:1',
-    provenanceRef: 'provenance-colour-1',
-    producerKey: 'colour-design-generator',
-    producerVersion: 'v1',
-    policyVersion: 'policy-v1',
-    templateGeneration: 0,
-    createdAt: '2026-09-09T00:00:00.000Z',
-    requestId: 'request-1',
-    runId: 'run-1'
-  }
-
-  const provenanceEntry = {
-    provenanceEntryId: 'provenance-colour-1',
-    artifactKind: 'colour-design' as const,
-    scope: {level: 'variant' as const, documentKey: 'product-1', variantKey: 'variant-1'},
-    fingerprint: 'fingerprint-colour-1',
-    artifactRef: 'artifact:colour-design:1',
-    producerKey: 'colour-design-generator',
-    producerVersion: 'v1',
-    policyVersion: 'policy-v1',
-    templateGeneration: 0,
-    recordedAt: '2026-09-09T00:00:00.000Z',
-    requestId: 'request-1',
-    runId: 'run-1'
-  }
-
-  it('builds a paired reusable projection and omits internal references from its review metadata', () => {
-    const projection = buildImageGenerationTemplateArtifactProjection({cacheEntry, provenanceEntry})
-
-    expect(projection.cacheEntry.cacheEntryId).toBe('cache-colour-1')
-    expect(projection.provenanceEntry.provenanceEntryId).toBe('provenance-colour-1')
-    expect(projection.metadata).toEqual(expect.objectContaining({
-      cacheEntryId: 'cache-colour-1',
-      provenanceEntryId: 'provenance-colour-1',
-      artifactKind: 'colour-design',
-      scope: {level: 'variant', documentKey: 'product-1', variantKey: 'variant-1'},
-      fingerprint: 'fingerprint-colour-1'
-    }))
-    expect(projection.metadata).not.toHaveProperty('artifactRef')
-    expect(projection.metadata).not.toHaveProperty('provenanceRef')
+  it('rejects multiple colour/design prompts for one variant even when fingerprints differ', () => {
+    expect(() => aiImageGenerationTemplateSchema.parse({
+      _id: 'template-2',
+      _type: 'aiImageGenerationTemplate',
+      title: 'Bedroom inspiration',
+      product: {_type: 'reference', _ref: 'product-1'},
+      colourDesignPrompts: [
+        {variantKey: 'variant-1', fingerprint: 'fingerprint-1', prompt: 'First prompt', schemaVersion: 1, generatedAt: '2026-09-06T00:00:00.000Z'},
+        {variantKey: 'variant-1', fingerprint: 'fingerprint-2', prompt: 'Second prompt', schemaVersion: 1, generatedAt: '2026-09-06T00:00:00.000Z'}
+      ]
+    })).toThrow(/duplicate cache entry/)
   })
 
-  it.each(['room', 'scene'] as const)('accepts a product-scoped %s reusable projection', (artifactKind) => {
-    const projection = buildImageGenerationTemplateArtifactProjection({
-      cacheEntry: {...cacheEntry, cacheEntryId: `cache-${artifactKind}-1`, artifactKind, scope: {level: 'product'}, provenanceRef: `provenance-${artifactKind}-1`},
-      provenanceEntry: {...provenanceEntry, provenanceEntryId: `provenance-${artifactKind}-1`, artifactKind, scope: {level: 'product'}}
-    })
-
-    expect(projection.metadata).toEqual(expect.objectContaining({artifactKind, scope: {level: 'product'}}))
-  })
-
-  it('rejects non-reusable artifact kinds from the template artifact projection', () => {
-    expect(() => buildImageGenerationTemplateArtifactProjection({
-      cacheEntry: {...cacheEntry, artifactKind: 'pattern'},
-      provenanceEntry: {...provenanceEntry, artifactKind: 'pattern'}
-    })).toThrow(/reusable template artifact/i)
-  })
-
-  it.each([
-    ['a missing provenance pairing', {provenanceEntry: {...provenanceEntry, provenanceEntryId: 'provenance-other'}}],
-    ['a different scope', {provenanceEntry: {...provenanceEntry, scope: {level: 'variant' as const, documentKey: 'product-1', variantKey: 'variant-2'}}}],
-    ['a different fingerprint', {provenanceEntry: {...provenanceEntry, fingerprint: 'fingerprint-other'}}]
-  ])('rejects %s', (_description, override) => {
-    expect(() => buildImageGenerationTemplateArtifactProjection({
-      cacheEntry,
-      provenanceEntry: override.provenanceEntry
-    })).toThrow()
-  })
-})
-
-describe('template-owned room sources', () => {
-  it('accepts a normalized room key only when its persisted fingerprint matches the room description', () => {
-    const source = imageGenerationTemplateRoomSourceSchema.parse({
-      roomKey: 'sitting-room',
-      roomDescription: 'A bright sitting room with a bay window and a fireplace on the north wall.',
-      fingerprint: 'A bright sitting room with a bay window and a fireplace on the north wall.'
-    })
-
-    expect(source.roomKey).toBe('sitting-room')
-    expect(() => imageGenerationTemplateRoomSourceSchema.parse({
-      ...source,
-      fingerprint: 'stale room description'
-    })).toThrow(/fingerprint/i)
+  it('rejects multiple room prompts for one room even when fingerprints differ', () => {
+    expect(() => aiImageGenerationTemplateSchema.parse({
+      _id: 'template-3',
+      _type: 'aiImageGenerationTemplate',
+      title: 'Bedroom inspiration',
+      product: {_type: 'reference', _ref: 'product-1'},
+      roomPrompts: [
+        {roomKey: 'bedroom', fingerprint: 'fingerprint-1', prompt: 'First prompt', schemaVersion: 1, generatedAt: '2026-09-06T00:00:00.000Z'},
+        {roomKey: 'bedroom', fingerprint: 'fingerprint-2', prompt: 'Second prompt', schemaVersion: 1, generatedAt: '2026-09-06T00:00:00.000Z'}
+      ]
+    })).toThrow(/duplicate cache entry/)
   })
 })
 
@@ -632,7 +528,7 @@ describe('request and run schemas', () => {
 describe('image generation template readiness', () => {
   const template = {
     _id: 'template-1', _type: 'aiImageGenerationTemplate', title: 'Template',
-    product: {_type: 'reference', _ref: 'product-1'}, evidenceImages: [], artifactFamilies: {portable: [], bindingLocal: []}, audit: [],
+    product: {_type: 'reference', _ref: 'product-1'}, evidenceImages: [], audit: [],
     binding: {productId: 'product-1', productType: 'carpet', categoryKey: 'carpets', variantBindings: [{variantKey: 'variant-key-1', colourName: 'Natural'}]},
   }
   const selection = {variantKey: 'variant-key-1', room: 'bedroom', aspectRatio: '4:3', creativeDirection: {fashion: 'soft-contemporary', tone: 'balanced', furnitureTier: 'high', lighting: 'bright-even-daylight', version: 1}}

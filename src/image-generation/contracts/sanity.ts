@@ -58,74 +58,11 @@ export const imageGenerationTemplateBindingSchema = z.object({
   variantBindings: z.array(imageGenerationVariantBindingSchema).default([])
 }).strict()
 
-export const imageGenerationTemplateRoomSourceSchema = z.object({
-  roomKey: z.string().regex(/^[a-z]+(?:-[a-z]+)*$/, 'roomKey must be lowercase kebab-case'),
-  roomDescription: z.string().trim().min(1),
-  fingerprint: z.string().trim().min(1)
-}).strict().superRefine((value, context) => {
-  if (value.fingerprint !== value.roomDescription) {
-    context.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['fingerprint'],
-      message: 'fingerprint must match roomDescription'
-    })
-  }
-})
-
-export const imageGenerationTemplateArtifactFamilySchema = z.enum(['portable', 'binding-local'])
-
-export const imageGenerationTemplateArtifactFamiliesSchema = z.object({
-  portable: z.array(z.string().trim().min(1)).default([]),
-  bindingLocal: z.array(z.string().trim().min(1)).default([])
-}).strict()
-
-export const imageGenerationTemplateArtifactKindSchema = z.enum([
-  'texture',
-  'pattern',
-  'scene',
-  'colour-design',
-  'visual-product',
-  'room',
-  'scene'
+export const imageGenerationTemplateCacheFieldSchema = z.enum([
+  'texturePrompt',
+  'colourDesignPrompts',
+  'roomPrompts'
 ])
-
-export const imageGenerationTemplateArtifactScopeSchema = z.discriminatedUnion('level', [
-  z.object({ level: z.literal('product') }).strict(),
-  z.object({ level: z.literal('variant'), documentKey: z.string().trim().min(1), variantKey: z.string().trim().min(1) }).strict()
-])
-
-export const imageGenerationTemplateArtifactCacheEntrySchema = z.object({
-  cacheEntryId: z.string().trim().min(1),
-  artifactKind: imageGenerationTemplateArtifactKindSchema,
-  scope: imageGenerationTemplateArtifactScopeSchema,
-  fingerprint: z.string().trim().min(1),
-  artifactRef: z.string().trim().min(1),
-  provenanceRef: z.string().trim().min(1),
-  producerKey: z.string().trim().min(1),
-  producerVersion: z.string().trim().min(1),
-  policyVersion: z.string().trim().min(1),
-  surfaceProfileVersion: z.string().trim().min(1).optional(),
-  templateGeneration: z.number().int().nonnegative().default(0),
-  createdAt: z.string().datetime(),
-  requestId: z.string().trim().min(1).optional(),
-  runId: z.string().trim().min(1).optional()
-}).strict()
-
-export const imageGenerationTemplateArtifactProvenanceEntrySchema = z.object({
-  provenanceEntryId: z.string().trim().min(1),
-  artifactKind: imageGenerationTemplateArtifactKindSchema,
-  scope: imageGenerationTemplateArtifactScopeSchema,
-  fingerprint: z.string().trim().min(1),
-  artifactRef: z.string().trim().min(1),
-  producerKey: z.string().trim().min(1),
-  producerVersion: z.string().trim().min(1),
-  policyVersion: z.string().trim().min(1),
-  surfaceProfileVersion: z.string().trim().min(1).optional(),
-  templateGeneration: z.number().int().nonnegative().default(0),
-  recordedAt: z.string().datetime(),
-  requestId: z.string().trim().min(1),
-  runId: z.string().trim().min(1)
-}).strict()
 
 const imageGenerationTemplateAuditEntryBaseSchema = z.object({
   auditId: z.string().trim().min(1),
@@ -138,7 +75,7 @@ export const imageGenerationTemplateResetAuditEntrySchema = imageGenerationTempl
   operation: z.literal('template.reset'),
   targetRunId: z.string().trim().min(1).optional(),
   targetRunEpoch: z.number().int().min(0).optional(),
-  clearedArtifactFamilies: z.array(imageGenerationTemplateArtifactFamilySchema).min(1)
+  clearedFields: z.array(imageGenerationTemplateCacheFieldSchema).min(1)
 }).superRefine((value, context) => {
   const hasTargetRunId = typeof value.targetRunId === 'string'
   const hasTargetRunEpoch = typeof value.targetRunEpoch === 'number'
@@ -157,7 +94,7 @@ export const imageGenerationTemplateRebindAuditEntrySchema = imageGenerationTemp
   nextProductId: z.string().trim().min(1),
   previousVariantIds: z.array(z.string().trim().min(1)).default([]),
   nextVariantIds: z.array(z.string().trim().min(1)).default([]),
-  reboundArtifactFamilies: z.array(imageGenerationTemplateArtifactFamilySchema).min(1)
+  reboundFields: z.array(imageGenerationTemplateCacheFieldSchema).min(1)
 })
 
 export const imageGenerationTemplateAuditEntrySchema = z.union([
@@ -189,10 +126,5 @@ export const roomPromptSchema = z.object({
   generatedAt: z.string().datetime()
 }).strict()
 
-export type ImageGenerationTemplateArtifactKind = z.infer<typeof imageGenerationTemplateArtifactKindSchema>
-export type ImageGenerationTemplateArtifactScope = z.infer<typeof imageGenerationTemplateArtifactScopeSchema>
-export type ImageGenerationTemplateArtifactCacheEntry = z.infer<typeof imageGenerationTemplateArtifactCacheEntrySchema>
-export type ImageGenerationTemplateArtifactProvenanceEntry = z.infer<typeof imageGenerationTemplateArtifactProvenanceEntrySchema>
-export type ImageGenerationTemplateRoomSource = z.infer<typeof imageGenerationTemplateRoomSourceSchema>
 export type ColourDesignPrompt = z.infer<typeof colourDesignPromptSchema>
 export type RoomPrompt = z.infer<typeof roomPromptSchema>

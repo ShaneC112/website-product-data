@@ -278,10 +278,21 @@
         ]
       },
       "dirtyPathsAtInventory": [
+        "docs/project/architecture/pipeline-and-durability.md",
+        "docs/project/architecture/sanity-and-operator-workflows.md",
         "docs/project/learnings/azure/README.md",
-        "docs/project/learnings/azure/azure-a-live-recovery-proof-found-two-v2-image-generation-state-transition-gaps.md",
-        "src/image-generation/cache/prompt-cache-value.schema.ts",
-        "test/image-generation-storage.test.ts"
+        "docs/project/learnings/azure/azure-prompt-feature-cache-hits-must-validate-the-persisted-schema-before-reuse.md",
+        "src/image-generation/contracts/prompt-generation.ts",
+        "src/image-generation/contracts/sanity.ts",
+        "src/image-generation/index.ts",
+        "src/image-generation/sanity/control-template.ts",
+        "src/image-generation/sanity/template-artifact-projection.ts",
+        "src/image-generation/sanity/template.schema.ts",
+        "src/image-generation/storage/run-snapshot.schema.ts",
+        "test/image-generation-sanity.test.ts",
+        "test/image-generation-v2-contracts.test.ts",
+        "workspace-customizations/.github/agents/project-engineer.agent.md",
+        "workspace-customizations/.github/agents/project-implementor.agent.md"
       ],
       "disposition": {
         "category": "consolidated",
@@ -615,8 +626,16 @@
           "live-pdf-probe.mjs",
           "m2crmAuth.ts",
           "m2crmProductFields.ts",
+          "prove-brand-identity-caching-live.ts",
+          "prove-camera-runtime-live.ts",
+          "prove-colour-design-caching-live.ts",
+          "prove-product-artifact-caching-live.ts",
+          "prove-product-ingress-caching-live.ts",
+          "prove-room-caching-live.ts",
           "prove-run-content-store-live.ts",
+          "prove-scene-caching-live.ts",
           "prove-texture-caching-live.ts",
+          "prove-texture-non-completed-concurrency-live.ts",
           "prove-texture-poison-live.ts",
           "prove-texture-resolver-live.ts",
           "query-m2crm-custom-fields.ts",
@@ -634,9 +653,30 @@
         "customizationPaths": []
       },
       "dirtyPathsAtInventory": [
+        "src/operator-actions/sanity/image-generation-template-create/processTemplateCreate.ts",
+        "src/sanity-images-v2/00-ingress/control.test.ts",
         "src/sanity-images-v2/02-generate/worker.test.ts",
-        "src/sanity-images-v2/core/runContentResolver.test.ts",
-        "src/sanity-images-v2/core/runContentResolver.ts"
+        "src/sanity-images-v2/03-assemble/registry.ts",
+        "src/sanity-images-v2/03-assemble/worker.test.ts",
+        "src/sanity-images-v2/core/sanityClient.test.ts",
+        "src/sanity-images-v2/core/sanityClient.ts",
+        "src/sanity-images-v2/prompt-features/colour-design/artifact.test.ts",
+        "src/sanity-images-v2/prompt-features/colour-design/handler.ts",
+        "src/sanity-images-v2/prompt-features/colour-design/sanity.ts",
+        "src/sanity-images-v2/prompt-features/product/index.ts",
+        "src/sanity-images-v2/prompt-features/product/refinement.test.ts",
+        "src/sanity-images-v2/prompt-features/product/refinement.ts",
+        "src/sanity-images-v2/prompt-features/room/cache.ts",
+        "src/sanity-images-v2/prompt-features/room/handler.test.ts",
+        "src/sanity-images-v2/prompt-features/room/handler.ts",
+        "src/sanity-images-v2/prompt-features/room/sanity.test.ts",
+        "src/sanity-images-v2/prompt-features/room/sanity.ts",
+        "src/sanity-images-v2/prompt-features/scene/cache.ts",
+        "src/sanity-images-v2/prompt-features/scene/handler.test.ts",
+        "src/sanity-images-v2/prompt-features/scene/handler.ts",
+        "src/sanity-images-v2/prompt-features/scene/index.ts",
+        "src/sanity-images-v2/prompt-features/scene/sanity.ts",
+        "src/sanity-images-v2/prompt-features/texture/cache.test.ts"
       ],
       "disposition": {
         "category": "consolidated",
@@ -936,6 +976,8 @@
         "version": "0.1.0",
         "manager": "pnpm",
         "aliases": [
+          "auth:e2e",
+          "auth:e2e:capture",
           "blueprints:deploy",
           "blueprints:logs:v2",
           "blueprints:plan",
@@ -955,6 +997,7 @@
           "schema:extract",
           "seed:room-image-designs",
           "test",
+          "test:e2e:v2",
           "typecheck",
           "typegen",
           "verify"
@@ -967,6 +1010,41 @@
             "level": 1,
             "text": "Website Product Enrichment Sanity Studio",
             "anchor": "website-product-enrichment-sanity-studio"
+          },
+          {
+            "level": 2,
+            "text": "Local UI Test Runbook",
+            "anchor": "local-ui-test-runbook"
+          },
+          {
+            "level": 3,
+            "text": "1. Start the Studio",
+            "anchor": "1-start-the-studio"
+          },
+          {
+            "level": 3,
+            "text": "2. Start Chrome on macOS with CDP",
+            "anchor": "2-start-chrome-on-macos-with-cdp"
+          },
+          {
+            "level": 3,
+            "text": "3. Verify the CDP endpoint",
+            "anchor": "3-verify-the-cdp-endpoint"
+          },
+          {
+            "level": 3,
+            "text": "4. Capture the existing authenticated session",
+            "anchor": "4-capture-the-existing-authenticated-session"
+          },
+          {
+            "level": 3,
+            "text": "5. Run the authenticated UI test",
+            "anchor": "5-run-the-authenticated-ui-test"
+          },
+          {
+            "level": 3,
+            "text": "6. Run the automated non-UI checks",
+            "anchor": "6-run-the-automated-non-ui-checks"
           },
           {
             "level": 2,
@@ -1070,6 +1148,8 @@
         "status": "present",
         "rootIndex": "present",
         "files": [
+          "capture-playwright-session.ts",
+          "create-playwright-auth-state.ts",
           "imageGenerationHistoryMigration.ts",
           "inventory-live-sanity-content.ts",
           "migrate-image-generation-history.ts",
@@ -1087,7 +1167,28 @@
         "customizationPaths": []
       },
       "dirtyPathsAtInventory": [
-        "schemaTypes/image-generation-v2/documents/aiImageGenerationTemplate.ts"
+        ".gitignore",
+        "README.md",
+        "components/image-generation-v2/CreateImageryV2Action.tsx",
+        "package.json",
+        "playwright.config.ts",
+        "pnpm-lock.yaml",
+        "schemaTypes/image-generation-v2/documents/aiImageGenerationTemplate.ts",
+        "schemaTypes/image-generation-v2/objects/templateArtifactCacheEntry.ts",
+        "schemaTypes/image-generation-v2/objects/templateArtifactProvenanceEntry.ts",
+        "schemaTypes/image-generation-v2/objects/templateRebindAuditEntry.ts",
+        "schemaTypes/image-generation-v2/objects/templateResetAuditEntry.ts",
+        "schemaTypes/image-generation-v2/objects/templateRoomSource.ts",
+        "schemaTypes/index.ts",
+        "scripts/capture-playwright-session.ts",
+        "scripts/create-playwright-auth-state.ts",
+        "src/image-generation-v2/historySummary.test.ts",
+        "src/image-generation-v2/historySummary.ts",
+        "test/e2e-v2/",
+        "test/image-generation-v2.action.test.ts",
+        "test/image-generation-v2.schema.test.ts",
+        "test/requestAiImagesV2Handler.test.ts",
+        "vitest.config.ts"
       ],
       "disposition": {
         "category": "consolidated",

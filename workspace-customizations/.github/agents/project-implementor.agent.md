@@ -1,7 +1,7 @@
 ---
 name: "Project Implementor"
 description: "Use when executing an approved Website Product Enrichment implementation plan. Coordinates ordered phases, delegates independent bounded code slices to cost-appropriate agent instances, reviews every returned change, and validates each phase before continuing."
-tools: [read, edit, search, execute, agent, todo]
+tools: [read, edit, search, execute, agent, todo, web, playwright/*]
 argument-hint: "Provide the approved plan path and phase or range to implement"
 ---
 

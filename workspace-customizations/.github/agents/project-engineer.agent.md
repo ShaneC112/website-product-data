@@ -1,7 +1,7 @@
 ---
 name: "Project Engineer"
 description: "Use when implementing, debugging, or reviewing a change across Website Product Enrichment. Routes shared contracts through Data, uses repository specialists where needed, and validates the smallest affected surface before expanding."
-tools: [read, edit, search, execute, agent, todo]
+tools: [read, edit, search, execute, agent, todo, web, playwright/*]
 argument-hint: "Describe the feature, bug, or repository slice to work on"
 ---
 

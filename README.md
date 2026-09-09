@@ -216,7 +216,7 @@ variant page), so there is no fallback source for these fields other than this
 message. Trimming this schema back to "just status and a content hash" reintroduces
 a real bug found via live E2E testing: pages silently lost their `url`, `pageRole`,
 and `sourceGroupKey`, corrupting downstream transform/publish. See
-[plan/render-update/06-live-e2e-payloads.md](/workspaces/project-container/plan/render-update/06-live-e2e-payloads.md#findings-from-the-first-live-run--read-before-touching-render-complete-or-dispatcher-code)
+[plan/render-update/06-live-e2e-payloads.md](/workspaces/project-container/plan/_completed-or-dropped/render-update/06-live-e2e-payloads.md#findings-from-the-first-live-run--read-before-touching-render-complete-or-dispatcher-code)
 for the full writeup. If a new field is added to the render job contract that Azure
 needs after completion, add it here too.
 
@@ -234,7 +234,7 @@ unbounded vendor text. Because this schema is shared across repos (at minimum
 package *and* restarting every consuming repo's process — a `file:` dependency
 consumer can be holding a stale on-disk copy and/or a stale in-memory module even
 after this package's `dist` is rebuilt. See
-[plan/render-update/06-live-e2e-payloads.md](/workspaces/project-container/plan/render-update/06-live-e2e-payloads.md#findings-from-the-first-live-run--read-before-touching-render-complete-or-dispatcher-code)
+[plan/render-update/06-live-e2e-payloads.md](/workspaces/project-container/plan/_completed-or-dropped/render-update/06-live-e2e-payloads.md#findings-from-the-first-live-run--read-before-touching-render-complete-or-dispatcher-code)
 (Pitfall 6) for the full trace.
 
 This section is the canonical reference for shared Azure Tables, queues, and blob artefacts used by the website product enrichment pipeline.
