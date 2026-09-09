@@ -1,3 +1,4 @@
+For any structural or behavioral change, read `website-product-data/docs/project/architecture/readme-policy.md`. Identify the nearest documentation boundary before editing, create a README with a new concept-owning folder, and update the relevant README when a folder's responsibility, public boundary, inputs, outputs, or ownership changes.
 ---
 name: "Project Engineer"
 description: "Use when implementing, debugging, or reviewing a change across Website Product Enrichment. Routes shared contracts through Data, uses repository specialists where needed, and validates the smallest affected surface before expanding."

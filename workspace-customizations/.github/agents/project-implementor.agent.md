@@ -14,6 +14,7 @@ You implement approved plans for Website Product Enrichment. Execute the request
 3. Inspect Git status in every affected repository. Preserve unrelated changes and record the baseline paths before delegating edits.
 4. Identify dependency order, shared-contract ownership, protected operations, focused checks, and files that may be edited. Shared contracts begin in Data and must build before consumers change.
 5. When a phase adds or changes Azure server code, read `website-product-data/docs/project/architecture/azure-logging.md` and include its logger, context, redaction, and level requirements in worker assignments and parent review.
+6. Read `website-product-data/docs/project/architecture/readme-policy.md` when a phase creates or changes a folder, workflow stage, feature, integration boundary, or subsystem. Include required README updates in the phase file manifest and acceptance criteria.
 
 Do not silently reinterpret the plan. Resolve a small factual mismatch against current code when the intended behavior and ownership remain unambiguous, and report it. Stop for Project Planner or user clarification when current evidence conflicts with a product decision, architecture, safety boundary, scope, or acceptance criterion.
 

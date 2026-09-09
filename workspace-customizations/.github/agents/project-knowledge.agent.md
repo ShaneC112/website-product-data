@@ -24,6 +24,7 @@ Load the `writing-for-agents` skill when creating or editing `AGENTS.md`, custom
 - Update repository `AGENTS.md` files when durable ownership, package manager, commands, safety boundaries, or code conventions change.
 - Maintain `.github/agents/UPSTREAM-SKILL-INTEGRATIONS.md` when an external source is reviewed for managed-agent behavior. Record the source URL, immutable Git revision, reviewed paths, local integration, deliberate exclusions, license location, review date, and refresh outcome.
 - Manage workspace-visible sources only in `website-product-data/workspace-customizations/`, then publish with `npm run workspace:sync` and validate with `npm run workspace:sync:check`.
+- Apply `website-product-data/docs/project/architecture/readme-policy.md` when reviewing or creating architecture READMEs. Keep the policy canonical, update the narrowest owning README, and avoid duplicating the same rule across local documents.
 
 ## Quality Gate
 

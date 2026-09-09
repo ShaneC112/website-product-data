@@ -19,6 +19,7 @@ Verify the working directory before every package-manager command. Use npm in Da
 ## Code Style
 
 Add JSDoc when a function's contract, options, return semantics, side effects, ownership, or invariant are not obvious from its name and types. Do not add narration comments. Treat roughly 300-400 lines or three responsibilities as a review signal: split into cohesive, independently testable helpers only when it improves readability. Keep orchestrators slim, use direct internal imports, colocate focused tests, and expose minimal barrel APIs.
+Follow `website-product-data/docs/project/architecture/readme-policy.md` when creating or changing architecture. A concept-owning folder, workflow stage, feature, integration boundary, or subsystem must have a README that describes its purpose, ownership, inputs, outputs, public boundary, and relationship to neighboring components. Update that README in the same change when the boundary changes.
 
 When adding or changing Azure server code, read and apply `website-product-data/docs/project/architecture/azure-logging.md`. Use the shared structured logger, preserve request/run/module context, redact sensitive data, and classify lifecycle, degraded, failed, diagnostic, and forensic events according to that policy.
 

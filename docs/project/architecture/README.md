@@ -18,6 +18,7 @@ flowchart LR
 Read these documents in order when changing a cross-repository feature:
 
 - [Domain language](domain-language.md): canonical identity, pipeline, evidence, and publication terms used across repositories.
+- [Architecture README policy](readme-policy.md): documentation requirements for concept-owning folders, workflow stages, and agent-authored changes.
 - [Pipeline and durability](pipeline-and-durability.md): stage progression, durable state, recovery, and retry boundaries.
 - [Azure logging policy](azure-logging.md): mandatory structured logging, context, redaction, and level decisions for Azure server code.
 - [Identity and contracts](identity-and-contracts.md): Data-first contracts and product identity invariants.
