@@ -2,6 +2,15 @@ import {z} from 'zod'
 import {sha256} from '../sanity/sha256.js'
 
 const colourHexSchema = z.string().regex(/^#[0-9a-f]{6}$/i).optional()
+const colourPaletteSchema = z.array(z.object({
+  _key: z.string().trim().min(1).optional(),
+  hex: z.string().regex(/^#[0-9a-f]{6}$/i),
+  coveragePercent: z.number().int().min(1).max(100)
+}).strict()).min(1).max(3).superRefine((palette, context) => {
+  if (palette.reduce((total, colour) => total + colour.coveragePercent, 0) !== 100) {
+    context.addIssue({code: z.ZodIssueCode.custom, message: 'Palette coverage percentages must total 100.'})
+  }
+})
 
 export const normalizedColourDesignSchema = z.object({
   version: z.literal(1),
@@ -9,6 +18,8 @@ export const normalizedColourDesignSchema = z.object({
   variantKey: z.string().trim().min(1),
   colourName: z.string().trim().min(1),
   colourHex: colourHexSchema,
+  swatchFingerprint: z.string().trim().min(1).optional(),
+  palette: colourPaletteSchema.optional(),
   fashion: z.string().trim().min(1),
   tone: z.string().trim().min(1),
   furnitureTier: z.string().trim().min(1),
@@ -42,9 +53,10 @@ export function computeColourDesignFingerprint(input: Omit<NormalizedColourDesig
     documentKey: input.documentKey,
     variantKey: input.variantKey,
     templateId: input.templateId,
-    templateRevision: input.templateRevision,
+    paletteExtractionVersion: 1,
     colourName: input.colourName,
     colourHex: input.colourHex,
+    swatchFingerprint: input.swatchFingerprint,
     fashion: input.fashion,
     tone: input.tone,
     furnitureTier: input.furnitureTier,

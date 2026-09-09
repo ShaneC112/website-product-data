@@ -132,6 +132,80 @@ describe('aiImageGenerationTemplateSchema', () => {
       ]
     })).toThrow(/duplicate cache entry/)
   })
+
+  it('accepts Sanity array keys on persisted colour/design palette entries', () => {
+    const parsed = aiImageGenerationTemplateSchema.parse({
+      _id: 'template-palette',
+      _type: 'aiImageGenerationTemplate',
+      title: 'Palette template',
+      product: {_type: 'reference', _ref: 'product-1'},
+      colourDesignPrompts: [{
+        _key: 'colour-design-1',
+        variantKey: 'variant-1',
+        fingerprint: 'fingerprint-1',
+        swatchFingerprint: 'sanity-asset:image-swatch-1',
+        palette: [
+          {_key: 'palette-1', hex: '#AABBCC', coveragePercent: 70},
+          {_key: 'palette-2', hex: '#99AABB', coveragePercent: 30},
+        ],
+        prompt: 'Palette-aware colour design prompt',
+        schemaVersion: 1,
+        generatedAt: '2026-09-09T00:00:00.000Z',
+      }],
+    })
+
+    expect(parsed.colourDesignPrompts[0]?.palette).toHaveLength(2)
+  })
+})
+
+describe('colour/design palette cache contract', () => {
+  it('accepts a bounded swatch-derived palette and invalidates the prior fingerprint shape', async () => {
+    const {computeColourDesignFingerprint, normalizedColourDesignSchema} = await import('../src/image-generation/cache/colour-design.schema.js')
+    const base = {
+      documentKey: 'product-1',
+      variantKey: 'variant-1',
+      colourName: 'Cloud',
+      colourHex: '#aabbcc',
+      fashion: 'soft-contemporary',
+      tone: 'balanced',
+      furnitureTier: 'high',
+      lighting: 'bright-even-daylight',
+    }
+    const fingerprintContext = {templateId: 'template-1', templateRevision: 'revision-1'}
+    const palette = [{_key: 'palette-1', hex: '#AABBCC', coveragePercent: 70}, {_key: 'palette-2', hex: '#99AABB', coveragePercent: 30}]
+
+    expect(normalizedColourDesignSchema.parse({
+      version: 1,
+      ...base,
+      swatchFingerprint: 'image-abc123-100x100-png',
+      palette,
+      semanticFingerprint: 'a'.repeat(64),
+    }).palette).toEqual(palette)
+    expect(computeColourDesignFingerprint({...base, ...fingerprintContext, swatchFingerprint: 'image-abc123-100x100-png', palette}))
+      .toBe(computeColourDesignFingerprint({...base, ...fingerprintContext, swatchFingerprint: 'image-abc123-100x100-png', palette: [{hex: '#112233', coveragePercent: 100}]}))
+    expect(computeColourDesignFingerprint({...base, ...fingerprintContext, swatchFingerprint: 'image-abc123-100x100-png'}))
+      .toBe(computeColourDesignFingerprint({...base, ...fingerprintContext, templateRevision: 'revision-2', swatchFingerprint: 'image-abc123-100x100-png'}))
+    expect(computeColourDesignFingerprint({...base, ...fingerprintContext, swatchFingerprint: 'image-abc123-100x100-png'}))
+      .not.toBe(computeColourDesignFingerprint({...base, ...fingerprintContext}))
+  })
+
+  it('rejects palette coverage that does not total 100 percent', async () => {
+    const {normalizedColourDesignSchema} = await import('../src/image-generation/cache/colour-design.schema.js')
+
+    expect(() => normalizedColourDesignSchema.parse({
+      version: 1,
+      documentKey: 'product-1',
+      variantKey: 'variant-1',
+      colourName: 'Cloud',
+      colourHex: '#aabbcc',
+      palette: [{hex: '#AABBCC', coveragePercent: 60}, {hex: '#99AABB', coveragePercent: 30}],
+      fashion: 'soft-contemporary',
+      tone: 'balanced',
+      furnitureTier: 'high',
+      lighting: 'bright-even-daylight',
+      semanticFingerprint: 'a'.repeat(64),
+    })).toThrow(/Palette coverage percentages must total 100/)
+  })
 })
 
 describe('request and run schemas', () => {

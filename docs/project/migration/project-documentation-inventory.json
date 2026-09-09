@@ -278,21 +278,20 @@
         ]
       },
       "dirtyPathsAtInventory": [
-        "docs/project/architecture/pipeline-and-durability.md",
-        "docs/project/architecture/sanity-and-operator-workflows.md",
-        "docs/project/learnings/azure/README.md",
-        "docs/project/learnings/azure/azure-prompt-feature-cache-hits-must-validate-the-persisted-schema-before-reuse.md",
-        "src/image-generation/contracts/prompt-generation.ts",
+        "docs/project/CHANGELOG.md",
+        "docs/project/agents/acceptance-scenarios.md",
+        "docs/project/agents/knowledge-coverage.md",
+        "docs/project/architecture/README.md",
+        "docs/project/architecture/azure-logging.md",
+        "docs/project/migration/project-documentation-inventory.json",
+        "scripts/check-agent-governance.mjs",
+        "scripts/check-documentation.mjs",
         "src/image-generation/contracts/sanity.ts",
-        "src/image-generation/index.ts",
-        "src/image-generation/sanity/control-template.ts",
-        "src/image-generation/sanity/template-artifact-projection.ts",
-        "src/image-generation/sanity/template.schema.ts",
-        "src/image-generation/storage/run-snapshot.schema.ts",
-        "test/image-generation-sanity.test.ts",
-        "test/image-generation-v2-contracts.test.ts",
+        "test/image-generation-v2-boundary.test.ts",
         "workspace-customizations/.github/agents/project-engineer.agent.md",
-        "workspace-customizations/.github/agents/project-implementor.agent.md"
+        "workspace-customizations/.github/agents/project-implementor.agent.md",
+        "workspace-customizations/.github/agents/project-qa-commit.agent.md",
+        "workspace-customizations/AGENTS.md"
       ],
       "disposition": {
         "category": "consolidated",
@@ -371,6 +370,11 @@
             "level": 3,
             "text": "Local debugging",
             "anchor": "local-debugging"
+          },
+          {
+            "level": 3,
+            "text": "Structured logging",
+            "anchor": "structured-logging"
           },
           {
             "level": 2,
@@ -653,30 +657,31 @@
         "customizationPaths": []
       },
       "dirtyPathsAtInventory": [
-        "src/operator-actions/sanity/image-generation-template-create/processTemplateCreate.ts",
-        "src/sanity-images-v2/00-ingress/control.test.ts",
-        "src/sanity-images-v2/02-generate/worker.test.ts",
-        "src/sanity-images-v2/03-assemble/registry.ts",
-        "src/sanity-images-v2/03-assemble/worker.test.ts",
+        "AGENTS.md",
+        "README.md",
+        "docs/",
+        "src/sanity-images-v2/00-ingress/queue.ts",
+        "src/sanity-images-v2/01-resolve/request.ts",
+        "src/sanity-images-v2/02-generate/texture/openAiClient.ts",
+        "src/sanity-images-v2/02-generate/worker.ts",
+        "src/sanity-images-v2/03-assemble/worker.ts",
+        "src/sanity-images-v2/04-render/worker.ts",
+        "src/sanity-images-v2/05-persist/worker.ts",
+        "src/sanity-images-v2/core/runContentResolver.ts",
         "src/sanity-images-v2/core/sanityClient.test.ts",
         "src/sanity-images-v2/core/sanityClient.ts",
-        "src/sanity-images-v2/prompt-features/colour-design/artifact.test.ts",
-        "src/sanity-images-v2/prompt-features/colour-design/handler.ts",
+        "src/sanity-images-v2/prompt-features/brand-identity/sanity.ts",
+        "src/sanity-images-v2/prompt-features/camera/sanity.ts",
         "src/sanity-images-v2/prompt-features/colour-design/sanity.ts",
-        "src/sanity-images-v2/prompt-features/product/index.ts",
-        "src/sanity-images-v2/prompt-features/product/refinement.test.ts",
-        "src/sanity-images-v2/prompt-features/product/refinement.ts",
-        "src/sanity-images-v2/prompt-features/room/cache.ts",
-        "src/sanity-images-v2/prompt-features/room/handler.test.ts",
+        "src/sanity-images-v2/prompt-features/product/sanity.ts",
         "src/sanity-images-v2/prompt-features/room/handler.ts",
+        "src/sanity-images-v2/prompt-features/room/roomAnalysis.ts",
         "src/sanity-images-v2/prompt-features/room/sanity.test.ts",
         "src/sanity-images-v2/prompt-features/room/sanity.ts",
-        "src/sanity-images-v2/prompt-features/scene/cache.ts",
-        "src/sanity-images-v2/prompt-features/scene/handler.test.ts",
+        "src/sanity-images-v2/prompt-features/room/schema.ts",
         "src/sanity-images-v2/prompt-features/scene/handler.ts",
-        "src/sanity-images-v2/prompt-features/scene/index.ts",
-        "src/sanity-images-v2/prompt-features/scene/sanity.ts",
-        "src/sanity-images-v2/prompt-features/texture/cache.test.ts"
+        "src/sanity-images-v2/prompt-features/texture/handler.ts",
+        "src/sanity-images-v2/prompt-features/texture/sanity.ts"
       ],
       "disposition": {
         "category": "consolidated",
@@ -984,6 +989,7 @@
           "build",
           "deploy",
           "dev",
+          "image-e2e:fixture:create",
           "image-history:inventory",
           "image-history:verify",
           "media-images:inventory",
@@ -1018,6 +1024,11 @@
           },
           {
             "level": 3,
+            "text": "Exact Mac workflow",
+            "anchor": "exact-mac-workflow"
+          },
+          {
+            "level": 3,
             "text": "1. Start the Studio",
             "anchor": "1-start-the-studio"
           },
@@ -1030,6 +1041,11 @@
             "level": 3,
             "text": "3. Verify the CDP endpoint",
             "anchor": "3-verify-the-cdp-endpoint"
+          },
+          {
+            "level": 3,
+            "text": "Reconnect after Chrome or CDP detaches",
+            "anchor": "reconnect-after-chrome-or-cdp-detaches"
           },
           {
             "level": 3,
@@ -1149,6 +1165,7 @@
         "rootIndex": "present",
         "files": [
           "capture-playwright-session.ts",
+          "create-image-generation-v2-fixture.ts",
           "create-playwright-auth-state.ts",
           "imageGenerationHistoryMigration.ts",
           "inventory-live-sanity-content.ts",
@@ -1167,28 +1184,11 @@
         "customizationPaths": []
       },
       "dirtyPathsAtInventory": [
-        ".gitignore",
+        ".artifacts/",
         "README.md",
-        "components/image-generation-v2/CreateImageryV2Action.tsx",
         "package.json",
-        "playwright.config.ts",
-        "pnpm-lock.yaml",
-        "schemaTypes/image-generation-v2/documents/aiImageGenerationTemplate.ts",
-        "schemaTypes/image-generation-v2/objects/templateArtifactCacheEntry.ts",
-        "schemaTypes/image-generation-v2/objects/templateArtifactProvenanceEntry.ts",
-        "schemaTypes/image-generation-v2/objects/templateRebindAuditEntry.ts",
-        "schemaTypes/image-generation-v2/objects/templateResetAuditEntry.ts",
-        "schemaTypes/image-generation-v2/objects/templateRoomSource.ts",
-        "schemaTypes/index.ts",
         "scripts/capture-playwright-session.ts",
-        "scripts/create-playwright-auth-state.ts",
-        "src/image-generation-v2/historySummary.test.ts",
-        "src/image-generation-v2/historySummary.ts",
-        "test/e2e-v2/",
-        "test/image-generation-v2.action.test.ts",
-        "test/image-generation-v2.schema.test.ts",
-        "test/requestAiImagesV2Handler.test.ts",
-        "vitest.config.ts"
+        "scripts/create-image-generation-v2-fixture.ts"
       ],
       "disposition": {
         "category": "consolidated",
