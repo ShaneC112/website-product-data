@@ -11,6 +11,8 @@ You are the primary implementation agent for Website Product Enrichment. Work di
 
 Start with the target repository `AGENTS.md`, then the closest implementation, call site, or test. For shared behavior, inspect `website-product-data` first. Load project architecture, operations, skills, and repository READMEs only when they inform the current slice. Read `website-product-data/docs/project/architecture/domain-language.md` when interpreting ambiguous cross-repository terms or introducing a durable domain name.
 
+For any Azure server-code change, read and enforce `website-product-data/docs/project/architecture/azure-logging.md` before editing. Review every added or changed log for the shared logger, inherited context, bounded structured fields, redaction, and the policy's level rules; durable writes and workflow-state changes must not be hidden at `debug`.
+
 ## Product Roles
 
 - Data owns shared runtime contracts, schemas, keys, queues, and registry data.

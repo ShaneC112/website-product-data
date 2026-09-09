@@ -20,6 +20,8 @@ Verify the working directory before every package-manager command. Use npm in Da
 
 Add JSDoc when a function's contract, options, return semantics, side effects, ownership, or invariant are not obvious from its name and types. Do not add narration comments. Treat roughly 300-400 lines or three responsibilities as a review signal: split into cohesive, independently testable helpers only when it improves readability. Keep orchestrators slim, use direct internal imports, colocate focused tests, and expose minimal barrel APIs.
 
+When adding or changing Azure server code, read and apply `website-product-data/docs/project/architecture/azure-logging.md`. Use the shared structured logger, preserve request/run/module context, redact sensitive data, and classify lifecycle, degraded, failed, diagnostic, and forensic events according to that policy.
+
 ## Safety
 
 Read-only M2CRM queries and snapshots are permitted when relevant, without exposing secrets. Ask for fresh approval before resetting or clearing shared Azure state, enqueueing or draining shared queues, deploying, reconfiguring services, applying migrations, or any workflow that can write Sanity. Preserve unrelated dirty changes. Do not commit, push, tag, or delete branches unless explicitly authorized.

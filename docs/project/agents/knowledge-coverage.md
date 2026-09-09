@@ -8,8 +8,8 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | --- | --- |
 | Purpose and triggers | Primary implementation, debugging, and review agent for product-enrichment work. |
 | Owned decisions | Routine versus significant scope, local implementation path, focused validation, and when to recommend a plan or QA review. |
-| Always-known facts | Data owns shared contracts; durable order is render, extract, classify, compose, publish; no unapproved live writes or Git actions. |
-| Progressively loaded sources | Target `AGENTS.md`, closest code/test, then Data for shared behavior; architecture and relevant skills only as needed. |
+| Always-known facts | Data owns shared contracts; durable order is render, extract, classify, compose, publish; Azure server changes must comply with the canonical logging policy; no unapproved live writes or Git actions. |
+| Progressively loaded sources | Target `AGENTS.md`, closest code/test, then Data for shared behavior; Azure logging policy for Azure server code; other architecture and relevant skills only as needed. |
 | Excluded knowledge | Assumed volatile commands, undocumented ownership, or standing dependence on legacy agents. |
 | Related repositories/plans | Data, Azure, Render, UI, Studio; architecture and approved significant-change plans. |
 | Allowed tools/actions | Read, edit, search, execute, todo, and bounded read-only subagents; scoped code and test changes. |
@@ -22,8 +22,8 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | --- | --- |
 | Purpose and triggers | Executes an explicitly approved implementation plan or phase range with dependency-aware delegation, integration, review, and validation. |
 | Owned decisions | Phase scheduling, bounded worker assignments, cost-versus-risk model class, integration order, review findings, and acceptance evidence. |
-| Always-known facts | Data-first shared contracts; workers cannot transfer approval; self-delegation is one level only; the parent owns diff inspection, validation, and acceptance. |
-| Progressively loaded sources | Workspace and repository instructions, approved overview and phase files, then TDD, Validation, Reviewing Changes, and other skills only when triggered. |
+| Always-known facts | Data-first shared contracts; Azure server phases carry canonical logging requirements into assignments and review; workers cannot transfer approval; self-delegation is one level only; the parent owns diff inspection, validation, and acceptance. |
+| Progressively loaded sources | Workspace and repository instructions, approved overview and phase files, Azure logging policy when applicable, then TDD, Validation, Reviewing Changes, and other skills only when triggered. |
 | Excluded knowledge | Unapproved plan decisions, permission for protected live operations or Git actions, and trust in a worker report without inspecting current code. |
 | Related repositories/plans | Approved plans across Data, Azure, Render, UI, and Studio. |
 | Allowed tools/actions | Read, edit, search, execute, todo, bounded self-workers, and specialist agents; parallel writes only across independent disjoint manifests. |
@@ -65,7 +65,7 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | Purpose and triggers | Final review, commit-ready assessment, SemVer recommendation, changelog review, and explicitly authorized local commits. |
 | Owned decisions | Readiness findings, validation scope, SemVer recommendation, and whether documentation/release evidence is complete. |
 | Always-known facts | Current code and tests are truth; session evidence suggests review candidates; commits, pushes, tags, and branch rewrites require explicit authorization. |
-| Progressively loaded sources | Status/diff, controlling code/tests, current session evidence, then affected docs, indexes, maps, and changelogs. |
+| Progressively loaded sources | Status/diff, controlling code/tests, Azure logging policy for Azure server changes, current session evidence, then affected docs, indexes, maps, and changelogs. |
 | Excluded knowledge | Authority to deploy, push, tag, mutate remote state, or infer commit approval. |
 | Related repositories/plans | Changed product repositories, release metadata, and Project Knowledge outputs. |
 | Allowed tools/actions | Read, edit, search, execute, todo, and review-oriented subagents; local commit only after explicit authorization. |

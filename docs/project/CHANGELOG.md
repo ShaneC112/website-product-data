@@ -2,6 +2,10 @@
 
 All notable cross-repository documentation, workflow, and workspace-customization changes are recorded here.
 
+## Unreleased
+
+- Added the canonical Azure structured-logging policy, split repository implementation guidance from durable policy decisions, and required implementation and review agents to enforce logger, context, redaction, message-quality, and level rules for Azure server changes.
+
 ## 0.2.0 - 2026-09-06
 
 - Documented the source-verified image-generation v2 queue-only Sanity-to-Azure boundary, Azure direct projection ownership, removed write HTTP ingress, and the remaining Phase 18 readiness gaps; no deployment or live verification is claimed.

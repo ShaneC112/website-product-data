@@ -19,6 +19,7 @@ Read these documents in order when changing a cross-repository feature:
 
 - [Domain language](domain-language.md): canonical identity, pipeline, evidence, and publication terms used across repositories.
 - [Pipeline and durability](pipeline-and-durability.md): stage progression, durable state, recovery, and retry boundaries.
+- [Azure logging policy](azure-logging.md): mandatory structured logging, context, redaction, and level decisions for Azure server code.
 - [Identity and contracts](identity-and-contracts.md): Data-first contracts and product identity invariants.
 - [Evidence and extraction](evidence-and-extraction.md): capture outputs, bounded storage, and extraction behavior.
 - [Sanity and operator workflows](sanity-and-operator-workflows.md): bridge and publish gates, editorial workflows, and registry synchronization.

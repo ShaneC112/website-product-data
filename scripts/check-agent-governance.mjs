@@ -15,6 +15,7 @@ const managedAgentFiles = [
 ]
 const requiredScenarioIds = [
   'data-first-contract-routing',
+  'azure-logging-policy-enforcement',
   'selective-recovery-learning-lookup',
   'script-reuse-and-guarded-creation',
   'readonly-victoria-m2crm-lookup',
