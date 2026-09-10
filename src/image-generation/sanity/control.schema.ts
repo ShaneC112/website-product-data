@@ -4,6 +4,7 @@ import { imageGenerationSubmissionOutcomeSchema, imageGenerationSubmissionStateS
 const guardedControlOperationSchema = z.enum([
   'pattern.validate',
   'request.duplicate',
+  'template.delete',
   'template.reset',
   'template.rebind',
   'request.refreshPolicy'
@@ -41,6 +42,12 @@ const imageGenerationTemplateResetControlBaseSchema = guardedControlBaseSchema.e
   targetRunEpoch: z.number().int().nonnegative().optional()
 }).strict()
 
+export const imageGenerationTemplateDeleteControlSchema = guardedControlBaseSchema.extend({
+  operation: z.literal('template.delete'),
+  templateId: z.string().trim().min(1),
+  expectedTemplateRevision: z.string().trim().min(1)
+}).strict()
+
 export const imageGenerationTemplateResetControlSchema = imageGenerationTemplateResetControlBaseSchema.superRefine((value, context) => {
   const hasRunId = typeof value.targetRunId === 'string'
   const hasRunEpoch = typeof value.targetRunEpoch === 'number'
@@ -73,6 +80,7 @@ export const imageGenerationRequestRefreshPolicyControlSchema = guardedControlBa
 export const imageGenerationGuardedControlRequestSchema = z.discriminatedUnion('operation', [
   imageGenerationPatternValidateControlSchema,
   imageGenerationRequestDuplicateControlSchema,
+  imageGenerationTemplateDeleteControlSchema,
   imageGenerationTemplateResetControlBaseSchema,
   imageGenerationTemplateRebindControlSchema,
   imageGenerationRequestRefreshPolicyControlSchema
@@ -196,6 +204,21 @@ export function buildImageGenerationTemplateResetControl(input: {
     expectedTemplateRevision: input.expectedTemplateRevision,
     targetRunId: input.targetRunId,
     targetRunEpoch: input.targetRunEpoch
+  })
+}
+
+export function buildImageGenerationTemplateDeleteControl(input: {
+  controlId: string
+  requestedAt: string
+  templateId: string
+  expectedTemplateRevision: string
+}): z.infer<typeof imageGenerationTemplateDeleteControlSchema> {
+  return imageGenerationTemplateDeleteControlSchema.parse({
+    operation: 'template.delete',
+    controlId: input.controlId,
+    requestedAt: input.requestedAt,
+    templateId: input.templateId,
+    expectedTemplateRevision: input.expectedTemplateRevision
   })
 }
 

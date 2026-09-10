@@ -4,7 +4,7 @@ import { cameraPolicySchema } from './camera-policy.schema.js'
 import { normalizedColourDesignSchema } from './colour-design.schema.js'
 import { normalizedFullProductSchema } from './product-ingress.schema.js'
 import { normalizedRoomSchema } from './room.schema.js'
-import { normalizedSceneSchema } from './scene.schema.js'
+import { legacyNormalizedSceneSchema, normalizedSceneSchema } from './scene.schema.js'
 
 const textureCompletedValueSchema = z.object({
   kind: z.literal('completed'),
@@ -84,6 +84,11 @@ export const promptCacheValueSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('scene'),
     schemaVersion: z.literal(1),
+    value: legacyNormalizedSceneSchema
+  }).strict(),
+  z.object({
+    type: z.literal('scene'),
+    schemaVersion: z.literal(2),
     value: normalizedSceneSchema
   }).strict()
 ])

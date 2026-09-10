@@ -7,6 +7,7 @@ import {
   buildImageGenerationTemplateResetAuditEntry,
   buildImageGenerationPatternValidateControl,
   buildImageGenerationTemplateRebindControl,
+  buildImageGenerationTemplateDeleteControl,
   buildImageGenerationTemplateResetControl,
   diffImageGenerationRequestPolicySnapshot,
   hashImageGenerationRequestPolicySnapshot,
@@ -682,6 +683,13 @@ describe('guarded control schemas', () => {
       targetRunId: 'run-1',
       targetRunEpoch: 2
     })).toEqual(expect.objectContaining({operation: 'template.reset'}))
+
+    expect(buildImageGenerationTemplateDeleteControl({
+      controlId: 'control-delete',
+      requestedAt: '2026-09-06T00:00:00.000Z',
+      templateId: 'template-1',
+      expectedTemplateRevision: 'rev-1'
+    })).toEqual(expect.objectContaining({operation: 'template.delete'}))
 
     expect(buildImageGenerationTemplateRebindControl({
       controlId: 'control-6',
