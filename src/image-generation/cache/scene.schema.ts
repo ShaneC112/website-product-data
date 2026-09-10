@@ -68,26 +68,6 @@ export const sceneStructuredSectionsSchema = z.object({
   }).strict()
 }).strict()
 
-export const legacyNormalizedSceneSchema = z.object({
-  version: z.literal(1),
-  documentKey: z.string().trim().min(1),
-  sceneKey: z.string().trim().min(1),
-  roomKey: z.string().trim().min(1),
-  roomFingerprint: z.string().length(64),
-  productFingerprint: z.string().length(64),
-  productContribution: z.string().trim().min(1),
-  sceneDesignBrief: z.string().trim().min(20),
-  roomCategory: z.enum(SANITY_SUITABLE_ROOMS),
-  tradeProductType: z.enum(SANITY_PRODUCT_TYPES),
-  colourDesignFingerprint: z.string().length(64),
-  lighting: z.string().trim().min(1),
-  fashion: z.string().trim().min(1),
-  tone: z.string().trim().min(1),
-  furnitureTier: z.string().trim().min(1),
-  sceneGenerationVersion: z.literal(1),
-  semanticFingerprint: z.string().length(64)
-}).strict()
-
 export const sceneArtifactSchema = z.object({
   artifactVersion: z.literal(1),
   artifactKind: z.literal('scene'),
