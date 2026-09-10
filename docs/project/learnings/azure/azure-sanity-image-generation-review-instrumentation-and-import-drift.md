@@ -8,17 +8,15 @@
 
 ## Sanity image generation review: instrumentation and import drift
 
-Reviewing the new `sanityImage*` functions/services against the established `traceImageGenerationEvent`
-pattern (enqueue, prepare, generate, status) found two inconsistencies once every file was compared
-side by side:
+Reviewing the legacy room-image functions/services against the established `traceImageGenerationEvent`
+pattern found two inconsistencies once every file was compared side by side:
 
-- `sanityImagePrepareWorker.ts` computed a prompt hash via `(await import('../services/tableStorage')).computeHash(...)`
-  instead of the static `computeHash` import every sibling file uses. A dynamic import in a hot queue-trigger
-  path has no behavioral upside here and is easy to miss when auditing imports for a module.
-- `sanityImageAutoCreate.ts` (the `autoCreate` fast-path that enqueues generation immediately after a
-  successful prepare) was the only file in the feature with no `traceImageGenerationEvent` calls at all,
-  so an auto-created run's queued/failed transitions were invisible to the same diagnostics every
-  manually-triggered run gets.
+- The prepare worker computed a prompt hash via a dynamic `tableStorage` import instead of the static
+  `computeHash` import every sibling file used. A dynamic import in a hot queue-trigger path had no
+  behavioral upside and was easy to miss when auditing imports for a module.
+- The `autoCreate` fast-path that enqueued generation immediately after a successful prepare was the
+  only file in the feature with no `traceImageGenerationEvent` calls at all, so an auto-created run's
+  queued/failed transitions were invisible to the same diagnostics every manually-triggered run got.
 
 **Best practice:** when a feature establishes a logging/tracing convention across several sibling files,
 diff all of them together before merging, not just the one under active development - drift shows up as

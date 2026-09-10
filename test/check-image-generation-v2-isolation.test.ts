@@ -157,11 +157,11 @@ describe('checkImageGenerationV2Isolation', () => {
     const source = [
       "import {type DocumentActionComponent, type DocumentActionsContext} from 'sanity'",
       "import {createRoomImageRequestAction} from '../components/CreateRoomImageRequestAction'",
-      "import {dismissRoomImageRequestAction} from '../components/DismissRoomImageRequestAction'",
+      "import {createImageryV2Action} from '../components/image-generation-v2/CreateImageryV2Action'",
       '',
       'export function resolveDocumentActions(previous: DocumentActionComponent[], context: DocumentActionsContext): DocumentActionComponent[] {',
       "  if (context.schemaType === 'product') {",
-      '    return [...previous, createRoomImageRequestAction as DocumentActionComponent, dismissRoomImageRequestAction as DocumentActionComponent, requeueProductAction as DocumentActionComponent]',
+      '    return [...previous, createRoomImageRequestAction as DocumentActionComponent, createImageryV2Action as DocumentActionComponent]',
       '  }',
       '',
       '  return previous',
@@ -173,7 +173,8 @@ describe('checkImageGenerationV2Isolation', () => {
 
     expect(result.removed).toBe('remove-room-image-document-action')
     expect(result.source).not.toContain('createRoomImageRequestAction')
-    expect(result.source).not.toContain("context.schemaType === 'product'")
+    expect(result.source).toContain("context.schemaType === 'product'")
+    expect(result.source).toContain('createImageryV2Action')
   })
 
   it('removes the legacy room-image Blueprint function with a structure-aware transform', async () => {

@@ -194,186 +194,6 @@ export const publishJobSchema = z.object({
   runId: z.string().trim().min(1).optional()
 })
 
-const sanityImageSettingsSchema = z.object({
-  aspectRatio: z.enum(['3:2', '4:3', '1:1', '16:9']).default('3:2'),
-  imagePromptStrength: z.number().min(0).max(1).default(0.85),
-  productSpecOverride: z.string().max(8000).optional(),
-  lightingDirectiveOverride: z.string().max(8000).optional(),
-  customInstructions: z.string().max(8000).optional()
-})
-
-const sanityImageSpecSchema = z.object({
-  key: z.string().trim().min(1),
-  label: z.string().trim().min(1),
-  value: z.string().trim().min(1)
-})
-
-const sanityImageVariantSchema = z.object({
-  variantId: z.string().trim().min(1),
-  colourName: z.string().trim().min(1),
-  colourFamily: z.string().trim().min(1).optional(),
-  hex: z.string().regex(/^#[0-9a-f]{6}$/i).optional(),
-  surfaceAppearance: surfaceAppearanceSchema.optional(),
-  swatchUrl: httpsUrlSchema,
-  patternRepeatCm: z.number().positive().optional(),
-  repeatsInSwatch: z.number().int().positive().optional(),
-  specs: z.array(sanityImageSpecSchema).default([])
-})
-
-export const sanityImageFurnitureStyleSchema = z.enum([
-  'ikea', 'jysk', 'next-home', 'dfs', 'harvey-norman', 'marks-and-spencer-home',
-  'habitat', 'west-elm', 'boconcept', 'hay', 'muuto', 'ligne-roset', 'minotti', 'poliform'
-])
-
-export const sanityImageInteriorFashionSchema = z.enum([
-  'contemporary', 'scandinavian', 'japandi', 'minimalist', 'mid-century-modern',
-  '1970s-revival', '1980s-postmodern', 'art-deco', 'industrial', 'edwardian',
-  'victorian', 'georgian', 'country-cottage', 'coastal'
-])
-
-export const sanityImageStatementToneSchema = z.enum(['none', 'restrained', 'subtle', 'balanced', 'bold', 'dramatic'])
-
-const sanityImageDesignSchema = z.object({
-  selectionKey: z.string().trim().min(1),
-  furnitureStyle: sanityImageFurnitureStyleSchema,
-  interiorFashion: sanityImageInteriorFashionSchema,
-  statementTone: sanityImageStatementToneSchema.default('balanced'),
-  lighting: z.enum(['morning', 'afternoon', 'sunset']),
-  pipeline: z.enum(['direct', 'patterned-kontext']),
-  generationProfile: z.enum(IMAGE_GENERATION_PROFILE_KEYS),
-  presetId: z.string().trim().min(1).optional(),
-  presetKey: z.string().trim().min(1).optional(),
-  presetTitle: z.string().trim().min(1).optional(),
-  presetVersion: z.number().int().positive().optional()
-})
-
-const sanityImageCommandBaseSchema = z.object({
-  commandId: z.string().trim().min(1),
-  requestId: z.string().trim().min(1),
-  sanityProjectId: z.string().trim().min(1),
-  sanityDataset: z.string().trim().min(1),
-  sanityDocumentId: z.string().trim().min(1),
-  requestKey: z.string().trim().min(1),
-  totalRuns: z.number().int().positive(),
-  requestedAt: z.string().datetime()
-})
-const sanityImageUserHintSchema = z.string()
-  .trim()
-  .min(1)
-  .max(300)
-  .refine((value) => !/[\r\n]/.test(value), 'userHint must be a single line')
-
-const sanityImageGenerateRunSchema = z.object({
-  runId: z.string().trim().min(1),
-  variantId: z.string().trim().min(1),
-  colourName: z.string().trim().min(1),
-  productType: z.enum(SANITY_PRODUCT_TYPES),
-  surfaceAppearance: surfaceAppearanceSchema.optional(),
-  room: z.string().trim().min(1),
-  pipeline: z.enum(['direct', 'patterned-kontext']),
-  generationProfile: z.enum(IMAGE_GENERATION_PROFILE_KEYS),
-  finalPrompt: z.string().trim().min(1).max(16000),
-  swatchUrl: httpsUrlSchema,
-  patternRepeatCm: z.number().positive().optional(),
-  repeatsInSwatch: z.number().int().positive().optional(),
-  texturePrompt: z.string().trim().min(40).max(2400).optional(),
-  textureSourceFingerprint: z.string().regex(/^[a-f0-9]{64}$/).optional()
-}).superRefine((run, ctx) => {
-  const hasTexturePrompt = typeof run.texturePrompt === 'string'
-  const hasTextureSourceFingerprint = typeof run.textureSourceFingerprint === 'string'
-
-  if (hasTexturePrompt !== hasTextureSourceFingerprint) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['texturePrompt'],
-      message: 'texturePrompt and textureSourceFingerprint must be provided together'
-    })
-  }
-})
-
-export const sanityImagePrepareCommandSchema = sanityImageCommandBaseSchema.extend({
-  phase: z.literal('prepare'),
-  autoCreate: z.boolean().default(true),
-  userHint: sanityImageUserHintSchema.optional(),
-  product: z.object({
-    name: z.string().trim().min(1),
-    productType: z.enum(SANITY_PRODUCT_TYPES),
-    brand: z.string().trim().optional(),
-    shortDescription: z.string().optional(),
-    features: z.array(z.string()).default([]),
-    specs: z.array(sanityImageSpecSchema).default([])
-  }),
-  variants: z.array(sanityImageVariantSchema).min(1),
-  rooms: z.array(z.string().trim().min(1)).min(1),
-  design: sanityImageDesignSchema,
-  layDirection: z.enum(IMAGE_LAY_DIRECTIONS).optional(),
-  customLayDirection: z.string().trim().min(1).max(100).optional(),
-  settings: sanityImageSettingsSchema.default({})
-}).superRefine((command, ctx) => {
-  for (const [path, values] of [
-    ['variants', command.variants.map((variant) => variant.variantId)],
-    ['rooms', command.rooms]
-  ] as const) {
-    if (new Set(values).size !== values.length) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: [path], message: `${path} must be unique` })
-    }
-  }
-  const layDirectionOptions = IMAGE_GENERATION_PRODUCT_REGISTRY[command.product.productType].layDirectionOptions
-  if (layDirectionOptions.length > 0 && !command.layDirection) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['layDirection'], message: `layDirection is required for ${command.product.productType}` })
-  }
-  if (command.layDirection && !isImageLayDirectionAllowed(command.product.productType, command.layDirection)) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['layDirection'], message: `${command.layDirection} is not supported for ${command.product.productType}` })
-  }
-  if (command.layDirection === 'custom' && !command.customLayDirection) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['customLayDirection'], message: 'customLayDirection is required when layDirection is custom' })
-  }
-  if (command.layDirection !== 'custom' && command.customLayDirection) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['customLayDirection'], message: 'customLayDirection is only valid when layDirection is custom' })
-  }
-  if (command.design.pipeline === 'patterned-kontext') {
-    command.variants.forEach((variant, index) => {
-      if (!variant.patternRepeatCm || !variant.repeatsInSwatch) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['variants', index],
-          message: 'patterned-kontext requires patternRepeatCm and repeatsInSwatch'
-        })
-      }
-    })
-  }
-})
-
-export const sanityImageGenerateCommandSchema = sanityImageCommandBaseSchema.extend({
-  phase: z.literal('generate'),
-  settings: sanityImageSettingsSchema.default({}),
-  runs: z.array(sanityImageGenerateRunSchema).min(1)
-}).superRefine((command, ctx) => {
-  const runIds = command.runs.map((run) => run.runId)
-  if (new Set(runIds).size !== runIds.length) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['runs'], message: 'run IDs must be unique' })
-  }
-  command.runs.forEach((run, index) => {
-    if (run.pipeline === 'patterned-kontext' && (!run.swatchUrl || !run.patternRepeatCm || !run.repeatsInSwatch)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['runs', index],
-        message: 'patterned-kontext requires swatchUrl, patternRepeatCm, and repeatsInSwatch'
-      })
-    }
-  })
-})
-
-export const sanityImageCommandSchema = z.union([
-  sanityImagePrepareCommandSchema,
-  sanityImageGenerateCommandSchema
-])
-
-export const sanityImageQueueMessageSchema = z.object({
-  schemaVersion: z.literal(1),
-  jobId: z.string().trim().min(1)
-})
-
 export const sanityActionQueueMessageSchema = z.object({
   schemaVersion: z.literal(1),
   sanityDocumentId: z.string().trim().min(1),
@@ -479,10 +299,6 @@ export type VariantJob = z.infer<typeof variantJobSchema>
 export type TransformJob = z.infer<typeof transformJobSchema>
 export type ImageJob = z.infer<typeof imageJobSchema>
 export type PublishJob = z.infer<typeof publishJobSchema>
-export type SanityImagePrepareCommand = z.infer<typeof sanityImagePrepareCommandSchema>
-export type SanityImageGenerateCommand = z.infer<typeof sanityImageGenerateCommandSchema>
-export type SanityImageCommand = z.infer<typeof sanityImageCommandSchema>
-export type SanityImageQueueMessage = z.infer<typeof sanityImageQueueMessageSchema>
 export type SanityActionQueueMessage = z.infer<typeof sanityActionQueueMessageSchema>
 export type BatchOperation = z.infer<typeof batchOperationSchema>
 export type BatchItemStatus = z.infer<typeof batchItemStatusSchema>
@@ -504,10 +320,6 @@ export const VariantJob = variantJobSchema
 export const TransformJob = transformJobSchema
 export const ImageJob = imageJobSchema
 export const PublishJob = publishJobSchema
-export const SanityImagePrepareCommand = sanityImagePrepareCommandSchema
-export const SanityImageGenerateCommand = sanityImageGenerateCommandSchema
-export const SanityImageCommand = sanityImageCommandSchema
-export const SanityImageQueueMessage = sanityImageQueueMessageSchema
 export const SanityActionQueueMessage = sanityActionQueueMessageSchema
 export const BatchOperation = batchOperationSchema
 export const BatchItemStatus = batchItemStatusSchema

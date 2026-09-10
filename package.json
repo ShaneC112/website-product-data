@@ -189,10 +189,6 @@
       "types": "./dist/storage/stage-ledger.schema.d.ts",
       "default": "./dist/storage/stage-ledger.schema.js"
     },
-    "./storage/sanity-image-generation.schema": {
-      "types": "./dist/storage/sanity-image-generation.schema.d.ts",
-      "default": "./dist/storage/sanity-image-generation.schema.js"
-    },
     "./storage/constants": {
       "types": "./dist/storage/constants.d.ts",
       "default": "./dist/storage/constants.js"

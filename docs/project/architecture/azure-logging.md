@@ -33,6 +33,8 @@ Do not use `info` for each function line, local variable, loop iteration, or dia
 
 Use `warn` when the workflow continues or remains recoverable, but an important data, policy, dependency, fallback, cleanup, or bounded-retry issue occurred.
 
+Use `warn` at the decision boundary when code converts an expected provider, policy, or dependency outcome into a degraded durable state such as `blocked`, `skipped`, or equivalent non-success terminal handling. This applies even when the surrounding worker invocation completes successfully and Azure Functions reports the function execution as succeeded. The warning must be emitted where the workflow decision is made, not only in a lower-level helper, so operators can see the highlighted terminal outcome in local and hosted logs.
+
 Expected idempotency and concurrency paths that complete normally are `debug`, such as a revision-conflict reread that finds an artifact written by another worker. Promote them to `warn` only when they indicate unexpected contention, delay, or data loss.
 
 ### `error`: failed business purpose or unsafe continuation

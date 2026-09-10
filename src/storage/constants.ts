@@ -14,8 +14,6 @@ export const STORAGE_TABLES = {
   crawlExtractBatch: 'webcrawlextractbatch',
   crawlStageLedger: 'webcrawlstageledger',
   crawlStageDispatch: 'webcrawlstagedispatch',
-  sanityImageGeneration: 'sanityimagegeneration',
-  sanityTexturePrompt: 'sanitytextureprompts',
   sanityImageGenerationV2: 'sanityimagegenerationv2',
   sanityImageArtifactsV2: 'sanityimageartifactsv2',
   aiProviderQuotas: 'aiproviderquotas'
@@ -42,8 +40,6 @@ export const STORAGE_QUEUES = {
   crawlImageClassifyBatchJobs: 'crawl-image-classify-batch-jobs',
   publishJobs: 'publish-jobs',
   sanityActions: 'sanity-actions',
-  sanityImagePrepare: 'sanity-image-prepare',
-  sanityImageGenerate: 'sanity-image-generate',
   sanityImageSubmissionV2: 'sanity-image-submission-v2',
   sanityImageResolveV2: 'sanity-image-resolve-v2',
   sanityImageGenerateV2: 'sanity-image-generate-v2',

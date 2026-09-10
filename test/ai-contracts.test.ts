@@ -70,16 +70,12 @@ describe('canonicalAiOperationSchema', () => {
 })
 
 describe('v2 storage identities', () => {
-  it('adds the approved v2 queues and tables without changing v1 values', () => {
-    expect(STORAGE_QUEUES.sanityImagePrepare).toBe('sanity-image-prepare')
-    expect(STORAGE_QUEUES.sanityImageGenerate).toBe('sanity-image-generate')
+  it('adds the approved v2 queues and tables', () => {
     expect(STORAGE_QUEUES.sanityImageResolveV2).toBe('sanity-image-resolve-v2')
     expect(STORAGE_QUEUES.sanityImageGenerateV2).toBe('sanity-image-generate-v2')
     expect(STORAGE_QUEUES.sanityImageAssembleV2).toBe('sanity-image-assemble-v2')
     expect(STORAGE_QUEUES.sanityImageRenderV2).toBe('sanity-image-render-v2')
     expect(STORAGE_QUEUES.sanityImagePersistV2).toBe('sanity-image-persist-v2')
-    expect(STORAGE_TABLES.sanityImageGeneration).toBe('sanityimagegeneration')
-    expect(STORAGE_TABLES.sanityTexturePrompt).toBe('sanitytextureprompts')
     expect(STORAGE_TABLES.sanityImageGenerationV2).toBe('sanityimagegenerationv2')
     expect(STORAGE_TABLES.sanityImageArtifactsV2).toBe('sanityimageartifactsv2')
     expect(STORAGE_TABLES.aiProviderQuotas).toBe('aiproviderquotas')

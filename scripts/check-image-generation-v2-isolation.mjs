@@ -200,6 +200,9 @@ async function applyRegistrationTransforms(temporaryRoot, manifest) {
 function applyStructuredRegistrationTransform(source, mode, file) {
   const sourceFile = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, scriptKindForFile(file))
   let removed = 0
+  const expectedRemovals = mode === 'remove-room-image-document-action'
+    ? (source.includes('createRoomImageRequestAction') ? 1 : 0)
+    : (source.includes("name: 'request-room-images'") ? 1 : 0)
   const transformer = mode === 'remove-room-image-document-action'
     ? (context) => (root) => ts.visitNode(root, function visit(node) {
         if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)
@@ -207,9 +210,25 @@ function applyStructuredRegistrationTransform(source, mode, file) {
           removed += 1
           return undefined
         }
-        if (ts.isIfStatement(node) && containsIdentifier(node.thenStatement, 'createRoomImageRequestAction')) {
-          removed += 1
+        if (ts.isIdentifier(node) && node.text === 'createRoomImageRequestAction') {
           return undefined
+        }
+        if (ts.isAsExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 'createRoomImageRequestAction') {
+          return undefined
+        }
+        if (ts.isArrayLiteralExpression(node)) {
+          const elements = node.elements.filter((element) => {
+            if (ts.isIdentifier(element) && element.text === 'createRoomImageRequestAction') {
+              return false
+            }
+            if (ts.isAsExpression(element) && ts.isIdentifier(element.expression) && element.expression.text === 'createRoomImageRequestAction') {
+              return false
+            }
+            return true
+          })
+          if (elements.length !== node.elements.length) {
+            return ts.factory.updateArrayLiteralExpression(node, elements)
+          }
         }
         return ts.visitEachChild(node, visit, context)
       })
@@ -231,7 +250,7 @@ function applyStructuredRegistrationTransform(source, mode, file) {
 
   if (!transformer) throw new Error(`Unsupported registration transform mode ${mode} in ${file}`)
   const transformed = ts.transform(sourceFile, [transformer]).transformed[0]
-  if (removed !== (mode === 'remove-room-image-document-action' ? 2 : 1)) {
+  if (removed !== expectedRemovals) {
     throw new Error(`Expected exactly one ${mode} registration in ${file}`)
   }
   return {source: ts.createPrinter().printFile(transformed), removed: mode}
