@@ -4,6 +4,7 @@ Canonical managed-agent sources are `website-product-data/workspace-customizatio
 
 | Agent | Authority |
 | --- | --- |
+| Image V2 Prompt Reviewer | Performs read-only provenance and FLUX-quality review for BFL FLUX.2 Pro through Azure AI Foundry across Vision inputs, caches, deterministic renderers, final assembly, render transport, and image adherence. It cannot edit prompts, generate images, connect directly to BFL or FLUX MCP, or mutate pipeline state. |
 | Project Engineer | Owns routine implementation routing, scope classification, focused validation, and plan/QA escalation. It cannot commit, deploy, push, or perform protected live actions without fresh authorization. |
 | Project Implementor | Executes approved plans phase by phase, delegates bounded independent slices to cost-appropriate workers, and retains integration, review, and validation authority. It cannot infer plan approval or transfer protected-operation authority to a worker. |
 | Project Knowledge | Owns canonical documentation, scripts, learnings, project maps, and workspace-customization maintenance in Data. It cannot invent behavior or perform remote mutations or commits. |

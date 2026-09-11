@@ -2,7 +2,7 @@
 
 This ledger records external repositories reviewed for the managed Project agents and the skills selectively adapted from them. Revisions are immutable source snapshots, not a claim that the upstream default branch is still unchanged.
 
-Last reviewed: 2026-09-07
+Last reviewed: 2026-09-11
 
 ## Source Snapshots
 
@@ -12,6 +12,13 @@ Last reviewed: 2026-09-07
 | [EveryInc/compound-engineering-plugin](https://github.com/EveryInc/compound-engineering-plugin) | [`caa3b231452a1cd444261d3c4d46bcd72d3246dd`](https://github.com/EveryInc/compound-engineering-plugin/commit/caa3b231452a1cd444261d3c4d46bcd72d3246dd) | 2026-09-07 | [`ce-work`](https://github.com/EveryInc/compound-engineering-plugin/blob/caa3b231452a1cd444261d3c4d46bcd72d3246dd/skills/ce-work/SKILL.md), [`ce-code-review`](https://github.com/EveryInc/compound-engineering-plugin/blob/caa3b231452a1cd444261d3c4d46bcd72d3246dd/skills/ce-code-review/SKILL.md), and [`ce-simplify-code`](https://github.com/EveryInc/compound-engineering-plugin/blob/caa3b231452a1cd444261d3c4d46bcd72d3246dd/skills/ce-simplify-code/SKILL.md) |
 | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) | [`974d940a1c5344210874150b98ff0d2c861fab6a`](https://github.com/DietrichGebert/ponytail/commit/974d940a1c5344210874150b98ff0d2c861fab6a) | 2026-09-04 | [`ponytail-review`](https://github.com/DietrichGebert/ponytail/blob/974d940a1c5344210874150b98ff0d2c861fab6a/skills/ponytail-review/SKILL.md) |
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | [`48cb1168aeaaa70dfc2bbf709eddfa2a8ed8129a`](https://github.com/addyosmani/agent-skills/commit/48cb1168aeaaa70dfc2bbf709eddfa2a8ed8129a) | 2026-09-06 | [`source-driven-development`](https://github.com/addyosmani/agent-skills/blob/48cb1168aeaaa70dfc2bbf709eddfa2a8ed8129a/skills/source-driven-development/SKILL.md) |
+| [black-forest-labs/skills](https://github.com/black-forest-labs/skills) | [`8907d515b0ac270a988ec7a239add81ee13d6cba`](https://github.com/black-forest-labs/skills/commit/8907d515b0ac270a988ec7a239add81ee13d6cba) | 2026-08-28 | [`flux-image-best-practices`](https://github.com/black-forest-labs/skills/blob/8907d515b0ac270a988ec7a239add81ee13d6cba/skills/flux-image-best-practices/SKILL.md) |
+
+## Reviewed But Not Integrated
+
+| Upstream | Reviewed revision | Decision |
+| --- | --- | --- |
+| [black-forest-labs/flux-mcp](https://github.com/black-forest-labs/flux-mcp) | [`cc2e57d9a702cfeec892ee405be36797da552dd8`](https://github.com/black-forest-labs/flux-mcp/commit/cc2e57d9a702cfeec892ee405be36797da552dd8) | Excluded. It is a hosted, OAuth-only client for generation, editing, variations, history, and BFL-direct billing at `mcp.bfl.ai`. This project uses BFL FLUX.2 Pro through Azure AI Foundry; the MCP's prompt tips duplicate the integrated static skill and its operational tools would bypass the project's provider boundary. |
 
 ## Local Integrations
 
@@ -24,6 +31,7 @@ Last reviewed: 2026-09-07
 | `source-grounded-development` | `addyosmani/agent-skills` | Version-aware first-party documentation checks, separation of external facts from local decisions, prompt-injection restraint for fetched material, and explicit source recording. It does not authorize upgrades, migrations, architecture changes, or remote actions. | Project Engineer and Project Planner use it for unfamiliar or version-sensitive external APIs. |
 | `test-driven-development` | `mattpocock/skills` and `addyosmani/agent-skills` | Stable public seams, independent expected values, red-green behavioral slices, characterization exceptions, and parent-witnessed delegated test work. Repository commands and broader gates remain owned by Product Enrichment Validation. | Project Implementor uses it for planned logic, behavior changes, and bug fixes. |
 | `reviewing-changes` | `mattpocock/skills`, `EveryInc/compound-engineering-plugin`, and `addyosmani/agent-skills` | Independent plan-fidelity and engineering-quality lenses, fresh-context adversarial review, parent reconciliation, severity, and bounded review cycles. External review automation, commits, PR operations, and upstream artifact conventions were excluded. | Project Implementor uses it before phase acceptance; Project QA Commit retains final release readiness. |
+| `image-v2-flux-prompt-review` | `black-forest-labs/skills` | FLUX prompt structure, specificity, natural-language, front-loading, lighting, colour, typography, conceptual reference-role, prompt-length, and negative-prompt guidance, integrated with the local Vision/cache/assembly/render provenance chain and read-only safety boundaries. Direct BFL API/MCP operations, provider payloads, model switching, pricing, and unrelated generation modes were excluded. | Image V2 Prompt Reviewer uses it for provenance-aware prompt and output-image quality review of Azure-hosted BFL FLUX.2 Pro. |
 
 The upstream suites were not installed wholesale. Their lifecycle automation, repository-specific routers, autonomous commit or pull-request behavior, tool assumptions, and conflicting documentation conventions were deliberately excluded. Local agent ownership, approval gates, package-manager rules, validation order, and canonical publication remain controlling.
 
@@ -38,6 +46,7 @@ All adapted sources above are MIT-licensed. The full notices retained for redist
 - [`source-grounded-development/UPSTREAM.md`](../skills/source-grounded-development/UPSTREAM.md)
 - [`test-driven-development/UPSTREAM.md`](../skills/test-driven-development/UPSTREAM.md)
 - [`reviewing-changes/UPSTREAM.md`](../skills/reviewing-changes/UPSTREAM.md)
+- [`image-v2-flux-prompt-review/UPSTREAM.md`](../skills/image-v2-flux-prompt-review/UPSTREAM.md)
 
 When adapting more upstream material, update the applicable notice as well as this ledger. Do not replace a full retained notice with this summary.
 

@@ -15,6 +15,7 @@ Load the `writing-for-agents` skill when creating or editing `AGENTS.md`, custom
 
 ## Responsibilities
 
+- Review Image V2 Prompt Reviewer knowledge handoffs as candidates, not established facts. Verify the cited implementation, test, trace, run, and external-source evidence; search existing learnings, architecture, decisions, operations, and future notes for overlap; then accept, merge, relocate, reject, or block each candidate. For accepted evidence-backed knowledge, create or amend the narrowest canonical document and required index. Return the chosen paths, disposition, rationale, and validation result to the reviewer. Do not turn a code smell, recommendation, one-off symptom, provider assumption, or unverified hypothesis into a learning.
 - Review planner-produced `plan/<topic>/documentation-handoff.md` files as recommendations, not authoritative facts. Verify the cited code and current documentation, decide whether each recommendation is accepted, revised, relocated, merged, or rejected, and own every resulting canonical documentation edit.
 - Before accepting a planner recommendation, search the existing documentation hierarchy for the same fact or intent. Amend and link existing focused documents where possible; do not duplicate knowledge because the planner missed an existing source.
 - Keep documentation hierarchical: an index should route readers to focused detail pages instead of growing into a catch-all.
@@ -30,6 +31,6 @@ Load the `writing-for-agents` skill when creating or editing `AGENTS.md`, custom
 
 Do not invent commands, safety guarantees, or architecture. Validate links and scripts after editing. Leave root documents as redirect stubs only after inbound references have been migrated. Do not deploy, mutate shared services, or commit unless the user explicitly authorizes it.
 
-For a planner handoff, record which recommendations were accepted, revised, relocated, merged, or rejected and why. A plan decision or proposed future design becomes canonical documentation only when implementation status and repository evidence support the wording. The planner does not authorize architecture changes or choose the final documentation destination.
+For a planner or Image V2 Prompt Reviewer handoff, record which recommendations or candidates were accepted, revised, relocated, merged, rejected, or blocked and why. A plan decision, review finding, or proposed future design becomes canonical documentation only when implementation status and repository evidence support the wording. The originating agent does not authorize architecture changes or choose the final documentation destination.
 
 When a request proposes a design marked future-only, do not infer approval to implement it. Locate and cite the canonical future note, state its reconsideration trigger and current boundary, and recommend a scoped, approved implementation plan only after the trigger has concrete evidence. For vendor/trade stage-flow requests, cite `website-product-data/docs/project/future/vendor-trade-stage-flows.md`.

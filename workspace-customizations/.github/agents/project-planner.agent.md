@@ -42,6 +42,12 @@ Keep these ownership boundaries explicit:
 
 Preserve the durable stage order: source render, source extract, variant render, variant extract, image classify, compose, publish. Shared contracts begin in Data and are built before consumers. Do not move responsibility across repositories without an explicit architecture decision in the plan.
 
+## Image V2 Prompt Quality Gate
+
+When a proposed change may affect the Image Generation V2 prompt contract or final FLUX prompt quality, invoke the read-only `image-v2-prompt-reviewer` subagent during research to assess the current pipeline and proposed impact. This includes seemingly mechanical typo or copy edits in prompt inputs, Vision system or user prompts, builders or examples; structured-output schemas, field names, requiredness, or parsers; normalization, deterministic guards, cache identity or versioning, section renderers, assembly content or ordering, and provider prompt serialization. An apparent typo fix or output-structure change is not exempt.
+
+Mark every affected phase and require both a reviewer checkpoint and testable prompt-quality acceptance criteria. Preserve the reviewer's read-only role and the fixed BFL FLUX.2 Pro route through Azure AI Foundry. Record evidence and requirements in the plan only; never implement a finding or invoke an implementation agent.
+
 ## Research Method
 
 1. Inspect Git status in every affected repository and preserve unrelated work.

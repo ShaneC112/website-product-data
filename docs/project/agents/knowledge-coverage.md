@@ -2,18 +2,32 @@
 
 Maintained responsibility matrix for the managed workspace agents and skills. Canonical sources are listed in [workspace customizations](../../../workspace-customizations/agents/README.md); legacy root agents are excluded.
 
+## Image V2 Prompt Reviewer
+
+| Responsibility | Coverage |
+| --- | --- |
+| Purpose and triggers | Handles the exact `review flux pipeline` command and read-only quality review of Image Generation V2 FLUX prompts, Vision-generated fragments, cache provenance, render handoff, and final-image adherence. |
+| Owned decisions | Full prompt-producer inventory, earliest responsible defect layer, finding severity, provenance completeness, prioritized stage improvements, durable-knowledge candidate classification and handoff, and `READY`, `REVISE`, or `INSUFFICIENT EVIDENCE` verdict. |
+| Always-known facts | The project uses BFL FLUX.2 Pro through Azure AI Foundry, never direct BFL or FLUX MCP; final prompt quality cannot be separated from fragment provenance; matching assembly/render hashes prove transport fidelity but not visual adherence; orchestrator quality gates do not transfer implementation ownership. |
+| Progressively loaded sources | Image V2 FLUX Prompt Review skill, supplied run artifact or image, Azure instructions, generating prompts and schemas, normalization/cache/renderers, assembly, render route, and the prompt-provenance learning. |
+| Excluded knowledge | Prompt edits, image generation, direct BFL/MCP access, model switching, queue/state mutation, deployment, Sanity writes, commits, and direct-API assumptions not implemented by the Azure adapter. |
+| Related repositories/plans | Azure Image Generation V2 implementation, Data image-generation contracts, template/run artifacts, and official BFL prompt guidance. |
+| Allowed tools/actions | Read, search, bounded local execution, web reference checks, visual inspection, and Project Knowledge delegation for evidence-backed canonical documentation; no implementation edits. |
+| Overlap/hand-off | Engineer requests pre-edit and settled-change review; Planner requests current/proposed-impact research and writes checkpoints; Implementor requests pre-change and settled-phase review; QA Commit requests final-diff review and owns release findings. Project Engineer owns fixes, Project Knowledge owns durable discoveries, and the reviewer remains read-only. |
+| Latest verification evidence | Canonical agent and skill sources; `image-v2-flux-provenance-review`; `npm run agents:check`; `npm run workspace:sync:check`. |
+
 ## Project Engineer
 
 | Responsibility | Coverage |
 | --- | --- |
 | Purpose and triggers | Primary implementation, debugging, and review agent for product-enrichment work. |
 | Owned decisions | Routine versus significant scope, local implementation path, focused validation, and when to recommend a plan or QA review. |
-| Always-known facts | Data owns shared contracts; durable order is render, extract, classify, compose, publish; Azure server changes must comply with the canonical logging policy; no unapproved live writes or Git actions. |
+| Always-known facts | Data owns shared contracts; durable order is render, extract, classify, compose, publish; Azure server changes must comply with the canonical logging policy; prompt-affecting work requires read-only Image V2 review before edits and on the settled change; no unapproved live writes or Git actions. |
 | Progressively loaded sources | Target `AGENTS.md`, closest code/test, then Data for shared behavior; Azure logging policy for Azure server code; other architecture and relevant skills only as needed. |
 | Excluded knowledge | Assumed volatile commands, undocumented ownership, or standing dependence on legacy agents. |
 | Related repositories/plans | Data, Azure, Render, UI, Studio; architecture and approved significant-change plans. |
 | Allowed tools/actions | Read, edit, search, execute, todo, and bounded read-only subagents; scoped code and test changes. |
-| Overlap/hand-off | Hands durable docs/scripts to Project Knowledge; sends release readiness and mixed-worktree review to Project QA Commit; uses Architecture for ownership. |
+| Overlap/hand-off | Hands prompt provenance and quality review to Image V2 Prompt Reviewer without transferring implementation; hands durable docs/scripts to Project Knowledge; sends release readiness and mixed-worktree review to Project QA Commit; uses Architecture for ownership. |
 | Latest verification evidence | Canonical agent source; `npm run agents:check`; [acceptance scenarios](acceptance-scenarios.md). |
 
 ## Project Implementor
@@ -22,26 +36,26 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | --- | --- |
 | Purpose and triggers | Executes an explicitly approved implementation plan or phase range with dependency-aware delegation, integration, review, and validation. |
 | Owned decisions | Phase scheduling, bounded worker assignments, cost-versus-risk model class, integration order, review findings, and acceptance evidence. |
-| Always-known facts | Data-first shared contracts; Azure server phases carry canonical logging requirements into assignments and review; workers cannot transfer approval; self-delegation is one level only; the parent owns diff inspection, validation, and acceptance. |
+| Always-known facts | Data-first shared contracts; Azure server phases carry canonical logging requirements into assignments and review; prompt-affecting phases require reviewer evidence before changes and on the settled diff; workers cannot transfer approval; the parent owns diff inspection, validation, and acceptance. |
 | Progressively loaded sources | Workspace and repository instructions, approved overview and phase files, Azure logging policy when applicable, then TDD, Validation, Reviewing Changes, and other skills only when triggered. |
 | Excluded knowledge | Unapproved plan decisions, permission for protected live operations or Git actions, and trust in a worker report without inspecting current code. |
 | Related repositories/plans | Approved plans across Data, Azure, Render, UI, and Studio. |
 | Allowed tools/actions | Read, edit, search, execute, todo, bounded self-workers, and specialist agents; parallel writes only across independent disjoint manifests. |
-| Overlap/hand-off | Receives approved plans from Project Planner or Engineer; uses Project Knowledge for durable documentation and Project QA Commit for final release readiness. |
+| Overlap/hand-off | Receives approved plans from Project Planner or Engineer; uses Image V2 Prompt Reviewer read-only at prompt-affecting phase entry and acceptance, then independently reconciles findings; uses Project Knowledge for durable documentation and Project QA Commit for final release readiness. |
 | Latest verification evidence | Canonical agent source; `project-implementor-cost-aware-parallel-review`; `npm run agents:evaluate:check`; `npm run agents:check`. |
 
 ## Project Knowledge
 
 | Responsibility | Coverage |
 | --- | --- |
-| Purpose and triggers | Maintains project docs, README hierarchy, AGENTS, reusable scripts, learnings, maps, and workspace customizations. |
-| Owned decisions | Canonical knowledge destination, hierarchy, domain vocabulary, planner-handoff acceptance/revision/rejection, evidence-backed learning shape, script documentation, and customization publication source. |
+| Purpose and triggers | Maintains project docs, README hierarchy, AGENTS, reusable scripts, learnings, maps, workspace customizations, and evidence-backed Image V2 FLUX knowledge handoffs. |
+| Owned decisions | Canonical knowledge destination, hierarchy, domain vocabulary, planner and Image V2 reviewer handoff acceptance/merge/relocation/rejection/blocking, evidence-backed learning shape, script documentation, and customization publication source. |
 | Always-known facts | Canonical cross-repository knowledge lives in Data; customizations are edited only under `workspace-customizations/`. |
 | Progressively loaded sources | Project README, domain language when terminology is involved, relevant repository README/learning index, and closest operational script or implementation. |
 | Excluded knowledge | Invented commands, guarantees, architecture, production behavior, versions, or changelog claims. |
 | Related repositories/plans | All five product repositories; docs, scripts, learnings, migration, future, and decision plans. |
 | Allowed tools/actions | Read, edit, search, execute, todo, and bounded discovery; documentation and customization maintenance. |
-| Overlap/hand-off | Reviews Planner documentation recommendations, independently verifies facts and duplication, owns canonical edits, receives durable knowledge changes from Engineer, and supplies documentation review evidence to QA Commit. |
+| Overlap/hand-off | Reviews Planner recommendations and Image V2 FLUX knowledge candidates, independently verifies facts and duplication, owns canonical edits, receives durable knowledge changes from Engineer, and supplies documentation review evidence to QA Commit. |
 | Latest verification evidence | `npm run docs:check`; `npm run scripts:index:check`; `npm run workspace:sync:check`; `npm run agents:check`. |
 
 ## Project Planner
@@ -50,12 +64,12 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | --- | --- |
 | Purpose and triggers | Researches significant or unclear changes and writes implementation-ready plans before code changes begin. |
 | Owned decisions | Plan decomposition, dependency order, explicit assumptions and unknowns, acceptance criteria, approval boundaries, rollback/recovery requirements, and self-contained implementation handoff detail. |
-| Always-known facts | Repository ownership, durable stage order, Data-first shared contracts, and the absolute prohibition on implementing a phase. |
+| Always-known facts | Repository ownership, durable stage order, Data-first shared contracts, prompt-affecting plans require reviewer research/checkpoints and quality criteria, and the absolute prohibition on implementing a phase. |
 | Progressively loaded sources | Workspace/Data instructions, architecture README and project map, relevant detail pages and learnings, repository docs, then controlling code and tests; phase files retain the targeted sources the implementer needs. |
 | Excluded knowledge | Unverified current behavior, implicit product decisions, implementation authority, and permission to mutate live services or Git state. |
 | Related repositories/plans | All five product repositories, `plan/<topic>/` overview/phase sets, and canonical current-state architecture docs. |
 | Allowed tools/actions | Broad read-only repository/web/MCP research; writes only to the active plan topic folder, including a documentation recommendation handoff. |
-| Overlap/hand-off | Receives significant-change routing from Project Engineer; submits `documentation-handoff.md` to Project Knowledge for independent review and final canonical decisions; stops after requesting plan approval, then hands approved execution back to Engineer or a named plan implementer. |
+| Overlap/hand-off | Uses Image V2 Prompt Reviewer read-only for current-pipeline and proposed-impact evidence; submits `documentation-handoff.md` to Project Knowledge; stops after requesting plan approval, then hands approved execution back to Engineer or Project Implementor. |
 | Latest verification evidence | Canonical agent source; `npm run agents:check`; [acceptance scenarios](acceptance-scenarios.md). |
 
 ## Project QA Commit
@@ -64,12 +78,12 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | --- | --- |
 | Purpose and triggers | Final review, commit-ready assessment, SemVer recommendation, changelog review, and explicitly authorized local commits. |
 | Owned decisions | Readiness findings, validation scope, SemVer recommendation, and whether documentation/release evidence is complete. |
-| Always-known facts | Current code and tests are truth; session evidence suggests review candidates; commits, pushes, tags, and branch rewrites require explicit authorization. |
+| Always-known facts | Current code and tests are truth; session evidence suggests review candidates; prompt-affecting final diffs require read-only Image V2 review and unresolved regression or missing provenance blocks release; Git actions require explicit authorization. |
 | Progressively loaded sources | Status/diff, controlling code/tests, Azure logging policy for Azure server changes, current session evidence, then affected docs, indexes, maps, and changelogs. |
 | Excluded knowledge | Authority to deploy, push, tag, mutate remote state, or infer commit approval. |
 | Related repositories/plans | Changed product repositories, release metadata, and Project Knowledge outputs. |
 | Allowed tools/actions | Read, edit, search, execute, todo, and review-oriented subagents; local commit only after explicit authorization. |
-| Overlap/hand-off | Invokes Project Knowledge for durable documentation change; receives Engineer's focused validation and dirty-worktree escalation. |
+| Overlap/hand-off | Invokes Image V2 Prompt Reviewer for prompt-affecting final diffs while retaining release-readiness ownership; invokes Project Knowledge for durable documentation change; receives Engineer's focused validation and dirty-worktree escalation. |
 | Latest verification evidence | Canonical agent source; targeted checks and affected repository `verify`; `npm run agents:check`. |
 
 ## Product Enrichment Architecture
@@ -169,6 +183,20 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | Allowed tools/actions | Read-only official-source research under Planner; scoped implementation support under Engineer after normal change gates. |
 | Overlap/hand-off | Sanity-specific work still loads Sanity guidance; Product Enrichment Architecture and repository instructions remain authoritative. |
 | Latest verification evidence | Canonical skill source; `version-sensitive-api-official-source`; `npm run agents:check`. |
+
+## Image V2 Flux Prompt Review
+
+| Responsibility | Coverage |
+| --- | --- |
+| Purpose and triggers | Executes `review flux pipeline`, reviews final FLUX prompts, and traces their Vision-generated, cached, Sanity-authored, and deterministic source pieces. |
+| Owned decisions | Producer-prompt/schema/guard review, provenance matrix, stage-level improvement sequence, FLUX prompt-quality assessment, prompt-transport check, visual-adherence classification, severity, durable-knowledge handoff, and readiness verdict. |
+| Always-known facts | The fixed provider path is BFL FLUX.2 Pro through Azure AI Foundry; structural section validation is not semantic quality validation; negative-prompt guidance must be reconciled with local invariants; prompt presence is not image adherence. |
+| Progressively loaded sources | Generate registry, texture/colour/scene producers and schemas, camera/brand renderers, direct assembly, render registry, route binding, run artifacts, then output image when available. |
+| Excluded knowledge | Authority to change prompts, invoke providers, connect directly to BFL/MCP, recommend Azure bypass, switch models, mutate caches or queues, write Sanity, or infer absent run evidence. |
+| Related repositories/plans | Azure Image Generation V2 and Data image-generation contracts; official Black Forest Labs image-prompting guidance. |
+| Allowed tools/actions | Read-only code, artifact, trace, and image inspection with bounded excerpts and hashes. |
+| Overlap/hand-off | Image V2 Prompt Reviewer is the primary consumer; Project Engineer receives concrete fix locations; Project Knowledge independently verifies and persists new evidence-backed knowledge. |
+| Latest verification evidence | Canonical skill and upstream notice; `image-v2-flux-provenance-review`; `npm run agents:check`. |
 
 ## Product Enrichment Scripts
 

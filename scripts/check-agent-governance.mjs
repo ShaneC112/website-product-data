@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url'
 const scriptDirectory = dirname(fileURLToPath(import.meta.url))
 const repositoryRoot = resolve(scriptDirectory, '..')
 const managedAgentFiles = [
+  'image-v2-prompt-reviewer.agent.md',
   'project-engineer.agent.md',
   'project-implementor.agent.md',
   'project-knowledge.agent.md',
@@ -39,7 +40,10 @@ const requiredScenarioIds = [
   'settled-diff-behavior-preserving-simplification',
   'version-sensitive-api-official-source',
   'quality-floor-cannot-self-weaken',
-  'canonical-domain-language-no-parallel-context'
+  'canonical-domain-language-no-parallel-context',
+  'image-v2-flux-provenance-review',
+  'image-v2-flux-knowledge-retention',
+  'image-v2-prompt-change-orchestrator-gate'
 ]
 const agentsDirectory = resolve(repositoryRoot, 'workspace-customizations/.github/agents')
 const skillsDirectory = resolve(repositoryRoot, 'workspace-customizations/.github/skills')
@@ -51,7 +55,8 @@ const requiredUpstreamRevisions = [
   ['https://github.com/mattpocock/skills', '3cca18b368ae95cdbdebbff572ccafa662551015'],
   ['https://github.com/EveryInc/compound-engineering-plugin', 'caa3b231452a1cd444261d3c4d46bcd72d3246dd'],
   ['https://github.com/DietrichGebert/ponytail', '974d940a1c5344210874150b98ff0d2c861fab6a'],
-  ['https://github.com/addyosmani/agent-skills', '48cb1168aeaaa70dfc2bbf709eddfa2a8ed8129a']
+  ['https://github.com/addyosmani/agent-skills', '48cb1168aeaaa70dfc2bbf709eddfa2a8ed8129a'],
+  ['https://github.com/black-forest-labs/skills', '8907d515b0ac270a988ec7a239add81ee13d6cba']
 ]
 
 const agentFiles = (await readdir(agentsDirectory, {withFileTypes: true}))
@@ -72,8 +77,8 @@ const skillDirectories = (await readdir(skillsDirectory, {withFileTypes: true}))
   .filter((entry) => entry.isDirectory())
   .sort((left, right) => left.name.localeCompare(right.name))
 
-if (skillDirectories.length !== 13) {
-  throw new Error(`Expected thirteen canonical skills, found ${skillDirectories.length}`)
+if (skillDirectories.length !== 14) {
+  throw new Error(`Expected fourteen canonical skills, found ${skillDirectories.length}`)
 }
 
 for (const directory of skillDirectories) {

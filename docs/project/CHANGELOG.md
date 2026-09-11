@@ -5,6 +5,8 @@ All notable cross-repository documentation, workflow, and workspace-customizatio
 ## Unreleased
 
 - Added the canonical Azure structured-logging policy, split repository implementation guidance from durable policy decisions, and required implementation and review agents to enforce logger, context, redaction, message-quality, and level rules for Azure server changes.
+- Added a read-only Image V2 Prompt Reviewer and provenance-aware FLUX review skill, adapted from provider-independent official Black Forest Labs guidance, with a `review flux pipeline` mode that audits Vision system/user prompts, schemas, guards, caches, renderers, final assembly, Azure AI Foundry FLUX.2 Pro transport, and applicable project learnings while explicitly excluding direct BFL and FLUX MCP access. New evidence-backed FLUX discoveries now require a verified Project Knowledge documentation handoff and an explicit retention disposition.
+- Required Project Engineer, Project Planner, Project Implementor, and Project QA Commit to use the read-only Image V2 Prompt Reviewer as a prompt-quality regression gate whenever work may affect the Image Generation V2 prompt contract or final FLUX prompt quality, including seemingly mechanical typo/copy fixes and structured-output changes. Added the `image-v2-prompt-change-orchestrator-gate` acceptance scenario and a reviewer aim, decisions, and sources overview page.
 
 ## 0.2.0 - 2026-09-06
 

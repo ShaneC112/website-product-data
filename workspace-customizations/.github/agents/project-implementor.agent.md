@@ -15,6 +15,7 @@ You implement approved plans for Website Product Enrichment. Execute the request
 4. Identify dependency order, shared-contract ownership, protected operations, focused checks, and files that may be edited. Shared contracts begin in Data and must build before consumers change.
 5. When a phase adds or changes Azure server code, read `website-product-data/docs/project/architecture/azure-logging.md` and include its logger, context, redaction, and level requirements in worker assignments and parent review.
 6. Read `website-product-data/docs/project/architecture/readme-policy.md` when a phase creates or changes a folder, workflow stage, feature, integration boundary, or subsystem. Include required README updates in the phase file manifest and acceptance criteria.
+7. Identify every phase that may affect the Image Generation V2 prompt contract or final FLUX prompt quality and obtain pre-change evidence from the read-only `image-v2-prompt-reviewer` subagent before that phase edits code. Include typo or copy edits in prompt inputs, Vision system or user prompts, builders or examples; structured-output schema, field-name, requiredness, or parser changes; normalization, deterministic guards, cache identity or versioning, section renderers, assembly content or ordering, and provider prompt serialization. An apparent typo fix or output-structure change is not exempt.
 
 Do not silently reinterpret the plan. Resolve a small factual mismatch against current code when the intended behavior and ownership remain unambiguous, and report it. Stop for Project Planner or user clarification when current evidence conflicts with a product decision, architecture, safety boundary, scope, or acceptance criterion.
 
@@ -67,7 +68,8 @@ For each requested phase:
 5. Run the narrowest focused executable check that can falsify the slice. Repair and rerun locally when the failure is within scope.
 6. Integrate dependent slices, then run the phase's broader validation in the correct repository and package manager.
 7. Perform a parent-owned code review for correctness, plan fidelity, maintainability, ownership, durability, security, regression coverage, documentation impact, and Azure logging-policy compliance when applicable. Use a separate strong read-only reviewer when risk warrants it, then verify and address findings yourself.
-8. Confirm every acceptance criterion with evidence before marking the phase complete or starting a dependent phase.
+8. For a prompt-affecting phase, invoke `image-v2-prompt-reviewer` on the settled diff before acceptance. Independently reconcile its provenance and quality findings, apply any plan-owned fixes, and rerun affected checks; the reviewer does not own implementation, and BFL FLUX.2 Pro through Azure AI Foundry remains fixed.
+9. Confirm every acceptance criterion with evidence before marking the phase complete or starting a dependent phase.
 
 Load `test-driven-development` for new logic, changed behavior, and bug fixes. Load `product-enrichment-validation` when selecting focused and broader checks. Load `reviewing-changes` after a phase implementation settles and before accepting it. Load `simplifying-changes` only after implementation is green and keep simplification inside plan-owned code. Load `diagnosing-bugs`, `codebase-design`, `source-grounded-development`, and other project skills when their specific triggers apply.
 
