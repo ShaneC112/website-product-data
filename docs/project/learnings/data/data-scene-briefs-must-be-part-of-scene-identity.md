@@ -1,8 +1,8 @@
 # Scene briefs must be part of scene identity
 
-## Context
-
-The image-generation v2 scene artifact carries an AI-generated interior-design brief into downstream assembly. A brief can change furniture layout, signature styling, materials, and visible furnishings even when the room, product, and creative-direction fields remain unchanged.
+- **ID:** `data-scene-briefs-must-be-part-of-scene-identity`
+- **Applies to:** `website-product-data`
+- **Status:** Canonical learning detail.
 
 ## Learning
 

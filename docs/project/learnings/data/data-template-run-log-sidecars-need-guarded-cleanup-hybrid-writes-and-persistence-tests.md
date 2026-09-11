@@ -1,7 +1,7 @@
 # Template run-log sidecars need guarded cleanup, hybrid writes, and persistence tests
 
 - **ID:** `data-template-run-log-sidecars-need-guarded-cleanup-hybrid-writes-and-persistence-tests`
-- **Applies to:** `website-product-data`, `website-product-enrichment-sanity-studio`, `website-product-enrichment-azure`
+- **Applies to:** `website-product-data`
 - **Status:** Canonical learning detail.
 
 ## Learning

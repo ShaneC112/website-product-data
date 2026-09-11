@@ -2,9 +2,9 @@
 
 - **ID:** `azure-flux-image-generation-must-use-the-direct-provider-transport-not-the-generic-openai-image-sdk`
 - **Applies to:** `website-product-enrichment-azure`
-- **Status:** Canonical learning detail
+- **Status:** Canonical learning detail.
 
-## Observation
+## Learning
 
 The committed Azure v2 image adapter used the generic OpenAI SDK image surface:
 

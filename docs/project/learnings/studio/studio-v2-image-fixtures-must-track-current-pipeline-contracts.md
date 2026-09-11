@@ -1,8 +1,8 @@
 # V2 image fixtures must track current pipeline contracts
 
-## Context
-
-The Studio image-generation fixture is used to exercise the Azure v2 workflow and persist generated roomshots against a product variant. The fixture must remain aligned with the current product, template, room, variant, and swatch contract.
+- **ID:** `studio-v2-image-fixtures-must-track-current-pipeline-contracts`
+- **Applies to:** `website-product-enrichment-sanity-studio`
+- **Status:** Canonical learning detail.
 
 ## Learning
 

@@ -1,18 +1,8 @@
 # Studio V2 run history was verified through three live image requests
 
-## Context
-
-The restored `TemplateRunHistoryInput` reads Azure-owned `aiImageGenerationTemplateRunLog` documents linked to the active `aiImageGenerationTemplate`. A three-request local E2E run was used to verify the full path after restoring the run-history feature.
-
-## Evidence
-
-- Fixture template: `e2e-image-v2-template-1789115848863`
-- Fixture product: `e2e-image-v2-product-1789115848863`
-- Three request documents were accepted by Azure.
-- Three run-log documents were created in Sanity.
-- All three runs reached `completed` with `recoveryState: completed`.
-- Each run received a persisted `mediaImage` reference.
-- The observed completed timestamps were `2026-09-11T08:38:42Z`, `2026-09-11T08:39:13Z`, and `2026-09-11T08:39:27Z`.
+- **ID:** `studio-v2-run-history-live-e2e-validation`
+- **Applies to:** `website-product-enrichment-sanity-studio`
+- **Status:** Canonical learning detail.
 
 ## Learning
 

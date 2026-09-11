@@ -67,6 +67,11 @@
             "anchor": "image-generation-v2-contracts"
           },
           {
+            "level": 3,
+            "text": "Prompt feature contract boundary",
+            "anchor": "prompt-feature-contract-boundary"
+          },
+          {
             "level": 2,
             "text": "Sanity media projections",
             "anchor": "sanity-media-projections"
@@ -278,20 +283,18 @@
         ]
       },
       "dirtyPathsAtInventory": [
-        "docs/project/CHANGELOG.md",
-        "docs/project/agents/acceptance-scenarios.md",
-        "docs/project/agents/knowledge-coverage.md",
-        "docs/project/architecture/README.md",
-        "docs/project/architecture/azure-logging.md",
-        "docs/project/migration/project-documentation-inventory.json",
-        "scripts/check-agent-governance.mjs",
-        "scripts/check-documentation.mjs",
-        "src/image-generation/contracts/sanity.ts",
-        "test/image-generation-v2-boundary.test.ts",
-        "workspace-customizations/.github/agents/project-engineer.agent.md",
-        "workspace-customizations/.github/agents/project-implementor.agent.md",
-        "workspace-customizations/.github/agents/project-qa-commit.agent.md",
-        "workspace-customizations/AGENTS.md"
+        "docs/project/learnings/azure/README.md",
+        "docs/project/learnings/azure/azure-flux-image-generation-must-use-the-direct-provider-transport-not-the-generic-openai-image-sdk.md",
+        "docs/project/learnings/azure/azure-flux-prompts-must-front-load-furniture-and-omit-meta-header-formatting-to-prevent-instruction-decay.md",
+        "docs/project/learnings/azure/azure-image-v2-prompt-provenance-and-recovery-handoffs-need-explicit-boundaries.md",
+        "docs/project/learnings/azure/azure-provider-image-adapters-must-bound-errors-and-validate-output.md",
+        "docs/project/learnings/azure/azure-vision-room-prompts-must-use-qualitative-visual-anchors-instead-of-cad-numerical-dimensions.md",
+        "docs/project/learnings/data/README.md",
+        "docs/project/learnings/data/data-scene-briefs-must-be-part-of-scene-identity.md",
+        "docs/project/learnings/data/data-template-run-log-sidecars-need-guarded-cleanup-hybrid-writes-and-persistence-tests.md",
+        "docs/project/learnings/studio/README.md",
+        "docs/project/learnings/studio/studio-v2-image-fixtures-must-track-current-pipeline-contracts.md",
+        "docs/project/learnings/studio/studio-v2-run-history-live-e2e-validation.md"
       ],
       "disposition": {
         "category": "consolidated",
@@ -308,10 +311,12 @@
           "build",
           "clean",
           "clear:crawl-queues",
-          "clear:sanity-image-queues",
+          "clear:sanity-image-v1-state",
           "clear:sanity-image-v2-queues",
           "clear:sanity-image-v2-state",
           "diagnose:image-prompt-policy",
+          "flux:prompt:review",
+          "flux:prompt:test",
           "m2crm:custom-fields",
           "m2crm:products",
           "m2crm:snapshot",
@@ -619,11 +624,16 @@
           "campaign-report.test.ts",
           "campaign-report.ts",
           "clear-crawl-queues.ts",
-          "clear-sanity-image-queues.ts",
+          "clear-sanity-image-v1-state.ts",
           "clear-sanity-image-v2-queues.ts",
           "clear-sanity-image-v2-state.ts",
-          "diagnose-image-prompt-policy.mjs",
           "estimate-swatch-colour.mjs",
+          "flux-prompt-review/baseline.ts",
+          "flux-prompt-review/compare.ts",
+          "flux-prompt-review/normalize.ts",
+          "flux-prompt-review/processMap.ts",
+          "flux-prompt-review/runner.test.ts",
+          "flux-prompt-review/runner.ts",
           "inspect-campaign-result.test.ts",
           "inspect-campaign-result.ts",
           "live-image-probe.mjs",
@@ -648,41 +658,15 @@
           "reset-preflight.test.ts",
           "reset-preflight.ts",
           "reset-trace-logs.ts",
-          "snapshot-m2crm-crawl-products.ts",
-          "test-image-endpoints.mjs"
+          "review-flux-prompt-pipeline.ts",
+          "snapshot-m2crm-crawl-products.ts"
         ]
       },
       "agentCustomization": {
         "rootAgents": "present",
         "customizationPaths": []
       },
-      "dirtyPathsAtInventory": [
-        "AGENTS.md",
-        "README.md",
-        "docs/",
-        "src/sanity-images-v2/00-ingress/queue.ts",
-        "src/sanity-images-v2/01-resolve/request.ts",
-        "src/sanity-images-v2/02-generate/texture/openAiClient.ts",
-        "src/sanity-images-v2/02-generate/worker.ts",
-        "src/sanity-images-v2/03-assemble/worker.ts",
-        "src/sanity-images-v2/04-render/worker.ts",
-        "src/sanity-images-v2/05-persist/worker.ts",
-        "src/sanity-images-v2/core/runContentResolver.ts",
-        "src/sanity-images-v2/core/sanityClient.test.ts",
-        "src/sanity-images-v2/core/sanityClient.ts",
-        "src/sanity-images-v2/prompt-features/brand-identity/sanity.ts",
-        "src/sanity-images-v2/prompt-features/camera/sanity.ts",
-        "src/sanity-images-v2/prompt-features/colour-design/sanity.ts",
-        "src/sanity-images-v2/prompt-features/product/sanity.ts",
-        "src/sanity-images-v2/prompt-features/room/handler.ts",
-        "src/sanity-images-v2/prompt-features/room/roomAnalysis.ts",
-        "src/sanity-images-v2/prompt-features/room/sanity.test.ts",
-        "src/sanity-images-v2/prompt-features/room/sanity.ts",
-        "src/sanity-images-v2/prompt-features/room/schema.ts",
-        "src/sanity-images-v2/prompt-features/scene/handler.ts",
-        "src/sanity-images-v2/prompt-features/texture/handler.ts",
-        "src/sanity-images-v2/prompt-features/texture/sanity.ts"
-      ],
+      "dirtyPathsAtInventory": [],
       "disposition": {
         "category": "consolidated",
         "detail": "Root learning catalog redirects to the canonical indexed project documentation."
@@ -990,18 +974,16 @@
           "deploy",
           "dev",
           "image-e2e:fixture:create",
-          "image-history:inventory",
-          "image-history:verify",
           "media-images:inventory",
           "media-images:migrate",
           "media-images:verify",
           "migration:apply",
           "migration:inventory",
           "migration:prepare",
+          "migration:strip-legacy-room-images",
           "migration:variant-overrides",
           "publish:product",
           "schema:extract",
-          "seed:room-image-designs",
           "test",
           "test:e2e:v2",
           "typecheck",
@@ -1167,16 +1149,12 @@
           "capture-playwright-session.ts",
           "create-image-generation-v2-fixture.ts",
           "create-playwright-auth-state.ts",
-          "imageGenerationHistoryMigration.ts",
           "inventory-live-sanity-content.ts",
-          "migrate-image-generation-history.ts",
           "migrate-live-sanity-content.ts",
           "migrate-media-images.ts",
           "migrate-variant-overrides.ts",
           "publish-product.ts",
-          "retrigger-room-image-request.ts",
-          "retry-room-image-generation.ts",
-          "seed-room-image-designs.ts"
+          "strip-legacy-room-image-fields.ts"
         ]
       },
       "agentCustomization": {
@@ -1184,11 +1162,7 @@
         "customizationPaths": []
       },
       "dirtyPathsAtInventory": [
-        ".artifacts/",
-        "README.md",
-        "package.json",
-        "scripts/capture-playwright-session.ts",
-        "scripts/create-image-generation-v2-fixture.ts"
+        ".artifacts/image-generation-v2-fixture.json"
       ],
       "disposition": {
         "category": "consolidated",

@@ -1,10 +1,10 @@
 # Image-generation V2 prompts and recovery handoffs need explicit boundaries
 
 - **ID:** `azure-image-v2-prompt-provenance-and-recovery-handoffs-need-explicit-boundaries`
-- **Applies to:** `website-product-enrichment-azure`, `website-product-data`
-- **Status:** current implementation learning
+- **Applies to:** `website-product-enrichment-azure`
+- **Status:** Canonical learning detail.
 
-## What happened
+## Learning
 
 A multi-room image run exposed several failures that initially looked like prompt or room-cache contamination:
 

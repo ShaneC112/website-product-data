@@ -20,3 +20,7 @@ types in the feature while leaving the persisted cache schema in Data.
 **Best practice:** test both sides of the cache boundary: a matching but malformed persisted
 entry must miss safely, and a generated entry must be accepted by the shared schema before it
 is written or returned.
+
+### Related Sources
+
+- The room prompt-feature does not yet follow this pattern: see [Room prompt cache has no prompt-version field and silently serves stale wording forever](azure-room-prompt-cache-has-no-prompt-version-field-and-silently-serves-stale-wording-forever.md).

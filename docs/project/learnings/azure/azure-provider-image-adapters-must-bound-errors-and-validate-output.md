@@ -1,8 +1,8 @@
 # Provider image adapters must bound errors and validate output
 
-## Context
-
-The Azure image-generation pipeline uses a direct FLUX provider transport for the verified Foundry endpoint. Provider failures can contain arbitrary response text, while successful HTTP responses can still contain missing or malformed image data.
+- **ID:** `azure-provider-image-adapters-must-bound-errors-and-validate-output`
+- **Applies to:** `website-product-enrichment-azure`
+- **Status:** Canonical learning detail.
 
 ## Learning
 
