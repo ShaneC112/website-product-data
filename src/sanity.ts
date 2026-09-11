@@ -1,4 +1,3 @@
-export * from './sanity/ai-texture-prompt.schema.js'
 export * from './sanity/bridgeContract.schema.js'
 export * from './sanity/ingestion.js'
 export * from './sanity/mediaImage.groq.js'

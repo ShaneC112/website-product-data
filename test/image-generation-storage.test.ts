@@ -10,8 +10,6 @@ import {
   buildFullProductCacheKey,
   buildProductVariantKey,
   normalizedFullProductSchema,
-  cameraAngleSourceRowSchema,
-  cameraPolicySchema,
   imageGenerationArtifactLedgerSchema,
   imageGenerationDispatchIntentSchema,
   imageGenerationOrchestrationLedgerSchema,
@@ -263,23 +261,6 @@ describe('promptCacheValueSchema', () => {
     expect(() => colourDesignArtifactSchema.parse({artifactVersion: 2, artifactKind: 'colour-design', scope: {documentKey: 'product-doc-1', variantKey: 'variant-key-1'}, value: valid})).toThrow()
   })
 
-  it('accepts the approved camera policy and source row', () => {
-    const sourceRow = {
-      room: 'bedroom',
-      productType: 'carpet',
-      cameraHeightMeters: [1.2, 1.4],
-      lensMmFullFrame: [40, 50],
-      pitch: 'slight-down',
-      targetFloorSharePercent: [40, 55],
-      cropSafeFloorMinimumPercent: 33,
-      stairsVisibleModifier: false
-    }
-
-    expect(cameraAngleSourceRowSchema.parse(sourceRow)).toEqual(sourceRow)
-    expect(cameraPolicySchema.parse({version: 1, ...sourceRow})).toEqual({version: 1, ...sourceRow})
-    expect(buildImageGenerationRunContentRowKey('run-1', 0, 'camera')).toBe('run:run-1:epoch:0:content:camera')
-  })
-
   it('accepts a camera cache value without changing existing members', () => {
     const parsed = promptCacheValueSchema.parse({
       type: 'camera',
@@ -297,26 +278,6 @@ describe('promptCacheValueSchema', () => {
     })
 
     expect(parsed.type).toBe('camera')
-  })
-
-  it('rejects invalid camera versions, rooms, and range ordering', () => {
-    const valid = {
-      version: 1,
-      room: 'bedroom',
-      productType: 'carpet',
-      cameraHeightMeters: [1.2, 1.4],
-      lensMmFullFrame: [40, 50],
-      pitch: 'slight-down',
-      targetFloorSharePercent: [40, 55],
-      cropSafeFloorMinimumPercent: 33
-    }
-
-    expect(() => cameraPolicySchema.parse({...valid, version: 2})).toThrow()
-    expect(() => cameraPolicySchema.parse({...valid, room: 'not-a-room'})).toThrow()
-    expect(() => cameraPolicySchema.parse({...valid, cameraHeightMeters: [1.4, 1.2]})).toThrow()
-    expect(() => cameraPolicySchema.parse({...valid, lensMmFullFrame: [50, 40]})).toThrow()
-    expect(() => cameraPolicySchema.parse({...valid, targetFloorSharePercent: [55, 40]})).toThrow()
-    expect(() => cameraPolicySchema.parse({...valid, cropSafeFloorMinimumPercent: 32})).toThrow()
   })
 
   it('accepts and normalizes the approved brand identity contract', () => {

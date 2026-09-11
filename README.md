@@ -22,6 +22,10 @@ The request document is the authoritative runtime source for the active generati
 
 The shared terminal status contract treats blocked and quarantined work as failed, requires verified attached-media evidence before reporting completion, and keeps recovery disposition explicit. These are source and local-test claims only; the v2 workflow has not been deployed or live-verified, and Phase 18 remains open for Studio capability readiness, complete control-mutation receipt convergence, complete durable-row version/upcast quarantine, and compiler/AST isolation proof.
 
+### Prompt feature contract boundary
+
+For Flux prompt features, this package exports only type-only contracts for persisted values with a proven Sanity/Azure persistence surface. Azure owns the feature-local Zod validation, `fromSanity`/`toSanity` transforms, and runtime prompt types. The persisted room and colour-design types remain shared because those values are stored in Sanity; a shared texture persisted type follows the same rule only where an actual shared consumer exists. Azure-only camera policy types, runtime prompt objects, and Zod schemas do not belong here. `swatch` remains colour-design evidence rather than a separate prompt contract.
+
 ## Sanity media projections
 
 `@shane-corrigan/website-product-data/sanity` exports `SANITY_MEDIA_IMAGE_FIELDS` and

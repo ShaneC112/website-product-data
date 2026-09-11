@@ -110,29 +110,22 @@ export function buildImageGenerationTemplateRebindAuditEntry(input: z.input<type
   return imageGenerationTemplateRebindAuditEntrySchema.parse(input)
 }
 
-export const colourDesignPromptSchema = z.object({
-  _key: z.string().trim().min(1).optional(),
-  variantKey: z.string().trim().min(1),
-  fingerprint: z.string().trim().min(1),
-  swatchFingerprint: z.string().trim().min(1).optional(),
-  palette: z.array(z.object({
-    _key: z.string().trim().min(1).optional(),
-    hex: z.string().regex(/^#[0-9a-f]{6}$/i),
-    coveragePercent: z.number().int().min(1).max(100)
-  }).strict()).min(1).max(3).optional(),
-  prompt: z.string().trim().min(1),
-  schemaVersion: z.literal(1),
-  generatedAt: z.string().datetime()
-}).strict()
+export type ColourDesignPrompt = {
+  _key?: string
+  variantKey: string
+  fingerprint: string
+  swatchFingerprint?: string
+  palette?: Array<{_key?: string; hex: string; coveragePercent: number}>
+  prompt: string
+  schemaVersion: 1
+  generatedAt: string
+}
 
-export const roomPromptSchema = z.object({
-  _key: z.string().trim().min(1).optional(),
-  roomKey: z.enum(SANITY_SUITABLE_ROOMS),
-  fingerprint: z.string().trim().min(1),
-  prompt: z.string().trim().min(1),
-  schemaVersion: z.literal(1),
-  generatedAt: z.string().datetime()
-}).strict()
-
-export type ColourDesignPrompt = z.infer<typeof colourDesignPromptSchema>
-export type RoomPrompt = z.infer<typeof roomPromptSchema>
+export type RoomPrompt = {
+  _key?: string
+  roomKey: (typeof SANITY_SUITABLE_ROOMS)[number]
+  fingerprint: string
+  prompt: string
+  schemaVersion: 1
+  generatedAt: string
+}

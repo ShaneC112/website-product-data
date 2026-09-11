@@ -1,6 +1,5 @@
 import { z } from 'zod'
 import { brandIdentitySchema } from './brand-identity.schema.js'
-import { cameraPolicySchema } from './camera-policy.schema.js'
 import { normalizedColourDesignSchema } from './colour-design.schema.js'
 import { normalizedFullProductSchema } from './product-ingress.schema.js'
 import { normalizedRoomSchema } from './room.schema.js'
@@ -43,6 +42,22 @@ const textureNotApplicableValueSchema = z.object({
   mode: z.literal('not-applicable')
 }).strict()
 
+const orderedRange = <T extends number>(item: z.ZodType<T>) => z.tuple([item, item]).refine(([minimum, maximum]) => minimum <= maximum, {
+  message: 'Range minimum must not exceed maximum'
+})
+
+const cameraPolicyCacheSchema = z.object({
+  version: z.literal(1),
+  room: z.string().min(1),
+  productType: z.string().min(1),
+  cameraHeightMeters: orderedRange(z.number().positive()),
+  lensMmFullFrame: orderedRange(z.number().int().positive()),
+  pitch: z.enum(['level', 'slight-down', 'level/slight-down']),
+  targetFloorSharePercent: orderedRange(z.number().int().min(1).max(100)),
+  cropSafeFloorMinimumPercent: z.literal(33),
+  stairsVisibleModifier: z.boolean().optional()
+}).strict()
+
 export const normalizedTextureSchema = z.discriminatedUnion('mode', [
   textureCompletedValueSchema,
   textureDeterministicFallbackValueSchema,
@@ -64,7 +79,7 @@ export const promptCacheValueSchema = z.union([
   z.object({
     type: z.literal('camera'),
     schemaVersion: z.literal(1),
-    value: cameraPolicySchema
+    value: cameraPolicyCacheSchema
   }).strict(),
   z.object({
     type: z.literal('colour-design'),
