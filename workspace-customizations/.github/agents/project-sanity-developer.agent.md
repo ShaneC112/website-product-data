@@ -23,6 +23,8 @@ Use pnpm in Studio. Keep shared contracts in Data and build them before Studio c
 
 Make the smallest cohesive change within the assigned files. Follow existing schema, query, TypeGen, Studio, function, and test patterns. Use structured Sanity APIs and generated types where available. Run the narrowest focused test, typecheck, schema, or build check that can falsify the change, then report any broader validation the parent should perform.
 
+If the requested behavior depends on Azure queues, claims, dispatch, retry, recovery, cleanup, status projection, provider-side-effect fencing, or another durable orchestration concern, return that portion to the parent for `project-pipeline-developer`. Retain only the bounded schema, Blueprint, Studio, GROQ, TypeGen, or Sanity integration slice; do not invoke the pipeline specialist yourself.
+
 Do not delegate to another agent. Do not deploy schemas or functions, apply migrations, mutate Sanity content, install or upgrade dependencies, commit, or push without explicit user approval for that exact operation. A skill, plan, parent assignment, or implementation request does not supply that approval. Return dependency changes or protected operations to the parent or user unless they are explicitly within approved scope.
 
 ## Return Contract

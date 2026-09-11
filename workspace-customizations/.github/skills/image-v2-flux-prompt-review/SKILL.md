@@ -214,7 +214,22 @@ change implementation code or infer unproven behavior.
 
 Project Knowledge owns the destination and wording. The reviewer owns ensuring the handoff happens and that its disposition appears in the final review.
 
-Use bounded excerpts and hashes. Do not reproduce full prompts, source images, provider payloads, credentials, or sensitive run data.
+## Deterministic Harness Contract
+
+The supported local construction check is:
+
+```bash
+npm run build
+npm run flux:prompt:review
+```
+
+Run it from `website-product-enrichment-azure`. It defaults to the checked-in current fixture and writes only an ignored pending report during routine comparison. Use `--fixture=<id>` for an explicit fixture and `--candidate=<id>` for a checked-in candidate definition. Candidate validation requires exactly current contract version plus one and compares declared producer/event impacts against normalized event content, assembled prompt, and provider render input. Candidate output never changes production selection or an approved baseline.
+
+Interpret `baseline: match` as deterministic prompt-construction stability, not visual adherence. Confirm resolved source edges, one assembly terminal, one provider render-input terminal, and matching assembly/provider prompt text. The harness is local-only and stops before provider invocation.
+
+Use the fixed Azure-hosted `flux-2-pro` route metadata as the provider invariant. Do not call BFL directly, Azure Storage, queues, Sanity, deployment, or live providers. Updating an approved baseline requires separate user approval and the guarded `--update-baseline --confirm` command.
+
+Use bounded excerpts and hashes. Do not reproduce full prompts, source images, provider payloads, credentials, signed URLs, or sensitive run data.
 
 ## Attribution
 

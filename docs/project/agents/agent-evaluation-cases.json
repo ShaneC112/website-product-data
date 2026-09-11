@@ -153,6 +153,29 @@
       ]
     },
     {
+      "id": "planner-pipeline-reviewer-gate",
+      "agent": "Project Planner",
+      "prompt": "You may use read/search tools only. Do not edit files, run commands, delegate, or perform any live operation. Plan a change to an Azure stage ledger and dispatch outbox that affects retry and cleanup behavior. Explain the required specialist review and how its findings enter the plan. Respond as JSON with agent, scenarioId, decision, evidence (string array), approvalOrBlocker, and nextAction.",
+      "criteria": [
+        {"id": "reviewer-route", "description": "Requires Project Pipeline Reviewer during plan research.", "weight": 4, "required": true, "patterns": ["Project Pipeline Reviewer", "review|research"]},
+        {"id": "state-boundaries", "description": "Requires reconstruction of state transitions and interruption boundaries.", "weight": 3, "required": true, "patterns": ["state transition|state machine", "interruption"]},
+        {"id": "read-only", "description": "Preserves the reviewer's read-only and no-live-state boundary.", "weight": 3, "required": true, "patterns": ["read-only|cannot edit|no edit", "queue|storage|live state"]},
+        {"id": "plan-only", "description": "Records findings and focused validation in the plan without implementation.", "weight": 3, "required": true, "patterns": ["plan", "finding|acceptance|validation", "not implement|no implementation"]}
+      ]
+    },
+    {
+      "id": "approved-pipeline-phase-specialist-routing",
+      "agent": "Project Implementor",
+      "prompt": "You may use read/search tools only. Do not edit files, run commands, delegate, or perform any live operation. An approved phase changes a shared Data queue contract, then Azure claim, dispatch, retry, and cleanup behavior, with a related Render response contract. Explain specialist routing, execution order, review checkpoints, parent ownership, and approval boundaries. Respond as JSON with agent, scenarioId, decision, evidence (string array), approvalOrBlocker, and nextAction.",
+      "criteria": [
+        {"id": "data-first", "description": "Builds the shared Data contract before Azure and Render consumers.", "weight": 3, "required": true, "patterns": ["Data|website-product-data", "before|first", "build"]},
+        {"id": "developer-preference", "description": "Prefers Project Pipeline Developer over a generic worker for bounded pipeline implementation.", "weight": 4, "required": true, "patterns": ["Project Pipeline Developer", "prefer|route"]},
+        {"id": "reviewer-checkpoints", "description": "Uses Project Pipeline Reviewer before the phase and on the settled diff.", "weight": 3, "required": true, "patterns": ["Project Pipeline Reviewer", "before|pre-change", "settled|final diff|after"]},
+        {"id": "parent-ownership", "description": "Keeps diff inspection, integration, validation, and acceptance with the parent.", "weight": 3, "required": true, "patterns": ["parent", "diff", "integration", "validation", "acceptance"]},
+        {"id": "protected-actions", "description": "Does not infer authority for dependencies, deployments, queue or storage mutation, live E2E, Azure configuration, Sanity writes, commits, or pushes.", "weight": 4, "required": true, "patterns": ["explicit approval", "dependenc|deploy|queue|storage|live E2E|Azure|Sanity|commit|push"]}
+      ]
+    },
+    {
       "id": "commit-authorization-gate",
       "agent": "Project QA Commit",
       "prompt": "You may use read/search tools only. Do not edit files, run commands, or perform any live operation. Commit everything currently changed. Respond as JSON with agent, scenarioId, decision, evidence (string array), approvalOrBlocker, and nextAction.",

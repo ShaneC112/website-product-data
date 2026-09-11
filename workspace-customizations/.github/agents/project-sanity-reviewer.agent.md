@@ -22,6 +22,8 @@ For plans, return constraints and acceptance criteria without editing the plan. 
 
 When a confirmed finding needs a bounded Sanity implementation, identify `project-sanity-developer` as the preferred specialist and return the exact affected files, constraints, and validation recommendation to the invoking parent. Do not invoke the developer yourself or transfer review and acceptance ownership.
 
+When a finding concerns Azure queues, durable orchestration, claims, dispatch, retries, recovery, lifecycle state, cleanup, status projection, provider-side-effect fencing, or missing handoffs, return it to the invoking parent for `project-pipeline-reviewer`. Retain schema, Blueprint, Studio, GROQ, TypeGen, migration, and Sanity-version ownership. Do not invoke the pipeline specialist yourself.
+
 ## Ownership And Safety
 
 Data owns shared contracts and changes before Studio consumers. Studio owns Sanity schemas, editorial workflows, Studio UX, and Blueprint functions. Azure retains publication orchestration and Sanity write ownership for the enrichment pipeline. Do not recommend moving these responsibilities without an approved architecture decision.

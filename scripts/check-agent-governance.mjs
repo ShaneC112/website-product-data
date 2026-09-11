@@ -11,6 +11,8 @@ const managedAgentFiles = [
   'project-engineer.agent.md',
   'project-implementor.agent.md',
   'project-knowledge.agent.md',
+  'project-pipeline-developer.agent.md',
+  'project-pipeline-reviewer.agent.md',
   'project-planner.agent.md',
   'project-qa-commit.agent.md',
   'project-sanity-developer.agent.md',
@@ -45,9 +47,15 @@ const requiredScenarioIds = [
   'canonical-domain-language-no-parallel-context',
   'image-v2-flux-provenance-review',
   'image-v2-flux-knowledge-retention',
+  'image-v2-flux-deterministic-baseline',
+  'image-v2-flux-candidate-next',
+  'image-v2-flux-trace-disclosure-boundary',
+  'image-v2-flux-live-approval-stop',
   'image-v2-prompt-change-orchestrator-gate',
   'sanity-reviewer-readonly-plan-check',
-  'sanity-developer-routing-and-approval-boundary'
+  'sanity-developer-routing-and-approval-boundary',
+  'pipeline-reviewer-durability-gate',
+  'pipeline-developer-routing-and-safety-boundary'
 ]
 const agentsDirectory = resolve(repositoryRoot, 'workspace-customizations/.github/agents')
 const skillsDirectory = resolve(repositoryRoot, 'workspace-customizations/.github/skills')
@@ -82,8 +90,8 @@ const skillDirectories = (await readdir(skillsDirectory, {withFileTypes: true}))
   .filter((entry) => entry.isDirectory())
   .sort((left, right) => left.name.localeCompare(right.name))
 
-if (skillDirectories.length !== 15) {
-  throw new Error(`Expected fifteen canonical skills, found ${skillDirectories.length}`)
+if (skillDirectories.length !== 16) {
+  throw new Error(`Expected sixteen canonical skills, found ${skillDirectories.length}`)
 }
 
 for (const directory of skillDirectories) {
@@ -100,8 +108,8 @@ for (const [repositoryUrl, revision] of requiredUpstreamRevisions) {
   requireText(upstreamIntegrations, revision, `upstream revision for ${repositoryUrl}`)
 }
 
-if (!Array.isArray(evaluationFixture.scenarios) || evaluationFixture.scenarios.length !== 20) {
-  throw new Error('Agent evaluation fixture must contain twenty screening scenarios.')
+if (!Array.isArray(evaluationFixture.scenarios) || evaluationFixture.scenarios.length !== 22) {
+  throw new Error('Agent evaluation fixture must contain twenty-two screening scenarios.')
 }
 
 for (const scenario of evaluationFixture.scenarios) {

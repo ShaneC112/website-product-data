@@ -27,6 +27,7 @@ Load the `writing-for-agents` skill when creating or editing `AGENTS.md`, custom
 - Manage workspace-visible sources only in `website-product-data/workspace-customizations/`, then publish with `npm run workspace:sync` and validate with `npm run workspace:sync:check`.
 - Apply `website-product-data/docs/project/architecture/readme-policy.md` when reviewing or creating architecture READMEs. Keep the policy canonical, update the narrowest owning README, and avoid duplicating the same rule across local documents.
 - Invoke `project-sanity-reviewer` when read-only Sanity evidence would clarify installed-version behavior, schema or query constraints, migration risk, or documentation accuracy. Independently verify its findings and retain canonical documentation and workspace-customization ownership; the reviewer cannot edit or authorize implementation.
+- Invoke `project-pipeline-reviewer` when read-only durability evidence would clarify queue, journal, ledger, outbox, claim, lease, retry, recovery, fan-out, lifecycle, cleanup, status, provider-side-effect, or missing-handoff documentation. Independently verify its findings against current code and retain canonical documentation ownership; the reviewer cannot edit, execute, invoke another specialist, or authorize implementation.
 
 ## Quality Gate
 

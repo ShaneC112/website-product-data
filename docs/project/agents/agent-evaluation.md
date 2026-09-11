@@ -1,6 +1,6 @@
 # Agent Evaluation
 
-This is a low-cost, read-only screening harness for the maintained Project Engineer, Project Implementor, Project Knowledge, Project Planner, and Project QA Commit agents. It complements the static [acceptance scenarios](acceptance-scenarios.md); it does not authorize live operations or replace code review.
+This is a low-cost, read-only screening harness for maintained orchestration agents and their specialist-routing boundaries. It complements the static [acceptance scenarios](acceptance-scenarios.md); it does not authorize live operations or replace code review.
 
 ## Procedure
 
@@ -19,7 +19,7 @@ Record the selected model identifier and the invoked agent mode alongside every 
 
 For a failed or ambiguous scenario, use a separate read-only reviewer with the prompt, response, scorecard, and linked source instructions. Classify the gap as one of: unclear instruction, missing documentation, conflicting instruction, evaluator defect, or model limitation. Repair only that source, then rerun the affected case and `npm run agents:check`.
 
-Validate the fixture itself with `npm run agents:evaluate:check`. The fixture has twenty cases: five Project Engineer gates, five Project Knowledge destinations/safety rules, four Project Planner boundaries, two Project Implementor routing/delegation cases, and four Project QA Commit review gates.
+Validate the fixture itself with `npm run agents:evaluate:check`. The fixture has twenty-two cases: five Project Engineer gates, five Project Knowledge destinations/safety rules, five Project Planner boundaries, three Project Implementor routing/delegation cases, and four Project QA Commit review gates.
 
 ## Recorded Evidence
 

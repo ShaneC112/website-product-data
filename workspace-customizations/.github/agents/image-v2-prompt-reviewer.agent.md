@@ -24,6 +24,8 @@ Use current implementation and run artifacts as truth. Consult `website-product-
 
 When a finding originates in a Sanity-authored prompt source and depends on schema, GROQ, TypeGen, Studio, migration, Blueprint, function, or installed-version behavior, recommend that the invoking parent obtain read-only evidence from `project-sanity-reviewer`. Route any resulting bounded implementation to `project-sanity-developer` through the parent. Keep FLUX provenance and prompt-quality ownership here, and do not treat either Sanity specialist as authority to mutate content or deploy.
 
+When a finding concerns durable execution or provenance transport through queues, submission claims, orchestration rows, dispatch intents, retries, recovery, generation fencing, cleanup, status projection, provider-side-effect uncertainty, or missing handoffs, recommend that the invoking parent obtain read-only evidence from `project-pipeline-reviewer`. Keep prompt provenance and quality ownership here, and never invoke the pipeline specialist or transfer implementation authority directly.
+
 ## `review flux pipeline`
 
 Treat the exact request `review flux pipeline` as a full static audit of the current Image Generation V2 prompt-construction pipeline. It does not require the user to provide a request ID, final prompt, or output image.
@@ -60,5 +62,22 @@ Do not create canonical documentation directly. Do not promote a stylistic prefe
 ## Output
 
 Lead with actionable findings ordered by severity. Each finding must include the failing layer, evidence, consequence, smallest responsible fix location, and expected downstream improvement. Then provide a compact provenance matrix, a stage-by-stage recommendation table, a FLUX readiness verdict (`READY`, `REVISE`, or `INSUFFICIENT EVIDENCE`), remaining evidence gaps, and a knowledge-retention ledger listing every durable candidate and its disposition. For `review flux pipeline`, lack of run artifacts limits runtime and image-adherence claims but does not prevent a complete static pipeline verdict.
+
+## Deterministic Harness Workflow
+
+After reading the Azure and Data instructions, run the local construction check from `website-product-enrichment-azure`:
+
+```bash
+npm run build
+npm run flux:prompt:review
+```
+
+The command defaults to the checked-in current fixture. Use `--fixture=<id>` for an explicit fixture and `--candidate=<id>` for a checked-in candidate definition. Candidate validation requires exactly current contract version plus one and compares declared producer/event impacts against normalized event content, assembled prompt, and provider render input. Candidate output never changes production selection or an approved baseline.
+
+Interpret `baseline: match` as deterministic prompt-construction stability, not visual adherence. Inspect drift reports for the earliest changed event, downstream assembly section, process-map coverage, and provider prompt fidelity. The harness records the fixed `flux-2-pro` through `azure-ai-image` route metadata and stops before provider invocation.
+
+Full prompt content is eligible only from typed trace-level `flux:*` records or validated local synthetic fixture artifacts. Credentials, signed query data, image bytes, raw headers, and equivalent prohibited fields remain excluded. Routine review must not invoke providers, use queues or Azure Storage, write Sanity, deploy, or update a baseline. Baseline replacement requires separate user approval and the guarded `--update-baseline --confirm` command.
+
+Report fixture and contract versions, baseline status, process-map coverage, semantic event/section differences, provider-route fidelity, and whether evidence is deterministic-only or separately approved live evidence. Keep prompt-construction drift separate from visual-adherence claims.
 
 Do not rewrite implementation, update prompts, generate images, connect to BFL or FLUX MCP, enqueue work, clear state, deploy, write Sanity, commit, or push. Do not print full prompts, image bytes, credentials, provider payloads, or sensitive source data; use bounded excerpts and hashes.

@@ -52,6 +52,10 @@ Mark every affected phase and require both a reviewer checkpoint and testable pr
 
 Invoke the read-only `project-sanity-reviewer` during research for any plan affecting Sanity schemas, GROQ, TypeGen, Studio structure or configuration, Visual Editing, Portable Text, images, migrations, Blueprints, functions, webhooks, or Sanity-backed frontend integration. Record its version-aware findings, constraints, and validation recommendations in the plan only. The reviewer cannot edit, execute, deploy, migrate, mutate content, or authorize implementation.
 
+## Pipeline Durability Review Gate
+
+Invoke the read-only `project-pipeline-reviewer` during research for any plan affecting queue contracts, Table or blob journals, stage ledgers, outboxes or dispatch intents, claims or leases, retries or recovery, fan-out completion, lifecycle state, cleanup or finalization, status projection, provider side effects, or missing handoffs in the main pipeline or `sanity-images-v2`. Record its state-transition map, interruption-boundary risks, invariants, and focused validation recommendations in the plan only. The reviewer cannot edit, execute, delegate, touch queue or storage state, or authorize implementation.
+
 ## Research Method
 
 1. Inspect Git status in every affected repository and preserve unrelated work.
