@@ -12,7 +12,9 @@ const managedAgentFiles = [
   'project-implementor.agent.md',
   'project-knowledge.agent.md',
   'project-planner.agent.md',
-  'project-qa-commit.agent.md'
+  'project-qa-commit.agent.md',
+  'project-sanity-developer.agent.md',
+  'project-sanity-reviewer.agent.md'
 ]
 const requiredScenarioIds = [
   'data-first-contract-routing',
@@ -43,7 +45,9 @@ const requiredScenarioIds = [
   'canonical-domain-language-no-parallel-context',
   'image-v2-flux-provenance-review',
   'image-v2-flux-knowledge-retention',
-  'image-v2-prompt-change-orchestrator-gate'
+  'image-v2-prompt-change-orchestrator-gate',
+  'sanity-reviewer-readonly-plan-check',
+  'sanity-developer-routing-and-approval-boundary'
 ]
 const agentsDirectory = resolve(repositoryRoot, 'workspace-customizations/.github/agents')
 const skillsDirectory = resolve(repositoryRoot, 'workspace-customizations/.github/skills')
@@ -56,7 +60,8 @@ const requiredUpstreamRevisions = [
   ['https://github.com/EveryInc/compound-engineering-plugin', 'caa3b231452a1cd444261d3c4d46bcd72d3246dd'],
   ['https://github.com/DietrichGebert/ponytail', '974d940a1c5344210874150b98ff0d2c861fab6a'],
   ['https://github.com/addyosmani/agent-skills', '48cb1168aeaaa70dfc2bbf709eddfa2a8ed8129a'],
-  ['https://github.com/black-forest-labs/skills', '8907d515b0ac270a988ec7a239add81ee13d6cba']
+  ['https://github.com/black-forest-labs/skills', '8907d515b0ac270a988ec7a239add81ee13d6cba'],
+  ['https://github.com/sanity-io/agent-toolkit', '0b3376799826fc82937770605d671b612bfc2d4f']
 ]
 
 const agentFiles = (await readdir(agentsDirectory, {withFileTypes: true}))
@@ -77,8 +82,8 @@ const skillDirectories = (await readdir(skillsDirectory, {withFileTypes: true}))
   .filter((entry) => entry.isDirectory())
   .sort((left, right) => left.name.localeCompare(right.name))
 
-if (skillDirectories.length !== 14) {
-  throw new Error(`Expected fourteen canonical skills, found ${skillDirectories.length}`)
+if (skillDirectories.length !== 15) {
+  throw new Error(`Expected fifteen canonical skills, found ${skillDirectories.length}`)
 }
 
 for (const directory of skillDirectories) {
@@ -95,8 +100,8 @@ for (const [repositoryUrl, revision] of requiredUpstreamRevisions) {
   requireText(upstreamIntegrations, revision, `upstream revision for ${repositoryUrl}`)
 }
 
-if (!Array.isArray(evaluationFixture.scenarios) || evaluationFixture.scenarios.length !== 18) {
-  throw new Error('Agent evaluation fixture must contain eighteen screening scenarios.')
+if (!Array.isArray(evaluationFixture.scenarios) || evaluationFixture.scenarios.length !== 20) {
+  throw new Error('Agent evaluation fixture must contain twenty screening scenarios.')
 }
 
 for (const scenario of evaluationFixture.scenarios) {

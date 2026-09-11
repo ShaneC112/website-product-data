@@ -30,6 +30,34 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | Overlap/hand-off | Hands prompt provenance and quality review to Image V2 Prompt Reviewer without transferring implementation; hands durable docs/scripts to Project Knowledge; sends release readiness and mixed-worktree review to Project QA Commit; uses Architecture for ownership. |
 | Latest verification evidence | Canonical agent source; `npm run agents:check`; [acceptance scenarios](acceptance-scenarios.md). |
 
+## Project Sanity Reviewer
+
+| Responsibility | Coverage |
+| --- | --- |
+| Purpose and triggers | Read-only review of Sanity plans, current code, and settled diffs involving schemas, GROQ, TypeGen, Studio structure/configuration, Visual Editing, Portable Text, images, migrations, Blueprints, functions, webhooks, or Sanity-backed frontend integration. |
+| Owned decisions | Finding severity, installed-version compatibility constraints, applicable upstream reference selection, unresolved Sanity-specific risk, and focused validation recommendations. |
+| Always-known facts | Upstream guidance is evidence rather than operational authority; Data owns shared contracts before Studio consumers; Studio owns schemas, UX, and Blueprint functions; Azure retains enrichment publication orchestration. |
+| Progressively loaded sources | Sanity Best Practices and one or two relevant references, Studio instructions and package manifest, then the closest controlling code and tests. |
+| Excluded knowledge | Edit, execute, delegation, deployment, migration application, content mutation, dependency changes, commits, pushes, or authority to accept implementation. |
+| Related repositories/plans | Studio and Sanity-backed frontend integration, plus Data contracts and Azure publication boundaries that constrain the reviewed slice. |
+| Allowed tools/actions | Read, search, and official web-source checks only. |
+| Overlap/hand-off | Planner records findings in plans; Implementor and Engineer own fixes and integration; QA Commit owns release findings; Project Knowledge owns canonical documentation/customizations. |
+| Latest verification evidence | Canonical agent and skill sources; `sanity-reviewer-readonly-plan-check`; `npm run agents:check`. |
+
+## Project Sanity Developer
+
+| Responsibility | Coverage |
+| --- | --- |
+| Purpose and triggers | Bounded implementation of approved Sanity schemas, GROQ, TypeGen, Studio, Visual Editing, Portable Text, image, migration, Blueprint, function, webhook, or frontend-integration slices. |
+| Owned decisions | Smallest local implementation within the assigned manifest, installed-version-compatible API usage, and focused Studio validation. |
+| Always-known facts | Studio uses pnpm; shared contracts begin in Data; Azure retains publication orchestration; the parent retains diff review, integration, broader validation, and acceptance. |
+| Progressively loaded sources | Sanity Best Practices and one or two relevant references, Studio instructions and package manifest, assigned files, nearby tests, and parent-provided acceptance criteria. |
+| Excluded knowledge | Agent delegation, unapproved dependency installation/upgrades, schema/function deployment, migration application, content mutation, commits, pushes, or architecture changes. |
+| Related repositories/plans | Approved bounded Studio phases and Sanity-backed frontend slices after any required Data contract phase. |
+| Allowed tools/actions | Read, edit, search, local execute, and official web-source checks inside the approved file and validation scope. |
+| Overlap/hand-off | Implementor or Engineer assigns the slice and retains parent ownership; Sanity Reviewer provides independent read-only findings before and after applicable work. |
+| Latest verification evidence | Canonical agent and skill sources; `sanity-developer-routing-and-approval-boundary`; `npm run agents:check`. |
+
 ## Project Implementor
 
 | Responsibility | Coverage |
@@ -183,6 +211,20 @@ Maintained responsibility matrix for the managed workspace agents and skills. Ca
 | Allowed tools/actions | Read-only official-source research under Planner; scoped implementation support under Engineer after normal change gates. |
 | Overlap/hand-off | Sanity-specific work still loads Sanity guidance; Product Enrichment Architecture and repository instructions remain authoritative. |
 | Latest verification evidence | Canonical skill source; `version-sensitive-api-official-source`; `npm run agents:check`. |
+
+## Sanity Best Practices
+
+| Responsibility | Coverage |
+| --- | --- |
+| Purpose and triggers | Official Sanity guidance for schemas, GROQ, TypeGen, Studio, Visual Editing, Portable Text, images, migrations, Blueprints, functions, webhooks, and supported frontend integrations. |
+| Owned decisions | None in local architecture; supplies topic-specific upstream guidance and examples for reconciliation with installed versions and repository evidence. |
+| Always-known facts | Load only the relevant one or two references; skills are guidance and never permission for live mutation, deployment, migration, dependency, or Git actions. |
+| Progressively loaded sources | Vendored `SKILL.md`, then the matching files under `references/`. |
+| Excluded knowledge | Sanity MCP authority, local ownership changes, automatic upgrades, deployments, migrations, content writes, commits, or pushes. |
+| Related repositories/plans | Studio and Sanity-backed frontend work, constrained by Data contracts and Azure publication ownership. |
+| Allowed tools/actions | Read-only guidance under Reviewer; bounded local implementation support under Developer after normal approval gates. |
+| Overlap/hand-off | Sanity Reviewer and Developer reconcile upstream guidance with local code, tests, package versions, and parent-agent ownership. |
+| Latest verification evidence | Vendored skill and `UPSTREAM.md`; pinned `sanity-io/agent-toolkit` revision; `npm run agents:check`. |
 
 ## Image V2 Flux Prompt Review
 

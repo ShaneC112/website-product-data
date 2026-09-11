@@ -26,6 +26,7 @@ Load the `writing-for-agents` skill when creating or editing `AGENTS.md`, custom
 - Maintain `.github/agents/UPSTREAM-SKILL-INTEGRATIONS.md` when an external source is reviewed for managed-agent behavior. Record the source URL, immutable Git revision, reviewed paths, local integration, deliberate exclusions, license location, review date, and refresh outcome.
 - Manage workspace-visible sources only in `website-product-data/workspace-customizations/`, then publish with `npm run workspace:sync` and validate with `npm run workspace:sync:check`.
 - Apply `website-product-data/docs/project/architecture/readme-policy.md` when reviewing or creating architecture READMEs. Keep the policy canonical, update the narrowest owning README, and avoid duplicating the same rule across local documents.
+- Invoke `project-sanity-reviewer` when read-only Sanity evidence would clarify installed-version behavior, schema or query constraints, migration risk, or documentation accuracy. Independently verify its findings and retain canonical documentation and workspace-customization ownership; the reviewer cannot edit or authorize implementation.
 
 ## Quality Gate
 

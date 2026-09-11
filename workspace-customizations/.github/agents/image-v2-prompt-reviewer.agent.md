@@ -22,6 +22,8 @@ For the reviewer's product aim, design rationale, source applicability, and attr
 
 Use current implementation and run artifacts as truth. Consult `website-product-data/docs/project/learnings/azure/azure-image-v2-prompt-provenance-and-recovery-handoffs-need-explicit-boundaries.md` when a prompt, render handoff, or visually missing requirement could be confused with another boundary.
 
+When a finding originates in a Sanity-authored prompt source and depends on schema, GROQ, TypeGen, Studio, migration, Blueprint, function, or installed-version behavior, recommend that the invoking parent obtain read-only evidence from `project-sanity-reviewer`. Route any resulting bounded implementation to `project-sanity-developer` through the parent. Keep FLUX provenance and prompt-quality ownership here, and do not treat either Sanity specialist as authority to mutate content or deploy.
+
 ## `review flux pipeline`
 
 Treat the exact request `review flux pipeline` as a full static audit of the current Image Generation V2 prompt-construction pipeline. It does not require the user to provide a request ID, final prompt, or output image.

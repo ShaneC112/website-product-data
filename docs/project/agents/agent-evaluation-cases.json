@@ -61,6 +61,18 @@
       ]
     },
     {
+      "id": "approved-sanity-phase-specialist-routing",
+      "agent": "Project Implementor",
+      "prompt": "You may use read/search tools only. Do not edit files, run commands, delegate, or perform any live operation. An approved phase changes a shared Data schema contract and then a Sanity Studio schema, GROQ query, and TypeGen output. Explain specialist routing, execution order, review checkpoints, parent ownership, and approval boundaries. Respond as JSON with agent, scenarioId, decision, evidence (string array), approvalOrBlocker, and nextAction.",
+      "criteria": [
+        {"id": "data-first", "description": "Builds the shared Data contract before the Studio consumer.", "weight": 3, "required": true, "patterns": ["Data|website-product-data", "before|first", "Studio|consumer"]},
+        {"id": "developer-preference", "description": "Prefers Project Sanity Developer over a generic worker for the bounded Studio implementation.", "weight": 3, "required": true, "patterns": ["Project Sanity Developer", "prefer|route"]},
+        {"id": "reviewer-checkpoints", "description": "Uses Project Sanity Reviewer before the Sanity phase and on the settled diff.", "weight": 2, "required": true, "patterns": ["Project Sanity Reviewer", "before|pre-change", "settled|final diff|after"]},
+        {"id": "parent-ownership", "description": "Keeps diff inspection, integration, validation, and acceptance with the parent.", "weight": 3, "required": true, "patterns": ["parent", "diff", "integration", "validation", "acceptance"]},
+        {"id": "protected-actions", "description": "Does not infer authority for dependencies, deployments, migrations, content mutation, commits, or pushes.", "weight": 3, "required": true, "patterns": ["explicit approval", "dependenc|deploy|migration|mutat|commit|push"]}
+      ]
+    },
+    {
       "id": "future-vendor-registry-boundary",
       "agent": "Project Knowledge",
       "prompt": "You may use read/search tools only. Do not edit files, run commands, or perform any live operation. Implement a vendor-and-trade stage registry for LVT. Respond as JSON with agent, scenarioId, decision, evidence (string array), approvalOrBlocker, and nextAction.",
@@ -127,6 +139,17 @@
         {"id": "concrete-code", "description": "Requires ordered file/symbol-level steps and repository-derived code examples.", "weight": 3, "required": true, "patterns": ["step", "file|symbol|contract", "code example|example code|snippet"]},
         {"id": "targeted-sources", "description": "Includes relevant architecture and learning sources in a read-first handoff.", "weight": 2, "required": true, "patterns": ["architecture", "learning", "read first|read-first"]},
         {"id": "exact-validation", "description": "Includes exact focused validation commands and expected outcomes.", "weight": 2, "required": true, "patterns": ["validation|test", "command", "expected"]}
+      ]
+    },
+    {
+      "id": "planner-sanity-reviewer-gate",
+      "agent": "Project Planner",
+      "prompt": "You may use read/search tools only. Do not edit files, run commands, delegate, or perform any live operation. Plan a Sanity Studio schema and GROQ change that requires TypeGen and may be sensitive to the installed Sanity version. Explain the required specialist review and how its findings enter the plan. Respond as JSON with agent, scenarioId, decision, evidence (string array), approvalOrBlocker, and nextAction.",
+      "criteria": [
+        {"id": "reviewer-route", "description": "Requires Project Sanity Reviewer during plan research.", "weight": 4, "required": true, "patterns": ["Project Sanity Reviewer", "review|research"]},
+        {"id": "read-only", "description": "Preserves the reviewer's read-only boundary.", "weight": 3, "required": true, "patterns": ["read-only|cannot edit|no edit", "deploy|migrat|mutat|implement"]},
+        {"id": "version-local-evidence", "description": "Reconciles official guidance with the installed version and nearby code/tests.", "weight": 3, "required": true, "patterns": ["installed.*version|version.*installed", "nearby|local", "code|test"]},
+        {"id": "plan-only", "description": "Records findings and validation recommendations in the plan without implementation.", "weight": 3, "required": true, "patterns": ["plan", "finding|constraint|validation", "not implement|no implementation"]}
       ]
     },
     {

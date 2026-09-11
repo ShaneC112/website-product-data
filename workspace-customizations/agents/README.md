@@ -10,6 +10,8 @@ Canonical managed-agent sources are `website-product-data/workspace-customizatio
 | Project Knowledge | Owns canonical documentation, scripts, learnings, project maps, and workspace-customization maintenance in Data. It cannot invent behavior or perform remote mutations or commits. |
 | Project Planner | Researches significant changes and writes approval-ready overview, phase, and documentation-handoff files. It recommends evidence-backed project-documentation changes for Project Knowledge review, but cannot edit canonical documentation, implementation files, or execute a phase. |
 | Project QA Commit | Owns final readiness review, validation sufficiency, documentation reconciliation, and SemVer recommendations. It may make a local commit only after explicit authorization; it never pushes or performs remote mutations. |
+| Project Sanity Developer | Implements bounded Sanity slices using installed-version evidence and focused Studio validation. It cannot delegate, deploy schemas/functions, apply migrations, mutate content, change dependencies, commit, or push without explicit approval; the parent retains integration and acceptance. |
+| Project Sanity Reviewer | Performs read-only, version-aware review of Sanity plans, current code, and settled diffs across schemas, GROQ, TypeGen, Studio, Visual Editing, Portable Text, images, migrations, Blueprints, functions, webhooks, and frontend integrations. It cannot edit, execute, deploy, migrate, mutate, or delegate. |
 
 Specialized plan implementation agents in the workspace root are legacy one-off files, not managed agents or standing dependencies. See [knowledge coverage](../../docs/project/agents/knowledge-coverage.md) and [acceptance scenarios](../../docs/project/agents/acceptance-scenarios.md).
 

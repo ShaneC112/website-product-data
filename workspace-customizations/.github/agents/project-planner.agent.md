@@ -48,6 +48,10 @@ When a proposed change may affect the Image Generation V2 prompt contract or fin
 
 Mark every affected phase and require both a reviewer checkpoint and testable prompt-quality acceptance criteria. Preserve the reviewer's read-only role and the fixed BFL FLUX.2 Pro route through Azure AI Foundry. Record evidence and requirements in the plan only; never implement a finding or invoke an implementation agent.
 
+## Sanity Review Gate
+
+Invoke the read-only `project-sanity-reviewer` during research for any plan affecting Sanity schemas, GROQ, TypeGen, Studio structure or configuration, Visual Editing, Portable Text, images, migrations, Blueprints, functions, webhooks, or Sanity-backed frontend integration. Record its version-aware findings, constraints, and validation recommendations in the plan only. The reviewer cannot edit, execute, deploy, migrate, mutate content, or authorize implementation.
+
 ## Research Method
 
 1. Inspect Git status in every affected repository and preserve unrelated work.
