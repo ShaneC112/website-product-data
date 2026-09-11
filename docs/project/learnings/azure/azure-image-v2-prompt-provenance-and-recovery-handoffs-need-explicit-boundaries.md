@@ -19,7 +19,7 @@ The evidence showed these were different boundaries and must not be diagnosed as
 
 ## Durable findings
 
-### Prompt provenance must be traceable without logging prompt content
+### Prompt provenance must be traceable without ordinary-log prompt disclosure
 
 The FLUX prompt is assembled in `03-assemble/direct/handler.ts` from product, colour, texture, pattern, scene, camera, brand, and flooring constraints. The scene text is rendered by `prompt-features/scene/render.ts`; the camera policy is added separately by `prompt-features/camera/render.ts`; `04-render/registry.ts` rehydrates the assembled prompt from the render row's `inputReference`.
 
@@ -32,7 +32,7 @@ The useful diagnostic identity is a shared SHA-256 prompt hash plus bounded meta
 - provider reuse versus new provider call;
 - provider operation ID.
 
-Do not log full prompts, image bytes, provider payloads, or credentials.
+Ordinary lifecycle and diagnostic logs must not contain full prompts, image bytes, provider payloads, or credentials. The canonical Azure logging policy permits a narrower typed exception for validated `trace` records whose module matches `flux:*`; that exception does not relax redaction or permit signed URLs, raw headers, binary payloads, or credentials.
 
 ### Structured scene content can be present while provider output still fails visually
 

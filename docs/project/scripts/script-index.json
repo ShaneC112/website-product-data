@@ -58,6 +58,7 @@
         "reset-preflight.test.ts": "test",
         "reset-preflight.ts": "helper-only",
         "reset-trace-logs.ts": "documented",
+        "review-flux-prompt-pipeline.ts": "documented",
         "snapshot-m2crm-crawl-products.ts": "documented",
         "test-image-endpoints.mjs": "documented"
       }

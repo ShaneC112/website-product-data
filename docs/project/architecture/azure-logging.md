@@ -16,6 +16,22 @@ This policy governs production server logging in `website-product-enrichment-azu
 
 Choose the level from the workflow outcome, not from the amount of detail in the message.
 
+### FLUX prompt trace exception
+
+For Image V2 FLUX prompt construction only, full prompt content is allowed in a narrow exception when all are true:
+
+- the record is emitted at `trace` level;
+- the logger module matches `flux:*`;
+- the field is one of the typed prompt-construction content fields defined by the shared Data contract;
+- the event is validated by the shared schema before emission;
+- the standard logger redaction boundary remains active for credentials, authorization, cookies, SAS values, binary/image payloads, and raw provider headers.
+
+This exception includes normalized inputs, Vision system/user prompts, structured text outputs, normalized or guarded values, cache decisions, rendered sections, assembled prompt content, and final render-input prompt values. It does not cover image bytes, base64/data URLs, raw payload dumps, credentials, authorization headers, cookies, SAS-bearing URLs, connection strings, or other prohibited material.
+
+Non-`flux:*` log records remain subject to the normal minimum-data rule and may not emit these full content fields.
+
+The older working rule that discouraged full prompt logging remains historically accurate for ordinary logs, but the typed `flux:*` trace exception in this policy supersedes that rule for the narrow approved prompt-trace use case only.
+
 ### `info`: operator-visible lifecycle or state change
 
 Use `info` when normal workflow state changes and an operator needs the event for auditability or recovery:
