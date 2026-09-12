@@ -3,7 +3,7 @@ import {sha256} from '../sanity/sha256.js'
 import {SANITY_PRODUCT_TYPES, SANITY_SUITABLE_ROOMS} from '../../registry/product-taxonomy.js'
 
 export const normalizedSceneSchema = z.object({
-  version: z.literal(1),
+  version: z.literal(2),
   documentKey: z.string().trim().min(1),
   sceneKey: z.string().trim().min(1),
   roomKey: z.string().trim().min(1),
@@ -14,7 +14,6 @@ export const normalizedSceneSchema = z.object({
   renderDirectives: z.array(z.string().trim().min(10).max(400)).min(1).max(16).default(['Fully furnish the room with the approved design choices.']),
   lockedSections: z.object({
     architecture: z.array(z.string().trim().min(10).max(400)).min(1).max(16),
-    camera: z.array(z.string().trim().min(10).max(300)).min(1).max(12),
     flooring: z.array(z.string().trim().min(10).max(400)).min(1).max(16),
     lighting: z.string().trim().min(10).max(300)
   }).strict(),
@@ -36,18 +35,22 @@ export const normalizedSceneSchema = z.object({
   roomCategory: z.enum(SANITY_SUITABLE_ROOMS),
   tradeProductType: z.enum(SANITY_PRODUCT_TYPES),
   colourDesignFingerprint: z.string().length(64),
+  colourPalette: z.array(z.object({
+    hex: z.string().trim().regex(/^#[0-9a-fA-F]{6}$/),
+    coveragePercent: z.number().int().min(1).max(100)
+  }).strict()).default([]),
   lighting: z.string().trim().min(1),
+  lightingMood: z.enum(['morning', 'daytime', 'evening', 'night']),
   fashion: z.string().trim().min(1),
   tone: z.string().trim().min(1),
   furnitureTier: z.string().trim().min(1),
-  sceneGenerationVersion: z.literal(1),
+  sceneGenerationVersion: z.literal(2),
   semanticFingerprint: z.string().length(64)
 }).strict()
 
 export const sceneStructuredSectionsSchema = z.object({
   lockedSections: z.object({
     architecture: z.array(z.string().trim().min(10)).min(1),
-    camera: z.array(z.string().trim().min(10)).min(1),
     flooring: z.array(z.string().trim().min(10)).min(1),
     lighting: z.string().trim().min(10)
   }).strict(),
@@ -73,7 +76,7 @@ export const sceneArtifactSchema = z.object({
   artifactKind: z.literal('scene'),
   scope: z.object({documentKey: z.string().trim().min(1), sceneKey: z.string().trim().min(1)}).strict(),
   roomDependency: z.object({roomKey: z.string().trim().min(1), roomFingerprint: z.string().length(64)}).strict(),
-    composition: z.object({shell: z.string().trim().min(1), product: z.string().trim().min(1), furnishings: z.string().trim().min(1), paletteStrategy: z.string().trim().min(1), lighting: z.string().trim().min(1), renderDirectives: z.array(z.string().trim().min(10).max(400)).min(1).max(16), lockedSections: z.object({architecture: z.array(z.string().trim().min(10)), camera: z.array(z.string().trim().min(10)), flooring: z.array(z.string().trim().min(10)), lighting: z.string().trim().min(10)}).strict(), variableSections: z.object({primaryFocalPoints: z.array(z.string().trim().min(10)).min(1), secondaryFurniture: z.array(z.string().trim().min(10)), windowTreatments: z.array(z.string().trim().min(10)), lighting: z.array(z.string().trim().min(10)), accessories: z.array(z.string().trim().min(10)), visibilityChecklist: z.array(z.string().trim().min(5)).min(1)}).strict(), styleSections: z.object({concept: z.string().trim().min(10), palette: z.array(z.string().trim().min(3)), materials: z.array(z.string().trim().min(3)), tone: z.string().trim().min(3), fashion: z.string().trim().min(3)}).strict(), designBrief: z.string().trim().min(100)}).strict(),
+    composition: z.object({shell: z.string().trim().min(1), product: z.string().trim().min(1), furnishings: z.string().trim().min(1), paletteStrategy: z.string().trim().min(1), lighting: z.string().trim().min(1), renderDirectives: z.array(z.string().trim().min(10).max(400)).min(1).max(16), lockedSections: z.object({architecture: z.array(z.string().trim().min(10)), flooring: z.array(z.string().trim().min(10)), lighting: z.string().trim().min(10)}).strict(), variableSections: z.object({primaryFocalPoints: z.array(z.string().trim().min(10)).min(1), secondaryFurniture: z.array(z.string().trim().min(10)), windowTreatments: z.array(z.string().trim().min(10)), lighting: z.array(z.string().trim().min(10)), accessories: z.array(z.string().trim().min(10)), visibilityChecklist: z.array(z.string().trim().min(5)).min(1)}).strict(), styleSections: z.object({concept: z.string().trim().min(10), palette: z.array(z.string().trim().min(3)), materials: z.array(z.string().trim().min(3)), tone: z.string().trim().min(3), fashion: z.string().trim().min(3)}).strict(), designBrief: z.string().trim().min(100)}).strict(),
   exclusions: z.array(z.string().trim().min(1)).min(1),
   semanticFingerprint: z.string().length(64)
 }).strict()
@@ -81,7 +84,7 @@ export const sceneArtifactSchema = z.object({
 export type NormalizedScene = z.infer<typeof normalizedSceneSchema>
 export type SceneArtifact = z.infer<typeof sceneArtifactSchema>
 
-export function buildSceneKey(input: Pick<NormalizedScene, 'roomKey' | 'roomFingerprint' | 'productFingerprint' | 'tradeProductType' | 'colourDesignFingerprint' | 'lighting' | 'fashion' | 'tone' | 'furnitureTier' | 'sceneGenerationVersion'>): string {
+export function buildSceneKey(input: Pick<NormalizedScene, 'roomKey' | 'roomFingerprint' | 'productFingerprint' | 'productContribution' | 'tradeProductType' | 'colourDesignFingerprint' | 'colourPalette' | 'lighting' | 'lightingMood' | 'fashion' | 'tone' | 'furnitureTier' | 'designBrief' | 'renderDirectives' | 'lockedSections' | 'variableSections' | 'styleSections' | 'sceneGenerationVersion'>): string {
   return sha256(JSON.stringify(input))
 }
 

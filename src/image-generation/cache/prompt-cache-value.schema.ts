@@ -54,8 +54,9 @@ const cameraPolicyCacheSchema = z.object({
   lensMmFullFrame: orderedRange(z.number().int().positive()),
   pitch: z.enum(['level', 'slight-down', 'level/slight-down']),
   targetFloorSharePercent: orderedRange(z.number().int().min(1).max(100)),
-  cropSafeFloorMinimumPercent: z.literal(33),
-  stairsVisibleModifier: z.boolean().optional()
+  cropSafeFloorMinimumPercent: z.number().int().min(1).max(100),
+  stairsVisibleModifier: z.boolean().optional(),
+  bedroomFurnitureCoverageModifier: z.boolean().optional()
 }).strict()
 
 export const normalizedTextureSchema = z.discriminatedUnion('mode', [
