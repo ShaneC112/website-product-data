@@ -4,6 +4,7 @@ import {SANITY_SUITABLE_ROOMS} from '../../registry/product-taxonomy.js'
 export const normalizedRoomSchema = z.object({
   version: z.literal(1),
   documentKey: z.string().trim().min(1),
+  templateRevision: z.string().trim().min(1),
   roomKey: z.string().trim().min(1),
   roomCategory: z.enum(SANITY_SUITABLE_ROOMS),
   roomDescription: z.string().trim().min(1),

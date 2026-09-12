@@ -17,6 +17,7 @@ import {
   imageGenerationRunContentRowSchema,
   imageGenerationRunSnapshotSchema,
   promptCacheValueSchema,
+  normalizedPromptArtifactMetadataSchema,
   normalizedColourDesignSchema,
   upcastImageGenerationOrchestrationLedger,
   upcastImageGenerationRunContentClaim,
@@ -43,6 +44,21 @@ describe('imageGenerationOrchestrationLedgerSchema', () => {
     })
 
     expect(parsed.attempt).toBe(0)
+  })
+})
+
+describe('normalizedPromptArtifactMetadataSchema', () => {
+  it('accepts bounded metadata for a room artifact', () => {
+    const parsed = normalizedPromptArtifactMetadataSchema.parse({
+      envelopeVersion: 1,
+      artifact: {kind: 'room', schemaVersion: 1, semanticFingerprint: 'a'.repeat(64)},
+      scope: {documentKey: 'product-1', templateId: 'template-1', templateRevision: 'revision-1', roomKey: 'bedroom'},
+      source: {mode: 'sanity-cache', sourceFingerprint: 'b'.repeat(64), cacheKey: 'product:room:product-1:bedroom:key'},
+      contract: {promptContractVersion: 1, producerVersion: 'room-v1', normalizationVersion: 'room-normalize-v1'},
+      provenance: {sourceEventIds: [], inputArtifactRefs: ['artifact:run-1:room']}
+    })
+
+    expect(parsed.artifact.kind).toBe('room')
   })
 })
 
@@ -80,6 +96,23 @@ describe('imageGenerationArtifactLedgerSchema', () => {
     })
 
     expect(parsed.state).toBe('review-required')
+  })
+
+  it('accepts optional artifact metadata and still accepts legacy rows without it', () => {
+    const row = imageGenerationArtifactLedgerSchema.parse({
+      schemaVersion: 1,
+      partitionKey: 'request-1',
+      rowKey: 'run-1:room:work-1',
+      artifactKind: 'room',
+      ownerScopeKey: 'run-1:generate.room',
+      fingerprint: 'a'.repeat(64),
+      state: 'validated',
+      artifactMetadataJson: '{"envelopeVersion":1}',
+      updatedAt: '2026-09-06T00:00:00.000Z'
+    })
+    expect(row.artifactMetadataJson).toBe('{"envelopeVersion":1}')
+    const {artifactMetadataJson: _metadata, ...legacyRow} = row
+    expect(imageGenerationArtifactLedgerSchema.parse(legacyRow)).not.toHaveProperty('artifactMetadataJson')
   })
 })
 
@@ -182,7 +215,7 @@ describe('promptCacheValueSchema', () => {
   it('uses the selected room as stable identity and its description fingerprint for cache invalidation', () => {
     const room = {roomCategory: 'bedroom' as const, roomDescription: 'Colour-neutral bedroom architecture with fixed openings.', roomSourceFingerprint: 'Colour-neutral bedroom architecture with fixed openings.', roomGenerationVersion: 1 as const}
     const roomKey = buildRoomKey(room.roomCategory)
-    const value = {version: 1 as const, documentKey: 'product-1', roomKey, roomCategory: 'bedroom' as const, roomDescription: room.roomDescription, roomSourceFingerprint: room.roomSourceFingerprint, cameraOverlap: {cropSafeFloorMinimumPercent: 33 as const}, roomGenerationVersion: 1 as const, semanticFingerprint: 'a'.repeat(64)}
+    const value = {version: 1 as const, documentKey: 'product-1', templateRevision: 'revision-1', roomKey, roomCategory: 'bedroom' as const, roomDescription: room.roomDescription, roomSourceFingerprint: room.roomSourceFingerprint, cameraOverlap: {cropSafeFloorMinimumPercent: 33 as const}, roomGenerationVersion: 1 as const, semanticFingerprint: 'a'.repeat(64)}
     expect(normalizedRoomSchema.parse(value)).toEqual(value)
     expect(buildRoomKey('bedroom')).toBe(roomKey)
     expect(buildRoomCacheKey('product-1', room.roomCategory, room.roomSourceFingerprint)).toBe(`product:room:product-1:bedroom:${room.roomSourceFingerprint}`)
@@ -223,6 +256,7 @@ describe('promptCacheValueSchema', () => {
       version: 1 as const,
       documentKey: 'product-doc-1',
       variantKey: 'variant-key-1',
+      templateRevision: 'rev-1',
       colourName: 'Cloud',
       colourHex: '#AABBCC',
       fashion: 'soft-contemporary',
@@ -248,6 +282,7 @@ describe('promptCacheValueSchema', () => {
       version: 1,
       documentKey: 'product-doc-1',
       variantKey: 'variant-key-1',
+      templateRevision: 'rev-1',
       colourName: 'Cloud',
       fashion: 'soft-contemporary',
       tone: 'balanced',

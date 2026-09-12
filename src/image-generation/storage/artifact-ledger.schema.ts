@@ -15,6 +15,7 @@ export const imageGenerationArtifactLedgerSchema = z.object({
   ownerToken: z.string().trim().min(1).optional(),
   leaseExpiresAt: z.string().datetime().optional(),
   outputReference: z.string().trim().min(1).optional(),
+  artifactMetadataJson: z.string().trim().min(1).optional(),
   updatedAt: z.string().datetime(),
   completedAt: z.string().datetime().optional()
 }).strict()

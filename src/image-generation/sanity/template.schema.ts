@@ -25,6 +25,7 @@ function rejectDuplicateCacheEntries<T extends {fingerprint: string}>(
 const colourDesignPromptSchema = z.object({
   _key: z.string().trim().min(1).optional(),
   variantKey: z.string().trim().min(1),
+  templateRevision: z.string().trim().min(1),
   fingerprint: z.string().trim().min(1),
   swatchFingerprint: z.string().trim().min(1).optional(),
   palette: z.array(z.object({
@@ -40,6 +41,7 @@ const colourDesignPromptSchema = z.object({
 const roomPromptSchema = z.object({
   _key: z.string().trim().min(1).optional(),
   roomKey: z.enum(SANITY_SUITABLE_ROOMS),
+  templateRevision: z.string().trim().min(1),
   fingerprint: z.string().trim().min(1),
   prompt: z.string().trim().min(1),
   schemaVersion: z.literal(1),

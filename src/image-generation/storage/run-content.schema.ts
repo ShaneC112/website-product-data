@@ -16,6 +16,7 @@ export const imageGenerationRunContentRowSchema = z.object({
   featureType: promptFeatureTypeSchema,
   payloadFingerprint: z.string().trim().min(1),
   payloadJson: z.string().trim().min(1),
+  artifactMetadataJson: z.string().trim().min(1).optional(),
   capturedAt: z.string().datetime()
 }).strict()
 

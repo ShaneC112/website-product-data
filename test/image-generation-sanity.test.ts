@@ -115,8 +115,8 @@ describe('aiImageGenerationTemplateSchema', () => {
       title: 'Bedroom inspiration',
       product: {_type: 'reference', _ref: 'product-1'},
       colourDesignPrompts: [
-        {variantKey: 'variant-1', fingerprint: 'fingerprint-1', prompt: 'First prompt', schemaVersion: 1, generatedAt: '2026-09-06T00:00:00.000Z'},
-        {variantKey: 'variant-1', fingerprint: 'fingerprint-2', prompt: 'Second prompt', schemaVersion: 1, generatedAt: '2026-09-06T00:00:00.000Z'}
+        {variantKey: 'variant-1', templateRevision: 'revision-1', fingerprint: 'fingerprint-1', prompt: 'First prompt', schemaVersion: 1, generatedAt: '2026-09-06T00:00:00.000Z'},
+        {variantKey: 'variant-1', templateRevision: 'revision-1', fingerprint: 'fingerprint-2', prompt: 'Second prompt', schemaVersion: 1, generatedAt: '2026-09-06T00:00:00.000Z'}
       ]
     })).toThrow(/duplicate cache entry/)
   })
@@ -128,8 +128,8 @@ describe('aiImageGenerationTemplateSchema', () => {
       title: 'Bedroom inspiration',
       product: {_type: 'reference', _ref: 'product-1'},
       roomPrompts: [
-        {roomKey: 'bedroom', fingerprint: 'fingerprint-1', prompt: 'First prompt', schemaVersion: 1, generatedAt: '2026-09-06T00:00:00.000Z'},
-        {roomKey: 'bedroom', fingerprint: 'fingerprint-2', prompt: 'Second prompt', schemaVersion: 1, generatedAt: '2026-09-06T00:00:00.000Z'}
+        {roomKey: 'bedroom', templateRevision: 'revision-1', fingerprint: 'fingerprint-1', prompt: 'First prompt', schemaVersion: 1, generatedAt: '2026-09-06T00:00:00.000Z'},
+        {roomKey: 'bedroom', templateRevision: 'revision-1', fingerprint: 'fingerprint-2', prompt: 'Second prompt', schemaVersion: 1, generatedAt: '2026-09-06T00:00:00.000Z'}
       ]
     })).toThrow(/duplicate cache entry/)
   })
@@ -143,6 +143,7 @@ describe('aiImageGenerationTemplateSchema', () => {
       colourDesignPrompts: [{
         _key: 'colour-design-1',
         variantKey: 'variant-1',
+        templateRevision: 'revision-1',
         fingerprint: 'fingerprint-1',
         swatchFingerprint: 'sanity-asset:image-swatch-1',
         palette: [
@@ -165,6 +166,7 @@ describe('colour/design palette cache contract', () => {
     const base = {
       documentKey: 'product-1',
       variantKey: 'variant-1',
+      templateRevision: 'revision-1',
       colourName: 'Cloud',
       colourHex: '#aabbcc',
       fashion: 'soft-contemporary',
@@ -185,7 +187,7 @@ describe('colour/design palette cache contract', () => {
     expect(computeColourDesignFingerprint({...base, ...fingerprintContext, swatchFingerprint: 'image-abc123-100x100-png', palette}))
       .toBe(computeColourDesignFingerprint({...base, ...fingerprintContext, swatchFingerprint: 'image-abc123-100x100-png', palette: [{hex: '#112233', coveragePercent: 100}]}))
     expect(computeColourDesignFingerprint({...base, ...fingerprintContext, swatchFingerprint: 'image-abc123-100x100-png'}))
-      .toBe(computeColourDesignFingerprint({...base, ...fingerprintContext, templateRevision: 'revision-2', swatchFingerprint: 'image-abc123-100x100-png'}))
+      .not.toBe(computeColourDesignFingerprint({...base, ...fingerprintContext, templateRevision: 'revision-2', swatchFingerprint: 'image-abc123-100x100-png'}))
     expect(computeColourDesignFingerprint({...base, ...fingerprintContext, swatchFingerprint: 'image-abc123-100x100-png'}))
       .not.toBe(computeColourDesignFingerprint({...base, ...fingerprintContext}))
   })
@@ -197,6 +199,7 @@ describe('colour/design palette cache contract', () => {
       version: 1,
       documentKey: 'product-1',
       variantKey: 'variant-1',
+      templateRevision: 'revision-1',
       colourName: 'Cloud',
       colourHex: '#aabbcc',
       palette: [{hex: '#AABBCC', coveragePercent: 60}, {hex: '#99AABB', coveragePercent: 30}],

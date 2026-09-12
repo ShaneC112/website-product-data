@@ -113,6 +113,7 @@ export function buildImageGenerationTemplateRebindAuditEntry(input: z.input<type
 export type ColourDesignPrompt = {
   _key?: string
   variantKey: string
+  templateRevision: string
   fingerprint: string
   swatchFingerprint?: string
   palette?: Array<{_key?: string; hex: string; coveragePercent: number}>
@@ -124,6 +125,7 @@ export type ColourDesignPrompt = {
 export type RoomPrompt = {
   _key?: string
   roomKey: (typeof SANITY_SUITABLE_ROOMS)[number]
+  templateRevision: string
   fingerprint: string
   prompt: string
   schemaVersion: 1
