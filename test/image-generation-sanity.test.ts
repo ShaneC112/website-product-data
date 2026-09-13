@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  buildImageGenerationProductDeleteControl,
   buildImageGenerationRequestDuplicateControl,
   buildImageGenerationRequestPolicySnapshot,
   buildImageGenerationRequestRefreshPolicyControl,
@@ -13,6 +14,20 @@ import {
   hashImageGenerationRequestPolicySnapshot,
   imageGenerationGuardedControlRequestSchema,
   imageGenerationGuardedControlResultSchema,
+  imageGenerationProductDeletionJournalSchema,
+  productDeletionFenceAliasKindSchema,
+  productDeletionManifestReferenceSchema,
+  productDeletionPermitSchema,
+  productDeletionPipelineClosureSnapshotSchema,
+  orphanDiscoveryAlgorithmVersion,
+  orphanDiscoveryManifestPayloadSchema,
+  orphanDiscoveryManifestEnvelopeSchema,
+  buildOrphanDiscoveryManifestEnvelope,
+  buildOrphanDiscoveryManifestBlobName,
+  canonicalizeOrphanDiscoveryManifestPayload,
+  computeOrphanDiscoveryManifestId,
+  computeOrphanDiscoveryManifestSha256,
+  verifyOrphanDiscoveryManifestEnvelope,
   aiImageGenerationControlIntentSchema,
   imageGenerationSanitySubmissionSchema,
   imageGenerationTemplateAuditEntrySchema,
@@ -369,10 +384,12 @@ describe('request and run schemas', () => {
       submissionId: 'control-1',
       documentId: 'control-1',
       controlId: 'control-1',
+      controlOperation: 'product.delete',
       requestedAt: '2026-09-06T00:00:00.000Z'
     })
 
     expect(parsed.submissionKind).toBe('control.submit')
+    expect(parsed.controlOperation).toBe('product.delete')
   })
 
   it('accepts a Sanity-originated template deletion submission', () => {
@@ -603,6 +620,122 @@ describe('request and run schemas', () => {
   })
 })
 
+describe('orphan discovery manifest contract', () => {
+  const basePayload = {
+    generatedAt: '2026-09-12T00:00:00.000Z',
+    upperUpdatedAt: '2026-09-12T00:00:00.000Z',
+    algorithmVersion: orphanDiscoveryAlgorithmVersion,
+    queryShapeVersion: 1,
+    pageCursors: [{ cursorUpdatedAt: '2026-09-12T00:00:00.000Z', cursorId: 'template-1' }],
+    candidates: [{
+      candidateType: 'template',
+      canonicalId: 'template-1',
+      documentId: 'template-1',
+      revision: 'rev-template-1',
+      reasonCode: 'template_product_missing',
+      dependencyEvidence: [{
+        productId: 'product-1',
+        resolutionState: 'missing'
+      }],
+      closure: {
+        requests: [{
+          candidateType: 'request',
+          canonicalId: 'request-1',
+          documentId: 'request-doc-1',
+          revision: 'rev-request-1',
+          reasonCode: 'request_template_product_missing',
+          dependencyEvidence: [{
+            templateId: 'template-1',
+            templateRevision: 'rev-template-1',
+            resolutionState: 'resolved'
+          }]
+        }],
+        runLogs: [{
+          candidateType: 'run-log',
+          canonicalId: 'run-log-1',
+          documentId: 'run-log-1',
+          revision: 'rev-run-log-1',
+          reasonCode: 'run_log_template_product_missing',
+          dependencyEvidence: [{
+            templateId: 'template-1',
+            templateRevision: 'rev-template-1',
+            resolutionState: 'resolved'
+          }]
+        }]
+      }
+    }]
+  } as const
+
+  it('accepts a versioned orphan discovery manifest payload and envelope', () => {
+    const payload = orphanDiscoveryManifestPayloadSchema.parse(basePayload)
+    const envelope = orphanDiscoveryManifestEnvelopeSchema.parse(buildOrphanDiscoveryManifestEnvelope(payload))
+    const reference = productDeletionManifestReferenceSchema.parse({
+      manifestId: envelope.manifestId,
+      sha256: envelope.sha256,
+      algorithmVersion: orphanDiscoveryAlgorithmVersion,
+      blobName: buildOrphanDiscoveryManifestBlobName(payload),
+      generatedAt: payload.generatedAt
+    })
+
+    expect(reference.manifestId).toBe(envelope.manifestId)
+  })
+
+  it('serializes equal logical payloads identically and derives stable identity', () => {
+    const first = canonicalizeOrphanDiscoveryManifestPayload(basePayload)
+    const second = canonicalizeOrphanDiscoveryManifestPayload({
+      candidates: basePayload.candidates,
+      pageCursors: basePayload.pageCursors,
+      queryShapeVersion: 1,
+      algorithmVersion: orphanDiscoveryAlgorithmVersion,
+      upperUpdatedAt: basePayload.upperUpdatedAt,
+      generatedAt: basePayload.generatedAt
+    })
+
+    expect(first).toBe(second)
+    expect(computeOrphanDiscoveryManifestSha256(basePayload)).toBe(computeOrphanDiscoveryManifestSha256(basePayload))
+    expect(computeOrphanDiscoveryManifestId(basePayload)).toBe(computeOrphanDiscoveryManifestSha256(basePayload))
+  })
+
+  it('treats candidate ordering as integrity-protected', () => {
+    const reordered = {
+      ...basePayload,
+      candidates: [...basePayload.candidates, {
+        candidateType: 'request',
+        canonicalId: 'request-2',
+        documentId: 'request-doc-2',
+        revision: 'rev-request-2',
+        reasonCode: 'request_template_missing',
+        dependencyEvidence: [{ templateId: 'template-2', resolutionState: 'missing' }],
+        closure: { requests: [], runLogs: [] }
+      }]
+    }
+    const reversed = {
+      ...reordered,
+      candidates: [...reordered.candidates].reverse()
+    }
+
+    expect(computeOrphanDiscoveryManifestSha256(reordered)).not.toBe(computeOrphanDiscoveryManifestSha256(reversed))
+  })
+
+  it('rejects a tampered envelope digest', () => {
+    const envelope = buildOrphanDiscoveryManifestEnvelope(basePayload)
+
+    expect(() => verifyOrphanDiscoveryManifestEnvelope({
+      ...envelope,
+      sha256: '0'.repeat(64)
+    })).toThrow(/integrity verification/)
+  })
+
+  it('rejects an algorithm-version mismatch', () => {
+    const envelope = buildOrphanDiscoveryManifestEnvelope(basePayload)
+
+    expect(() => verifyOrphanDiscoveryManifestEnvelope({
+      ...envelope,
+      algorithmVersion: 'orphan-discovery-v2'
+    })).toThrow()
+  })
+})
+
 describe('image generation template readiness', () => {
   const template = {
     _id: 'template-1', _type: 'aiImageGenerationTemplate', title: 'Template',
@@ -712,6 +845,216 @@ describe('guarded control schemas', () => {
       currentRunId: 'run-2',
       currentRunEpoch: 3
     })).toEqual(expect.objectContaining({operation: 'request.refreshPolicy'}))
+
+    expect(buildImageGenerationProductDeleteControl({
+      controlId: 'control-8',
+      requestedAt: '2026-09-06T00:00:00.000Z',
+      productId: 'product-1',
+      styleCode: 'STYLE-1',
+      expectedProductDocuments: [
+        {documentId: 'product-1', revision: 'rev-published'},
+        {documentId: 'drafts.product-1', revision: 'rev-draft'}
+      ]
+    })).toEqual(expect.objectContaining({operation: 'product.delete'}))
+  })
+
+  it('rejects product delete controls that do not carry both raw product revisions', () => {
+    expect(() => buildImageGenerationProductDeleteControl({
+      controlId: 'control-9',
+      requestedAt: '2026-09-06T00:00:00.000Z',
+      productId: 'product-1',
+      styleCode: 'STYLE-1',
+      expectedProductDocuments: [
+        {documentId: 'product-1', revision: 'rev-published'},
+        {documentId: 'product-1', revision: 'rev-duplicate'}
+      ]
+    })).toThrow(/expectedProductDocuments/)
+  })
+
+  it('accepts the unsupported absence-dependent closure result discriminant', () => {
+    const parsed = imageGenerationGuardedControlResultSchema.parse({
+      outcome: 'unsupported_absence_dependent_closure',
+      controlId: 'control-10',
+      reasonCode: 'missing_draft_or_published_product'
+    })
+
+    expect(parsed).toEqual({
+      outcome: 'unsupported_absence_dependent_closure',
+      controlId: 'control-10',
+      reasonCode: 'missing_draft_or_published_product'
+    })
+  })
+
+  it('accepts a blocked-active-work result with bounded inventory evidence', () => {
+    const parsed = imageGenerationGuardedControlResultSchema.parse({
+      outcome: 'blocked_active_work',
+      controlId: 'control-11',
+      reasonCode: 'product-delete-active-work-present',
+      activeWork: [{
+        requestId: 'request-1',
+        durableKind: 'orchestration',
+        reasonCode: 'orchestration-queued'
+      }]
+    })
+
+    expect(parsed).toEqual({
+      outcome: 'blocked_active_work',
+      controlId: 'control-11',
+      reasonCode: 'product-delete-active-work-present',
+      activeWork: [{
+        requestId: 'request-1',
+        durableKind: 'orchestration',
+        reasonCode: 'orchestration-queued'
+      }]
+    })
+  })
+
+  it('accepts a stabilizing result with bounded inventory evidence', () => {
+    const parsed = imageGenerationGuardedControlResultSchema.parse({
+      outcome: 'stabilizing',
+      controlId: 'control-11b',
+      reasonCode: 'product-delete-draining-pre-fence-work',
+      activeWork: [{
+        requestId: 'request-1',
+        durableKind: 'dispatch-intent',
+        reasonCode: 'dispatch-pending_outbound'
+      }]
+    })
+
+    expect(parsed).toEqual({
+      outcome: 'stabilizing',
+      controlId: 'control-11b',
+      reasonCode: 'product-delete-draining-pre-fence-work',
+      activeWork: [{
+        requestId: 'request-1',
+        durableKind: 'dispatch-intent',
+        reasonCode: 'dispatch-pending_outbound'
+      }]
+    })
+  })
+
+  it('accepts a product deletion journal row for a drain-state retry projection', () => {
+    const parsed = imageGenerationProductDeletionJournalSchema.parse({
+      partitionKey: 'product-deletion-journal',
+      rowKey: 'control-13',
+      schemaVersion: 1,
+      controlId: 'control-13',
+      productId: 'product-1',
+      styleCode: 'STYLE-1',
+      phase: 'awaiting-drain-retry',
+      resultOutcome: 'stabilizing',
+      resultReasonCode: 'product-delete-draining-pre-fence-work',
+      activeWork: [{
+        requestId: 'request-1',
+        durableKind: 'dispatch-intent',
+        reasonCode: 'dispatch-pending_outbound'
+      }],
+      drainRoster: [{
+        requestId: 'request-1',
+        durableKind: 'dispatch-intent',
+        reasonCode: 'dispatch-pending_outbound'
+      }],
+      nextRetryAt: '2026-09-06T00:05:00.000Z',
+      createdAt: '2026-09-06T00:00:00.000Z',
+      updatedAt: '2026-09-06T00:00:00.000Z'
+    })
+
+    expect(parsed).toEqual(expect.objectContaining({
+      phase: 'awaiting-drain-retry',
+      resultOutcome: 'stabilizing',
+      drainRoster: [{
+        requestId: 'request-1',
+        durableKind: 'dispatch-intent',
+        reasonCode: 'dispatch-pending_outbound'
+      }],
+      nextRetryAt: '2026-09-06T00:05:00.000Z'
+    }))
+  })
+
+  it('accepts a product deletion journal row with main-pipeline closure and fence generation evidence', () => {
+    const parsed = imageGenerationProductDeletionJournalSchema.parse({
+      partitionKey: 'product-deletion-journal',
+      rowKey: 'control-14',
+      schemaVersion: 1,
+      controlId: 'control-14',
+      productId: 'product-1',
+      styleCode: 'STYLE-1',
+      productFenceGeneration: 2,
+      phase: 'fence-acquired',
+      resultOutcome: 'accepted',
+      pipelineClosureSnapshotJson: JSON.stringify({
+        productId: 'product-1',
+        productFenceGeneration: 2,
+        styleCode: { raw: 'STYLE-1', normalized: 'style-1' },
+        sourceGroup: { key: 'STYLE-1', storageKey: 'STYLE-1' },
+        m2crmIds: ['row-1', 'uuid-1'],
+        urlKeys: ['url-key-1'],
+        aliases: [
+          { aliasKind: 'style-code', aliasValue: 'style-1' },
+          { aliasKind: 'source-group', aliasValue: 'STYLE-1' },
+          { aliasKind: 'm2crm', aliasValue: 'row-1' },
+          { aliasKind: 'url', aliasValue: 'url-key-1' }
+        ]
+      }),
+      createdAt: '2026-09-06T00:00:00.000Z',
+      updatedAt: '2026-09-06T00:00:00.000Z'
+    })
+
+    expect(parsed.productFenceGeneration).toBe(2)
+    expect(parsed.pipelineClosureSnapshotJson).toContain('source-group')
+  })
+
+  it('rejects blocked-active-work results without bounded inventory evidence', () => {
+    expect(() => imageGenerationGuardedControlResultSchema.parse({
+      outcome: 'blocked_active_work',
+      controlId: 'control-12',
+      reasonCode: 'product-delete-active-work-present',
+      activeWork: []
+    })).toThrow(/at least 1 element/)
+  })
+
+  it('accepts the approved main-pipeline alias kinds', () => {
+    expect(productDeletionFenceAliasKindSchema.options).toEqual([
+      'style-code',
+      'source-group',
+      'm2crm',
+      'url'
+    ])
+  })
+
+  it('rejects unsupported main-pipeline alias kinds', () => {
+    expect(productDeletionFenceAliasKindSchema.safeParse('product').success).toBe(false)
+  })
+
+  it('accepts a main-pipeline closure snapshot', () => {
+    const parsed = productDeletionPipelineClosureSnapshotSchema.parse({
+      productId: 'product-1',
+      productFenceGeneration: 2,
+      styleCode: { raw: 'STYLE-1', normalized: 'style-1' },
+      sourceGroup: { key: 'STYLE-1', storageKey: 'STYLE-1' },
+      m2crmIds: ['row-1', 'uuid-1'],
+      urlKeys: ['url-key-1'],
+      aliases: [
+        { aliasKind: 'style-code', aliasValue: 'style-1' },
+        { aliasKind: 'source-group', aliasValue: 'STYLE-1' },
+        { aliasKind: 'm2crm', aliasValue: 'row-1' },
+        { aliasKind: 'url', aliasValue: 'url-key-1' }
+      ]
+    })
+
+    expect(parsed.productFenceGeneration).toBe(2)
+    expect(parsed.aliases).toHaveLength(4)
+  })
+
+  it('accepts a generation-bound product deletion permit', () => {
+    const parsed = productDeletionPermitSchema.parse({
+      productId: 'product-1',
+      productFenceGeneration: 2,
+      workKey: 'publish:group-1:run-1',
+      sideEffectScope: 'publish-draft-write'
+    })
+
+    expect(parsed.sideEffectScope).toBe('publish-draft-write')
   })
 
   it('omits binding-local evidence and binding state from portable templates', () => {
