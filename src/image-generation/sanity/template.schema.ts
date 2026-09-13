@@ -5,6 +5,9 @@ import {
   imageGenerationTemplateBindingSchema
 } from '../contracts/sanity.js'
 import { SANITY_SUITABLE_ROOMS } from '../../registry/product-taxonomy.js'
+import { roomCacheMetadataSchema } from '../../image-generation-v3/cache-compatibility/room-metadata.schema.js'
+import { textureMetadataSchema } from '../../image-generation-v3/cache-compatibility/texture-metadata.schema.js'
+import { colourDesignMetadataSchema } from '../../image-generation-v3/cache-compatibility/colour-design-metadata.schema.js'
 
 function rejectDuplicateCacheEntries<T extends {fingerprint: string}>(
   entries: T[],
@@ -36,7 +39,7 @@ const colourDesignPromptSchema = z.object({
   prompt: z.string().trim().min(1),
   schemaVersion: z.literal(1),
   generatedAt: z.string().datetime()
-}).strict()
+}).strict().merge(colourDesignMetadataSchema)
 
 const roomPromptSchema = z.object({
   _key: z.string().trim().min(1).optional(),
@@ -46,7 +49,7 @@ const roomPromptSchema = z.object({
   prompt: z.string().trim().min(1),
   schemaVersion: z.literal(1),
   generatedAt: z.string().datetime()
-}).strict()
+}).strict().merge(roomCacheMetadataSchema)
 
 const sanityImageAssetRefSchema = z.string().regex(/^image-[a-f0-9]+-\d+x\d+-[a-z0-9]+$/i)
 const sanityAiTexturePromptCacheSchema = z.object({
@@ -56,7 +59,7 @@ const sanityAiTexturePromptCacheSchema = z.object({
   generatedAt: z.string().datetime(),
   model: z.string().trim().min(1),
   promptVersion: z.number().int().positive()
-}).strict()
+}).strict().merge(textureMetadataSchema)
 
 const colourDesignPromptsSchema = z.array(colourDesignPromptSchema).default([]).superRefine((entries, context) => {
   rejectDuplicateCacheEntries(entries, (entry) => entry.variantKey, context)

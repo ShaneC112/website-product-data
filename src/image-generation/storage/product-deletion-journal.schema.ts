@@ -61,7 +61,8 @@ export const productDeletionPipelineClosureSnapshotSchema = z.object({
 export const productDeletionPermitScopeSchema = z.enum([
   'publish-asset-upload',
   'publish-media-image-write',
-  'publish-draft-write'
+  'publish-draft-write',
+  'image-generation-v3-durable-work'
 ])
 
 export const productDeletionPermitSchema = z.object({

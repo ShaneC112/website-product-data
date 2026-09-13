@@ -53,6 +53,18 @@
       "types": "./dist/registry/index.d.ts",
       "default": "./dist/registry/index.js"
     },
+    "./image-generation-v3": {
+      "types": "./dist/image-generation-v3/index.d.ts",
+      "default": "./dist/image-generation-v3/index.js"
+    },
+    "./image-generation-v3/registry": {
+      "types": "./dist/image-generation-v3/registry/index.d.ts",
+      "default": "./dist/image-generation-v3/registry/index.js"
+    },
+    "./image-generation-v3/contracts": {
+      "types": "./dist/image-generation-v3/contracts/index.d.ts",
+      "default": "./dist/image-generation-v3/contracts/index.js"
+    },
     "./sanity": {
       "types": "./dist/sanity.d.ts",
       "default": "./dist/sanity.js"

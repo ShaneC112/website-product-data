@@ -1,5 +1,12 @@
 import { z } from 'zod'
 import { imageGenerationSubmissionOutcomeSchema, imageGenerationSubmissionStateSchema } from '../sanity/request.schema.js'
+import {
+  imageGenerationV3RecoveryAcceptedResultSchema,
+  imageGenerationV3RecoveryBlockedResultSchema,
+  imageGenerationV3RecoveryConflictResultSchema,
+  imageGenerationV3RecoveryControlSchema,
+  imageGenerationV3RecoveryFailedResultSchema
+} from '../../image-generation-v3/contracts/recovery.schema.js'
 
 const guardedControlOperationSchema = z.enum([
   'pattern.validate',
@@ -8,7 +15,8 @@ const guardedControlOperationSchema = z.enum([
   'template.reset',
   'template.rebind',
   'request.refreshPolicy',
-  'product.delete'
+  'product.delete',
+  'request.recover'
 ])
 
 const guardedControlBaseSchema = z.object({
@@ -144,7 +152,8 @@ export const imageGenerationGuardedControlRequestSchema = z.discriminatedUnion('
   imageGenerationTemplateResetControlBaseSchema,
   imageGenerationTemplateRebindControlSchema,
   imageGenerationRequestRefreshPolicyControlSchema,
-  imageGenerationProductDeleteControlBaseSchema
+  imageGenerationProductDeleteControlBaseSchema,
+  imageGenerationV3RecoveryControlSchema
 ])
 
 export const imageGenerationGuardedControlResultSchema = z.discriminatedUnion('outcome', [
@@ -168,7 +177,11 @@ export const imageGenerationGuardedControlResultSchema = z.discriminatedUnion('o
   }).strict(),
   z.object({ outcome: z.literal('unsupported_absence_dependent_closure'), controlId: z.string().trim().min(1), reasonCode: z.string().trim().min(1) }).strict(),
   z.object({ outcome: z.literal('not_found'), controlId: z.string().trim().min(1), target: z.string().trim().min(1) }).strict(),
-  z.object({ outcome: z.literal('invalid_state'), controlId: z.string().trim().min(1), reasonCode: z.string().trim().min(1) }).strict()
+  z.object({ outcome: z.literal('invalid_state'), controlId: z.string().trim().min(1), reasonCode: z.string().trim().min(1) }).strict(),
+  imageGenerationV3RecoveryAcceptedResultSchema,
+  imageGenerationV3RecoveryBlockedResultSchema,
+  imageGenerationV3RecoveryConflictResultSchema,
+  imageGenerationV3RecoveryFailedResultSchema
 ])
 
 export const aiImageGenerationControlIntentSchema = z.object({
@@ -350,5 +363,12 @@ export function buildImageGenerationProductDeleteControl(input: {
     productId: input.productId,
     styleCode: input.styleCode,
     expectedProductDocuments: input.expectedProductDocuments
+  })
+}
+
+export function buildV3RecoveryControl(input: Omit<z.infer<typeof imageGenerationV3RecoveryControlSchema>, 'operation'>): ImageGenerationGuardedControlRequest {
+  return imageGenerationV3RecoveryControlSchema.parse({
+    operation: 'request.recover',
+    ...input
   })
 }
