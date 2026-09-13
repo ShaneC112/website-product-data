@@ -104,6 +104,16 @@ describe('crawlStageLedgerTableSchema', () => {
     expect(parsed.parentRunId).toBe('run-0')
     expect(parsed.generation).toBe(2)
   })
+
+  it('accepts optional product association and fence generation fields', () => {
+    const parsed = crawlStageLedgerTableSchema.parse({
+      ...baseLedgerRow,
+      productId: 'product-1',
+      productFenceGeneration: 3
+    })
+    expect(parsed.productId).toBe('product-1')
+    expect(parsed.productFenceGeneration).toBe(3)
+  })
 })
 
 describe('crawlStageDispatchTableSchema', () => {
@@ -133,6 +143,16 @@ describe('crawlStageDispatchTableSchema', () => {
 
   it('rejects a non-positive generation', () => {
     expect(crawlStageDispatchTableSchema.safeParse({ ...baseDispatchRow, generation: -1 }).success).toBe(false)
+  })
+
+  it('accepts optional product association and fence generation fields', () => {
+    const parsed = crawlStageDispatchTableSchema.parse({
+      ...baseDispatchRow,
+      productId: 'product-1',
+      productFenceGeneration: 3
+    })
+    expect(parsed.productId).toBe('product-1')
+    expect(parsed.productFenceGeneration).toBe(3)
   })
 })
 

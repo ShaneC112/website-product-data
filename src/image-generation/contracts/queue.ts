@@ -54,6 +54,7 @@ export const imageGenerationSanitySubmissionSchema = z.discriminatedUnion('submi
     submissionId: z.string().trim().min(1),
     documentId: z.string().trim().min(1),
     controlId: z.string().trim().min(1),
+    controlOperation: z.string().trim().min(1).optional(),
     requestedAt: z.string().datetime()
   }).strict(),
   z.object({

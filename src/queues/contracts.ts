@@ -35,6 +35,8 @@ export const crawlRequestOriginSchema = z.object({
 export const crawlRequestMessageSchema = z.object({
   runId: z.string().trim().min(1).optional(),
   source: z.enum(['sync', 'manual', 'sweeper']),
+  productId: z.string().trim().min(1).optional(),
+  productFenceGeneration: z.number().int().positive().optional(),
   tableName: z.string().trim().min(1),
   rowKey: z.string().trim().min(1),
   url: z.string().trim().min(1).optional(),
@@ -191,6 +193,8 @@ export const imageJobSchema = z.object({
 
 export const publishJobSchema = z.object({
   sourceGroupKey: z.string().trim().min(1),
+  productId: z.string().trim().min(1).optional(),
+  productFenceGeneration: z.number().int().positive().optional(),
   runId: z.string().trim().min(1).optional()
 })
 

@@ -5,7 +5,7 @@ import {
   canonicalImageGenerationOperationSchema,
   canonicalStructuredTextOperationSchema
 } from '../src/ai/contracts.js'
-import { STORAGE_QUEUES, STORAGE_TABLES } from '../src/storage/constants.js'
+import { STORAGE_CONTAINERS, STORAGE_QUEUES, STORAGE_TABLES } from '../src/storage/constants.js'
 
 describe('canonicalAiOperationSchema', () => {
   it('accepts a structured-text operation', () => {
@@ -78,6 +78,9 @@ describe('v2 storage identities', () => {
     expect(STORAGE_QUEUES.sanityImagePersistV2).toBe('sanity-image-persist-v2')
     expect(STORAGE_TABLES.sanityImageGenerationV2).toBe('sanityimagegenerationv2')
     expect(STORAGE_TABLES.sanityImageArtifactsV2).toBe('sanityimageartifactsv2')
+    expect(STORAGE_TABLES.sanityProductDeletion).toBe('sanityproductdeletion')
+    expect(STORAGE_TABLES.sanityProductDeletionFenceAlias).toBe('sanityproductdeletionfencealias')
     expect(STORAGE_TABLES.aiProviderQuotas).toBe('aiproviderquotas')
+    expect(STORAGE_CONTAINERS.sanityProductDeletion).toBe('sanity-product-deletion')
   })
 })

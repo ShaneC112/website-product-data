@@ -7,9 +7,11 @@ export const crawlStageLedgerTableSchema = z.object({
   partitionKey: z.string().trim().min(1), // encoded sourceGroupKey
   rowKey: z.string().trim().min(1), // `${runId}:${stage}:${targetKey}`
   sourceGroupKey: z.string().trim().min(1),
+  productId: z.string().trim().min(1).optional(),
   runId: z.string().trim().min(1),
   parentRunId: z.string().trim().min(1).optional(),
   generation: z.number().int().positive(),
+  productFenceGeneration: z.number().int().positive().optional(),
   stage: crawlPipelineStageSchema,
   targetJson: z.string().trim().min(1),
   state: crawlStageStateSchema,
@@ -34,8 +36,10 @@ export const crawlStageDispatchTableSchema = z.object({
   partitionKey: z.string().trim().min(1), // encoded sourceGroupKey
   rowKey: z.string().trim().min(1), // `_dispatch:${runId}:${stage}:${targetKey}`
   sourceGroupKey: z.string().trim().min(1),
+  productId: z.string().trim().min(1).optional(),
   runId: z.string().trim().min(1),
   generation: z.number().int().positive(),
+  productFenceGeneration: z.number().int().positive().optional(),
   stageItemRowKey: z.string().trim().min(1),
   queueName: z.string().trim().min(1),
   payloadJson: z.string().trim().min(1),

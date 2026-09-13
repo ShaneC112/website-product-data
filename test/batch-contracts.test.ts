@@ -3,7 +3,8 @@ import {
   batchItemResultSchema,
   extractionBatchJobSchema,
   extractionBatchResultSchema,
-  imageJobSchema
+  imageJobSchema,
+  publishJobSchema
 } from '../src/queues/contracts.js'
 import { crawlExtractBatchTableSchema } from '../src/storage/extract-batch.schema.js'
 import { STORAGE_QUEUES, STORAGE_TABLES } from '../src/storage/constants.js'
@@ -139,6 +140,22 @@ describe('imageJobSchema', () => {
 
   it('rejects non-boolean fallback flags', () => {
     expect(imageJobSchema.safeParse({ urlKey: 'url-key-1', bypassBatch: 'true' }).success).toBe(false)
+  })
+})
+
+describe('publishJobSchema', () => {
+  it('accepts optional product association fields', () => {
+    expect(publishJobSchema.parse({
+      sourceGroupKey: 'group-1',
+      productId: 'product-1',
+      productFenceGeneration: 2,
+      runId: 'run-1'
+    })).toEqual({
+      sourceGroupKey: 'group-1',
+      productId: 'product-1',
+      productFenceGeneration: 2,
+      runId: 'run-1'
+    })
   })
 })
 

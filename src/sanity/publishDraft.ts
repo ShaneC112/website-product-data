@@ -27,6 +27,13 @@ export type PublishAssetEvent = {
   error?: string
 }
 
+export type PublishDraftPermitCheck = (input: {
+  stage: 'before_asset_upload' | 'before_media_image_create' | 'before_draft_write'
+  draftId: string
+  sourceUrl?: string
+  role?: AssetUpload['role']
+}) => Promise<void>
+
 type ExistingProduct = SanityProductDraft & {
   _id: string
   _rev?: string
@@ -46,6 +53,7 @@ export async function publishProductDraft(
   plan: SanityIngestionPlan,
   fetchImage: typeof fetch = fetch,
   onAssetEvent?: (event: PublishAssetEvent) => void,
+  permitCheck?: PublishDraftPermitCheck,
 ): Promise<PublishDraftResult> {
   const lookup = await client.fetch<ExistingProductVersions>(plan.existingProductQuery, {
     vendorId: plan.vendorId,
@@ -79,9 +87,11 @@ export async function publishProductDraft(
       if (!response.ok) throw new Error(`Image download failed (${response.status}): ${upload.sourceUrl}`)
       const image = await response.blob()
       onAssetEvent?.({action: 'asset_fetch_completed', sourceUrl: upload.sourceUrl, role: upload.role, target: upload.target, status: response.status, sizeBytes: image.size, durationMs: Date.now() - startedAt})
+      await permitCheck?.({stage: 'before_asset_upload', draftId, sourceUrl: upload.sourceUrl, role: upload.role})
       const asset = await client.assets.upload('image', image, {filename: filenameFromUrl(upload.sourceUrl)})
       onAssetEvent?.({action: 'asset_upload_completed', sourceUrl: upload.sourceUrl, role: upload.role, target: upload.target, durationMs: Date.now() - startedAt})
       assetIds.push(asset._id)
+      await permitCheck?.({stage: 'before_media_image_create', draftId, sourceUrl: upload.sourceUrl, role: upload.role})
       const mediaImage = await client.createIfNotExists({
         _id: vendorMediaImageId(upload.sourceUrl, upload.role),
         _type: 'mediaImage',
@@ -116,6 +126,7 @@ export async function publishProductDraft(
         },
         conflicts: [],
       }
+  await permitCheck?.({stage: 'before_draft_write', draftId})
   await client.createOrReplace({...stripSystemFields(merged.document), _id: draftId})
   return {outcome: 'draft', draftId, assetIds, conflictCount: merged.conflicts.length}
 }

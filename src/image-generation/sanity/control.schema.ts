@@ -7,7 +7,8 @@ const guardedControlOperationSchema = z.enum([
   'template.delete',
   'template.reset',
   'template.rebind',
-  'request.refreshPolicy'
+  'request.refreshPolicy',
+  'product.delete'
 ])
 
 const guardedControlBaseSchema = z.object({
@@ -77,22 +78,95 @@ export const imageGenerationRequestRefreshPolicyControlSchema = guardedControlBa
   currentRunEpoch: z.number().int().nonnegative()
 }).strict()
 
+const expectedProductDocumentRevisionSchema = z.object({
+  documentId: z.string().trim().min(1),
+  revision: z.string().trim().min(1)
+}).strict()
+
+const blockedActiveWorkItemSchema = z.object({
+  requestId: z.string().trim().min(1),
+  durableKind: z.enum([
+    'submission-claim',
+    'orchestration',
+    'dispatch-intent',
+    'run-snapshot',
+    'run-content',
+    'run-content-claim'
+  ]),
+  reasonCode: z.string().trim().min(1)
+}).strict()
+
+const imageGenerationProductDeleteControlBaseSchema = guardedControlBaseSchema.extend({
+  operation: z.literal('product.delete'),
+  productId: z.string().trim().min(1),
+  styleCode: z.string().trim().min(1),
+  expectedProductDocuments: z.tuple([
+    expectedProductDocumentRevisionSchema,
+    expectedProductDocumentRevisionSchema
+  ])
+}).strict()
+
+export const imageGenerationProductDeleteControlSchema = imageGenerationProductDeleteControlBaseSchema.superRefine((value, context) => {
+  const expectedIds = new Set([value.productId, `drafts.${value.productId}`])
+  const seen = new Set<string>()
+
+  for (const [index, document] of value.expectedProductDocuments.entries()) {
+    if (!expectedIds.has(document.documentId)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['expectedProductDocuments', index, 'documentId'],
+        message: 'expectedProductDocuments must contain exactly the published and draft product document IDs'
+      })
+    }
+    if (seen.has(document.documentId)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['expectedProductDocuments', index, 'documentId'],
+        message: 'expectedProductDocuments cannot contain duplicate document IDs'
+      })
+    }
+    seen.add(document.documentId)
+  }
+
+  if (seen.size !== expectedIds.size || ![...expectedIds].every((documentId) => seen.has(documentId))) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['expectedProductDocuments'],
+      message: 'expectedProductDocuments must include both the published and draft product document revisions'
+    })
+  }
+})
+
 export const imageGenerationGuardedControlRequestSchema = z.discriminatedUnion('operation', [
   imageGenerationPatternValidateControlSchema,
   imageGenerationRequestDuplicateControlSchema,
   imageGenerationTemplateDeleteControlSchema,
   imageGenerationTemplateResetControlBaseSchema,
   imageGenerationTemplateRebindControlSchema,
-  imageGenerationRequestRefreshPolicyControlSchema
+  imageGenerationRequestRefreshPolicyControlSchema,
+  imageGenerationProductDeleteControlBaseSchema
 ])
 
 export const imageGenerationGuardedControlResultSchema = z.discriminatedUnion('outcome', [
   z.object({ outcome: z.literal('accepted'), controlId: z.string().trim().min(1) }).strict(),
   z.object({ outcome: z.literal('duplicate'), controlId: z.string().trim().min(1) }).strict(),
+  z.object({
+    outcome: z.literal('stabilizing'),
+    controlId: z.string().trim().min(1),
+    reasonCode: z.string().trim().min(1),
+    activeWork: z.array(blockedActiveWorkItemSchema).min(1).max(25)
+  }).strict(),
   z.object({ outcome: z.literal('conflict_revision'), controlId: z.string().trim().min(1), currentRevision: z.string().trim().min(1) }).strict(),
   z.object({ outcome: z.literal('conflict_hash'), controlId: z.string().trim().min(1), currentHash: z.string().trim().min(1) }).strict(),
   z.object({ outcome: z.literal('conflict_run'), controlId: z.string().trim().min(1), currentRunId: z.string().trim().min(1), currentRunEpoch: z.number().int().nonnegative() }).strict(),
   z.object({ outcome: z.literal('blocked'), controlId: z.string().trim().min(1), reasonCode: z.string().trim().min(1) }).strict(),
+  z.object({
+    outcome: z.literal('blocked_active_work'),
+    controlId: z.string().trim().min(1),
+    reasonCode: z.string().trim().min(1),
+    activeWork: z.array(blockedActiveWorkItemSchema).min(1).max(25)
+  }).strict(),
+  z.object({ outcome: z.literal('unsupported_absence_dependent_closure'), controlId: z.string().trim().min(1), reasonCode: z.string().trim().min(1) }).strict(),
   z.object({ outcome: z.literal('not_found'), controlId: z.string().trim().min(1), target: z.string().trim().min(1) }).strict(),
   z.object({ outcome: z.literal('invalid_state'), controlId: z.string().trim().min(1), reasonCode: z.string().trim().min(1) }).strict()
 ])
@@ -259,5 +333,22 @@ export function buildImageGenerationRequestRefreshPolicyControl(input: {
     expectedPolicyHash: input.expectedPolicyHash,
     currentRunId: input.currentRunId,
     currentRunEpoch: input.currentRunEpoch
+  })
+}
+
+export function buildImageGenerationProductDeleteControl(input: {
+  controlId: string
+  requestedAt: string
+  productId: string
+  styleCode: string
+  expectedProductDocuments: Array<{documentId: string; revision: string}>
+}): ImageGenerationGuardedControlRequest {
+  return imageGenerationProductDeleteControlSchema.parse({
+    operation: 'product.delete',
+    controlId: input.controlId,
+    requestedAt: input.requestedAt,
+    productId: input.productId,
+    styleCode: input.styleCode,
+    expectedProductDocuments: input.expectedProductDocuments
   })
 }

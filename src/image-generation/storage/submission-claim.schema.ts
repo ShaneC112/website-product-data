@@ -5,6 +5,7 @@ export const imageGenerationSubmissionClaimSchema = z.object({
   rowKey: z.string().trim().min(1),
   schemaVersion: z.literal(1),
   submissionKind: z.enum(['product.request.enqueue', 'request.enqueue', 'control.submit', 'template.delete']),
+  controlOperation: z.string().trim().min(1).optional(),
   documentId: z.string().trim().min(1),
   requestedAt: z.string().datetime(),
   state: z.enum(['processing', 'completed', 'failed']),

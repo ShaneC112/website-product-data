@@ -57,6 +57,34 @@
       "types": "./dist/sanity.d.ts",
       "default": "./dist/sanity.js"
     },
+    "./sanity/bridgeContract.schema": {
+      "types": "./dist/sanity/bridgeContract.schema.d.ts",
+      "default": "./dist/sanity/bridgeContract.schema.js"
+    },
+    "./sanity/ingestion": {
+      "types": "./dist/sanity/ingestion.d.ts",
+      "default": "./dist/sanity/ingestion.js"
+    },
+    "./sanity/mediaImage.groq": {
+      "types": "./dist/sanity/mediaImage.groq.d.ts",
+      "default": "./dist/sanity/mediaImage.groq.js"
+    },
+    "./sanity/mergeProductUpdate": {
+      "types": "./dist/sanity/mergeProductUpdate.d.ts",
+      "default": "./dist/sanity/mergeProductUpdate.js"
+    },
+    "./sanity/publicationGate": {
+      "types": "./dist/sanity/publicationGate.d.ts",
+      "default": "./dist/sanity/publicationGate.js"
+    },
+    "./sanity/publishDraft": {
+      "types": "./dist/sanity/publishDraft.d.ts",
+      "default": "./dist/sanity/publishDraft.js"
+    },
+    "./sanity/registrySync": {
+      "types": "./dist/sanity/registrySync.d.ts",
+      "default": "./dist/sanity/registrySync.js"
+    },
     "./sanity/ai-texture-prompt.schema": {
       "types": "./dist/sanity/ai-texture-prompt.schema.d.ts",
       "default": "./dist/sanity/ai-texture-prompt.schema.js"

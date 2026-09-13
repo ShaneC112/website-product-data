@@ -16,13 +16,16 @@ export const STORAGE_TABLES = {
   crawlStageDispatch: 'webcrawlstagedispatch',
   sanityImageGenerationV2: 'sanityimagegenerationv2',
   sanityImageArtifactsV2: 'sanityimageartifactsv2',
+  sanityProductDeletion: 'sanityproductdeletion',
+  sanityProductDeletionFenceAlias: 'sanityproductdeletionfencealias',
   aiProviderQuotas: 'aiproviderquotas'
 } as const
 
 export const STORAGE_CONTAINERS = {
   crawlArtefacts: 'crawl-artefacts',
   crawlManualPdfs: 'crawl-manual-pdfs',
-  crawlSwatches: 'crawl-swatches'
+  crawlSwatches: 'crawl-swatches',
+  sanityProductDeletion: 'sanity-product-deletion'
 } as const
 
 export const STORAGE_QUEUES = {
