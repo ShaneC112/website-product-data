@@ -40,30 +40,26 @@ Every concept-owning folder must contain a `README.md`.
 
 The README must document the concept represented by the folder, not simply repeat the names of its files.
 
-It should normally include:
+## README Content Contract
 
-- **Purpose**: why the folder exists
-- **Responsibilities**: what behavior it owns
-- **Inputs and outputs**: important information entering and leaving the boundary
-- **Ownership boundaries**: responsibilities deliberately owned elsewhere
-- **Workflow relationship**: how the folder connects to neighboring components
-- **Public boundary**: the supported entry point or interface, when one exists
-- **Files**: only the files whose roles are important or not obvious
+Every README for a concept-owning folder or workflow stage must state the following information under these headings or clear equivalent headings. It may be concise, but it must answer every applicable item in plain language.
+
+1. **Purpose**: the human or business outcome the boundary exists to achieve, not merely the name of a component or file.
+2. **Current status**: what is live now, and what is future, inactive, experimental, or otherwise not part of the active workflow. Omit this only when the whole described capability is current.
+3. **Inputs**: the authoritative request, evidence, references, or state it receives, including where those inputs came from when that matters.
+4. **Outputs and side effects**: the artifacts, references, state transitions, external writes, or other results it produces. State explicitly when rich data is intentionally kept out of a transport or orchestration boundary.
+5. **Responsibilities**: the decisions and behavior this folder owns.
+6. **Does not own**: consequential responsibilities deliberately performed by a neighboring feature, orchestration, transport, persistence, provider, or UI boundary.
+7. **Workflow relationship**: what happens before this boundary, what happens after it, and how the handoff is made.
+8. **Public boundary**: the supported entry point, interface, or export surface when the folder exposes one. State that there is no public boundary when it is intentionally private.
+
+Document important files only when their role is not clear from their name. Do not turn a README into a line-by-line source listing.
 
 ### Workflow stages
 
 Each meaningful workflow stage must have a README explaining the stage in plain language.
 
-The documentation should answer:
-
-- What is this stage trying to accomplish?
-- Why is the stage needed?
-- What does it receive?
-- What does it produce?
-- What happens before and after it?
-- Which responsibilities remain with another stage?
-
-Stage documentation should be understandable without requiring the reader to know the implementation language or framework.
+Stage documentation must meet the README Content Contract. It must be understandable without requiring the reader to know the implementation language or framework.
 
 ### Nested concepts
 
@@ -207,7 +203,8 @@ The relevant README or architecture document should be updated as part of the sa
 Before completing an implementation, the author must confirm:
 
 - meaningful concept-owning folders have READMEs
-- workflow stages have purpose documentation
+- every applicable README Content Contract item is answered accurately
+- workflow stages explain their human purpose, inputs, outputs, and before/after handoffs
 - nested READMEs exist where nested folders represent independent concepts
 - ownership and non-ownership are clear
 - public boundaries are documented
