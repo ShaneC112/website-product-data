@@ -29,6 +29,10 @@ export const STORAGE_CONTAINERS = {
 } as const
 
 export const STORAGE_QUEUES = {
+  productGenerationSubmissions: 'product-generation-submissions-v1',
+  productGenerationSanityActions: 'product-generation-sanity-actions-v1',
+  websiteScrapeRequests: 'website-scrape-requests-v1',
+  websiteScrapeCompletions: 'website-scrape-completions-v1',
   crawlRequests: 'crawl-requests',
   crawlRenderJobs: 'crawl-render-jobs',
   crawlSourceRenderComplete: 'crawl-source-render-complete',

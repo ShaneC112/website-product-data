@@ -109,6 +109,10 @@
       "types": "./dist/requests/contracts.d.ts",
       "default": "./dist/requests/contracts.js"
     },
+    "./requests/product-generation-boundary": {
+      "types": "./dist/requests/product-generation-boundary.d.ts",
+      "default": "./dist/requests/product-generation-boundary.js"
+    },
     "./requests/style-code-import": {
       "types": "./dist/requests/style-code-import.d.ts",
       "default": "./dist/requests/style-code-import.js"
@@ -124,6 +128,10 @@
     "./queues/contracts": {
       "types": "./dist/queues/contracts.d.ts",
       "default": "./dist/queues/contracts.js"
+    },
+    "./queues/website-scrape-boundary": {
+      "types": "./dist/queues/website-scrape-boundary.d.ts",
+      "default": "./dist/queues/website-scrape-boundary.js"
     },
     "./ai": {
       "types": "./dist/ai/index.d.ts",
